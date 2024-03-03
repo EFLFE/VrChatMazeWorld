@@ -4,7 +4,6 @@ Library
 .vs
 .vsconfig
 Assets/Scripts/*.asset
-Assets/Scripts/*.meta
 Assets/SerializedUdonPrograms
 obj
 Logs
