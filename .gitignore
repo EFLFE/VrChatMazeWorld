@@ -3,7 +3,6 @@ UserSettings
 Library
 .vs
 .vsconfig
-Assets/Scripts/*.asset
 Assets/SerializedUdonPrograms
 obj
 Logs
