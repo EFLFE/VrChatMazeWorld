@@ -1,22 +1,18 @@
 ﻿using UdonSharp;
 using UnityEngine;
 
-public class MazeBuilder : UdonSharpBehaviour
-{
+public class MazeBuilder : UdonSharpBehaviour {
     [SerializeField] private Transform mazeContainer;
     [Header("Rooms")]
-    [SerializeField] private float roomsOffset = 10f;
+    [SerializeField] private float roomsOffset = 20f;
     [SerializeField] private GameObject baseRoomPrefab;
     [SerializeField] private GameObject corridorPrefab;
 
-    public void BuildRooms(RoomTypeEnum[][] rooms)
-    {
+    public void BuildRooms(RoomTypeEnum[][] rooms) {
         int h = rooms.Length;
-        for (int y = 0; y < h; y++)
-        {
+        for (int y = 0; y < h; y++) {
             int w = rooms[y].Length;
-            for (int x = 0; x < w; x++)
-            {
+            for (int x = 0; x < w; x++) {
                 GameObject roomObj = CreateRoom(rooms[y][x]);
                 if (roomObj == null)
                     continue;
@@ -32,15 +28,17 @@ public class MazeBuilder : UdonSharpBehaviour
                 //    roomObj.OpenRight();
 
                 var pos = roomObj.transform.position;
-                pos.x = x * roomsOffset;
-                pos.z = y * roomsOffset;
+                //pos.x -= w / 2;
+                //pos.z -= w / 2;
+                pos.x = (x - w / 2) * roomsOffset;
+                pos.z = (y - w / 2) * roomsOffset;
+                pos.y = 0;
                 roomObj.transform.position = pos;
             }
         }
     }
 
-    private GameObject CreateRoom(RoomTypeEnum roomType)
-    {
+    private GameObject CreateRoom(RoomTypeEnum roomType) {
         GameObject prefab = GetRoomTypePrefab(roomType);
         if (prefab == null)
             return null;
@@ -49,10 +47,8 @@ public class MazeBuilder : UdonSharpBehaviour
         return obj;
     }
 
-    private GameObject GetRoomTypePrefab(RoomTypeEnum roomType)
-    {
-        switch (roomType)
-        {
+    private GameObject GetRoomTypePrefab(RoomTypeEnum roomType) {
+        switch (roomType) {
             case RoomTypeEnum.Nothing: return null;
             case RoomTypeEnum.Room: return baseRoomPrefab;
             case RoomTypeEnum.Corridor: return corridorPrefab;
