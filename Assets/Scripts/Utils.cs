@@ -22,10 +22,10 @@ public class Utils : UdonSharpBehaviour {
         }
     }
 
-    public void RemoveAllChildGameObjects(Transform transform) {
+    public void RemoveAllChildGameObjects(Transform transform, float time = 0f) {
         for (int i = transform.childCount - 1; i >= 0; --i) {
             GameObject child = transform.GetChild(i).gameObject;
-            GameObject.Destroy(child);
+            GameObject.Destroy(child, time);
         }
     }
 

@@ -47,7 +47,7 @@ public class MazeBuilder : UdonSharpBehaviour {
 
     public void BuildRoomsBegin(MazeController controller, RoomTypeEnum[][] rooms) {
         MazeReady = false;
-        controller.Utils.RemoveAllChildGameObjects(mazeContainer);
+        controller.Utils.RemoveAllChildGameObjects(mazeContainer, 0.1f);
         iterX = -1;
         iterY = 0;
         buildLeft = 0;
