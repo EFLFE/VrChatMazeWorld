@@ -12,7 +12,18 @@ public class MazeBuilder : UdonSharpBehaviour {
     [SerializeField] private GameObject floorPrefab;
     private float scale = 0.75f / 4;
 
+    private void RemoveAllChildGameObjects(Transform transform)
+    {
+        for (int i = transform.childCount - 1; i >= 0; --i)
+        {
+            var child = transform.GetChild(i).gameObject;
+            Object.Destroy(child);
+        }
+    }
+
     public void BuildRooms(RoomTypeEnum[][] rooms) {
+        RemoveAllChildGameObjects(mazeContainer);
+
         int h = rooms.Length;
         for (int y = 0; y < h; y++) {
             int w = rooms[y].Length;
@@ -22,8 +33,7 @@ public class MazeBuilder : UdonSharpBehaviour {
                 if (rooms[y][x] == RoomTypeEnum.Room || rooms[y][x] == RoomTypeEnum.Corridor) {
 
                     // spawn floor
-                    GameObject obj_floor = null;
-                    obj_floor = Instantiate(floorPrefab, mazeContainer);
+                    GameObject obj_floor = Instantiate(floorPrefab, mazeContainer);
                     var pos2 = obj_floor.transform.position;
                     pos2.x = (x - w / 2) * roomsOffset;
                     pos2.z = (y - w / 2) * roomsOffset;
@@ -41,8 +51,8 @@ public class MazeBuilder : UdonSharpBehaviour {
                         // не ругайте меня пж
                         if (direction == 1) rotation = 90;
                         if (direction == 2) rotation = 0;
-                        if (direction == 3) rotation = 270;
                         if (direction == 4) rotation = 180;
+                        if (direction == 3) rotation = 270;
 
                         RoomTypeEnum neighbor = rooms[y + dy][x + dx];
                         GameObject obj = null;

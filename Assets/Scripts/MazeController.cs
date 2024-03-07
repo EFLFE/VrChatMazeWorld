@@ -21,21 +21,26 @@ public class MazeController : UdonSharpBehaviour {
         bool isOwner = Networking.LocalPlayer.IsOwner(gameObject);
         if (isOwner) {
             debugText.text += "Owner\n";
-            int newSeed = Random.Range(0, 9999);
-            seed = newSeed;
-            Build(newSeed);
+            seed = Random.Range(0, 9999);
+            Build();
         }
         RequestSerialization();
     }
 
     public override void OnDeserialization() {
         base.OnDeserialization();
-        if (!Networking.LocalPlayer.IsOwner(gameObject)) {
-            Build(seed);
-        }
+        Build();
     }
 
-    private void Build(int seed) {
+    public void SendRebuild()
+    {
+        seed = Random.Range(0, 9999);
+        if (Networking.LocalPlayer.IsOwner(gameObject))
+            Build();
+        RequestSerialization();
+    }
+
+    public void Build() {
         debugText.text += $"Build seed: {seed}\n";
 
         maze = Generator.Generate(seed);
