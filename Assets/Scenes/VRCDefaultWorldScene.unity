@@ -574,6 +574,12 @@ MonoBehaviour:
     type: 3}
   corridorPrefab: {fileID: 2896056671231885470, guid: 455b849f4ff286b488ede34670e1ba1e,
     type: 3}
+  wallPrefab: {fileID: 905098062294493335, guid: 76b8bdca1f5495743ba5a43df01b9de9,
+    type: 3}
+  doorPrefab: {fileID: 2480857744835207839, guid: ab299d1f4de302c4693aecf255860aee,
+    type: 3}
+  floorPrefab: {fileID: 7466882519704946436, guid: cfed6a43b1aefd047b77f3e416bbd7fd,
+    type: 3}
 --- !u!114 &1027156426
 MonoBehaviour:
   m_ObjectHideFlags: 2
