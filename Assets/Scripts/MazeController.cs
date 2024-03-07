@@ -19,12 +19,12 @@ public class MazeController : UdonSharpBehaviour {
 
     private void Start() {
         Generator.Init(this);
+        Builder.Init(this);
         UI.Init(this);
 
         if (buildOnStart) {
             bool isOwner = Networking.LocalPlayer.IsOwner(gameObject);
             if (isOwner) {
-                debugText.text += "Owner\n";
                 seed = Random.Range(0, 9999);
                 Build();
             }
@@ -47,7 +47,7 @@ public class MazeController : UdonSharpBehaviour {
     public void Build() {
         maze = Generator.Generate(seed);
         PrintRooms();
-        Builder.BuildRooms(this, maze);
+        Builder.BuildRoomsBegin(this, maze);
 
         //Vector2 pos = Builder.GetMainRoomPos(rooms);
         //Networking.LocalPlayer.TeleportTo(new Vector3(pos.x, 1, pos.y), Quaternion.identity);
@@ -61,6 +61,10 @@ public class MazeController : UdonSharpBehaviour {
             PrintRooms();
         }
 
+        if (maze != null && !Builder.MazeReady)
+            if (Builder.BuildRoomsIter(maze))
+                UI.HideProgress();
+
         UI.ManualUpdate();
     }
 
@@ -72,7 +76,8 @@ public class MazeController : UdonSharpBehaviour {
             }
             debugText.text += "\n";
         }
-        debugText.text += $"\nBuild seed: {seed}\n";
+        bool isOwner = Networking.LocalPlayer.IsOwner(gameObject);
+        debugText.text += $"\nBuild seed: {seed}\n{(isOwner ? "Owner" : "")}";
     }
 
 }
