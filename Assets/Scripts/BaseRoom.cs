@@ -1,30 +1,27 @@
 ﻿using UdonSharp;
 using UnityEngine;
 
-public class BaseRoom : UdonSharpBehaviour
-{
+// wip
+[UdonBehaviourSyncMode(BehaviourSyncMode.None)]
+public class BaseRoom : UdonSharpBehaviour {
     [SerializeField] private GameObject topDoorBlocker;
     [SerializeField] private GameObject bottomDoorBlocker;
     [SerializeField] private GameObject leftDoorBlocker;
     [SerializeField] private GameObject rightDoorBlocker;
 
-    public void OpenTop()
-    {
+    public void OpenTop() {
         topDoorBlocker.SetActive(false);
     }
 
-    public void OpenBottom()
-    {
+    public void OpenBottom() {
         bottomDoorBlocker.SetActive(false);
     }
 
-    public void OpenLeft()
-    {
+    public void OpenLeft() {
         leftDoorBlocker.SetActive(false);
     }
 
-    public void OpenRight()
-    {
+    public void OpenRight() {
         rightDoorBlocker.SetActive(false);
     }
 

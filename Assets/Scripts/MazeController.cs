@@ -1,13 +1,15 @@
-﻿
-using UdonSharp;
+﻿using UdonSharp;
 using UnityEngine;
 using VRC.SDKBase;
-using VRC.Udon;
 
+[UdonBehaviourSyncMode(BehaviourSyncMode.Manual)]
 public class MazeController : UdonSharpBehaviour {
+    [SerializeField] private bool buildOnStart;
+
     public MazeBuilder Builder;
     public MazeGenerator Generator;
     public Utils Utils;
+    public MazeUI UI;
 
     public TMPro.TextMeshProUGUI debugText;
 
@@ -17,14 +19,17 @@ public class MazeController : UdonSharpBehaviour {
 
     private void Start() {
         Generator.Init(this);
+        UI.Init(this);
 
-        bool isOwner = Networking.LocalPlayer.IsOwner(gameObject);
-        if (isOwner) {
-            debugText.text += "Owner\n";
-            seed = Random.Range(0, 9999);
-            Build();
+        if (buildOnStart) {
+            bool isOwner = Networking.LocalPlayer.IsOwner(gameObject);
+            if (isOwner) {
+                debugText.text += "Owner\n";
+                seed = Random.Range(0, 9999);
+                Build();
+            }
+            RequestSerialization();
         }
-        RequestSerialization();
     }
 
     public override void OnDeserialization() {
@@ -32,8 +37,7 @@ public class MazeController : UdonSharpBehaviour {
         Build();
     }
 
-    public void SendRebuild()
-    {
+    public void SendRebuild() {
         seed = Random.Range(0, 9999);
         if (Networking.LocalPlayer.IsOwner(gameObject))
             Build();
@@ -41,11 +45,9 @@ public class MazeController : UdonSharpBehaviour {
     }
 
     public void Build() {
-        debugText.text += $"Build seed: {seed}\n";
-
         maze = Generator.Generate(seed);
         PrintRooms();
-        Builder.BuildRooms(maze);
+        Builder.BuildRooms(this, maze);
 
         //Vector2 pos = Builder.GetMainRoomPos(rooms);
         //Networking.LocalPlayer.TeleportTo(new Vector3(pos.x, 1, pos.y), Quaternion.identity);
@@ -58,6 +60,8 @@ public class MazeController : UdonSharpBehaviour {
             maze = Generator.Generate(seed);
             PrintRooms();
         }
+
+        UI.ManualUpdate();
     }
 
     public void PrintRooms() {
@@ -68,6 +72,7 @@ public class MazeController : UdonSharpBehaviour {
             }
             debugText.text += "\n";
         }
+        debugText.text += $"\nBuild seed: {seed}\n";
     }
 
 }

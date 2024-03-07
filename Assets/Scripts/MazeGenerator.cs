@@ -1,10 +1,9 @@
-﻿using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.X500;
-using UdonSharp;
+﻿using UdonSharp;
 using UnityEngine;
 
+[UdonBehaviourSyncMode(BehaviourSyncMode.None)]
 public class MazeGenerator : UdonSharpBehaviour {
-    [SerializeField, Range(30, 512)]
-    private int size = 49;
+    [SerializeField] private int size = 49;
 
     private MazeController controller;
     private int[][] rooms_ids;

@@ -1,46 +1,41 @@
 ﻿using UdonSharp;
 using UnityEngine;
 
+[UdonBehaviourSyncMode(BehaviourSyncMode.None)]
 public class MazeBuilder : UdonSharpBehaviour {
-    [SerializeField] private Transform mazeContainer;
+    public const float ROOMS_OFFSET = 5f;
+    public const float ROOM_SCALE = 0.75f / 4;
+
     [Header("Rooms")]
-    private float roomsOffset = 5f;
+    [SerializeField] private Transform mazeContainer;
     [SerializeField] private GameObject baseRoomPrefab;
     [SerializeField] private GameObject corridorPrefab;
     [SerializeField] private GameObject wallPrefab;
     [SerializeField] private GameObject doorPrefab;
     [SerializeField] private GameObject floorPrefab;
-    private float scale = 0.75f / 4;
 
-    private void RemoveAllChildGameObjects(Transform transform)
-    {
-        for (int i = transform.childCount - 1; i >= 0; --i)
-        {
-            var child = transform.GetChild(i).gameObject;
-            Object.Destroy(child);
-        }
-    }
+    public int MazeSize { get; private set; }
 
-    public void BuildRooms(RoomTypeEnum[][] rooms) {
-        RemoveAllChildGameObjects(mazeContainer);
+    public void BuildRooms(MazeController controller, RoomTypeEnum[][] rooms) {
+        controller.Utils.RemoveAllChildGameObjects(mazeContainer);
 
-        int h = rooms.Length;
+        MazeSize = rooms.Length;
+        int h = MazeSize;
         for (int y = 0; y < h; y++) {
             int w = rooms[y].Length;
             for (int x = 0; x < w; x++) {
-
 
                 if (rooms[y][x] == RoomTypeEnum.Room || rooms[y][x] == RoomTypeEnum.Corridor) {
 
                     // spawn floor
                     GameObject obj_floor = Instantiate(floorPrefab, mazeContainer);
                     var pos2 = obj_floor.transform.position;
-                    pos2.x = (x - w / 2) * roomsOffset;
-                    pos2.z = (y - w / 2) * roomsOffset;
+                    pos2.x = (x - w / 2) * ROOMS_OFFSET;
+                    pos2.z = (y - w / 2) * ROOMS_OFFSET;
                     pos2.y = 0;
                     obj_floor.transform.position = pos2;
 
-                    obj_floor.transform.localScale = new Vector3(scale, scale, scale);
+                    obj_floor.transform.localScale = new Vector3(ROOM_SCALE, ROOM_SCALE, ROOM_SCALE);
 
 
                     for (int direction = 1; direction <= 4; direction++) {
@@ -70,13 +65,13 @@ public class MazeBuilder : UdonSharpBehaviour {
                         obj.name = direction.ToString();
 
                         var pos = obj.transform.position;
-                        pos.x = (x - w / 2) * roomsOffset;
-                        pos.z = (y - w / 2) * roomsOffset;
+                        pos.x = (x - w / 2) * ROOMS_OFFSET;
+                        pos.z = (y - w / 2) * ROOMS_OFFSET;
                         pos.y = 0;
                         obj.transform.position = pos;
 
                         obj.transform.rotation = Quaternion.Euler(-90, rotation, 0);
-                        obj.transform.localScale = new Vector3(scale, scale, scale);
+                        obj.transform.localScale = new Vector3(ROOM_SCALE, ROOM_SCALE, ROOM_SCALE);
                     }
                 }
 
