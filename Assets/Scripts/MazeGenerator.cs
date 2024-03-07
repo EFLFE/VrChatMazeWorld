@@ -105,6 +105,7 @@ public class MazeGenerator : UdonSharpBehaviour {
         }
     }
 
+    [RecursiveMethod]
     private bool GenerateRoomsAndPassagesRecirsevly(
        int room_center_x,
        int room_center_y,
@@ -126,17 +127,15 @@ public class MazeGenerator : UdonSharpBehaviour {
                         room_size_x,
                         room_size_y
                     );
-
             if (!result_of_passage) {
                 Restore();
-            } else {
-
             }
         }
 
         return true;
     }
 
+    [RecursiveMethod]
     private bool GeneratePassagesRecurcively(
            int direction,
            int room_start_x,

@@ -59,7 +59,7 @@ public class MazeController : UdonSharpBehaviour {
         debugText.text = "";
         for (int x = 0; x < maze.Length; x++) {
             for (int y = 0; y < maze[x].Length; y++) {
-                debugText.text += (maze[x][y] == RoomTypeEnum.Nothing) ? 0 : 1;
+                debugText.text += (maze[x][y] == RoomTypeEnum.Nothing) ? " " : "#";
             }
             debugText.text += "\n";
         }
