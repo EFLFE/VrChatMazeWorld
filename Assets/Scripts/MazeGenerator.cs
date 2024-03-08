@@ -24,10 +24,10 @@ public class MazeGenerator : UdonSharpBehaviour {
         Random.InitState(seed);
         // 0 = nothing
         // 1 - room, 2 - corridor
-        controller.Utils.CreateJaggedArrayOfarrays(out rooms_ids, size, size);
-        controller.Utils.CreateJaggedArrayOfarrays(out rooms_types, size, size);
-        controller.Utils.CreateJaggedArrayOfarrays(out temp_rooms_ids, size, size);
-        controller.Utils.CreateJaggedArrayOfarrays(out temp_rooms_types, size, size);
+        Utils.CreateJaggedArrayOfarrays(out rooms_ids, size, size);
+        Utils.CreateJaggedArrayOfarrays(out rooms_types, size, size);
+        Utils.CreateJaggedArrayOfarrays(out temp_rooms_ids, size, size);
+        Utils.CreateJaggedArrayOfarrays(out temp_rooms_types, size, size);
 
         // центральная комната
         int room_center_x = size / 2;

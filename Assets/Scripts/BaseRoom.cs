@@ -25,4 +25,6 @@ public class BaseRoom : UdonSharpBehaviour {
         rightDoorBlocker.SetActive(false);
     }
 
+    public static void Test() { }
+
 }

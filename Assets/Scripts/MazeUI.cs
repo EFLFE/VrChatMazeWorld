@@ -1,6 +1,7 @@
 ﻿using UdonSharp;
 using UnityEngine;
 using UnityEngine.UI;
+using VRC.SDK3.Data;
 using VRC.SDKBase;
 
 [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
@@ -17,9 +18,9 @@ public class MazeUI : UdonSharpBehaviour {
     }
 
     public void ManualUpdate() {
+        DataToken 
         if (controller == null)
             return;
-
     }
 
     public void HideProgress() {
