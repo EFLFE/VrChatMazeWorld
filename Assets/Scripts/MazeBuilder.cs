@@ -82,6 +82,8 @@ public class MazeBuilder : UdonSharpBehaviour {
         obj_floor.transform.localScale = new Vector3(ROOM_SCALE, ROOM_SCALE, ROOM_SCALE);
         int[][] ids = controller.GeneratorV2.GetIds;
 
+        obj_floor.name = $"floor {ids[x][y]}";
+
         for (int direction = 1; direction <= 4; direction++) {
             int dx = (direction == 1) ? 1 : (direction == 3) ? -1 : 0;
             int dy = (direction == 2) ? 1 : (direction == 4) ? -1 : 0;
@@ -117,7 +119,7 @@ public class MazeBuilder : UdonSharpBehaviour {
                 continue;
             }
 
-            obj.name = direction.ToString();
+            obj.name = $"id={ids[x][y]}";
 
             Vector3 pos = obj.transform.position;
             pos.x = (x - w / 2) * ROOMS_OFFSET;

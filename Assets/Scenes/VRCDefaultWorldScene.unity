@@ -192,7 +192,7 @@ MonoBehaviour:
     SerializationNodes: []
   _udonSharpBackingUdonBehaviour: {fileID: 112654832}
   buildOnStart: 1
-  maxRooms: 10
+  maxRooms: 50
   Builder: {fileID: 1027156425}
   GeneratorV2: {fileID: 1990344165}
   Utils: {fileID: 770584525}

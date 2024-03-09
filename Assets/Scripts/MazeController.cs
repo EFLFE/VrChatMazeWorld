@@ -43,7 +43,7 @@ public class MazeController : UdonSharpBehaviour {
     }
 
     public void Build() {
-        GeneratorV2.Init(maxRooms);
+        GeneratorV2.Init(maxRooms, seed);
         GeneratorV2.Generate();
         PrintRooms();
         Builder.BuildRoomsBegin();
@@ -56,7 +56,7 @@ public class MazeController : UdonSharpBehaviour {
         if (Input.GetKeyDown(KeyCode.O)) {
             //debugText.text += $"Pressed!!!\n";
             seed++;
-            GeneratorV2.Init(maxRooms);
+            GeneratorV2.Init(maxRooms, seed);
             GeneratorV2.Generate();
             PrintRooms();
         }
@@ -70,12 +70,26 @@ public class MazeController : UdonSharpBehaviour {
 
     public void PrintRooms() {
         debugText.text = "";
-        //for (int x = 0; x < maze.Length; x++) {
-        //    for (int y = 0; y < maze[x].Length; y++) {
-        //        debugText.text += (maze[x][y] == RoomTypeEnum.Nothing) ? " " : "#";
-        //    }
-        //    debugText.text += "\n";
-        //}
+        var maze = GeneratorV2.GetCells;
+        for (int x = 0; x < maze.Length; x++) {
+            for (int y = 0; y < maze[x].Length; y++) {
+                if (maze[x][y] == Cell.DoorEnterance)
+                    debugText.text += "D";
+
+                else if (maze[x][y] == Cell.DoorExit)
+                    debugText.text += "d";
+
+                else if (maze[x][y] == Cell.Passage)
+                    debugText.text += ".";
+
+                else if (maze[x][y] == Cell.Wall)
+                    debugText.text += "#";
+
+                else
+                    debugText.text += ".";
+            }
+            debugText.text += "\n";
+        }
         bool isOwner = Networking.LocalPlayer.IsOwner(gameObject);
         debugText.text += $"\nBuild seed: {seed}\n{(isOwner ? "Owner" : "")}";
     }
