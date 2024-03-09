@@ -42,7 +42,7 @@ public class MazeBuilder : UdonSharpBehaviour {
     /// </summary>
     public bool BuildRoomsIter() {
         Cell[][] cells = controller.GeneratorV2.GetCells;
-        //int[][] ids = controller.GeneratorV2.GetIds;
+        int[][] ids = controller.GeneratorV2.GetIds;
 
         while (buildLeft > 0 && !MazeReady) {
             // step
@@ -60,7 +60,7 @@ public class MazeBuilder : UdonSharpBehaviour {
 
             // build
             Cell roomType = cells[iterX][iterY];
-            if (roomType != Cell.Wall) {
+            if (roomType != Cell.Wall && ids[iterX][iterY] != 0) {
                 SpawnFloor(iterX, iterY, cells);
                 buildLeft--;
             }
@@ -103,13 +103,16 @@ public class MazeBuilder : UdonSharpBehaviour {
             }
 
             GameObject obj = null;
-            if (neighbor == Cell.Wall) {
+            if (neighbor == Cell.Wall || nearId == 0) {
                 // spawn wall
                 obj = Instantiate(wallPrefab, mazeContainer);
             } else if (nearId > 0 && nearId != ids[x][y]) {
                 // wall or door?
-                if ((cells[x][y] == Cell.DoorEnterance || cells[x][y] == Cell.DoorExit)
-                    && (neighbor == Cell.DoorEnterance || neighbor == Cell.DoorExit)) {
+                if (
+                    (cells[x][y] == Cell.DoorEnterance && neighbor == Cell.DoorExit)
+                    ||
+                    (cells[x][y] == Cell.DoorExit && neighbor == Cell.DoorEnterance)
+                    ) {
                     obj = Instantiate(doorPrefab, mazeContainer);
                 } else {
                     obj = Instantiate(wallPrefab, mazeContainer);
