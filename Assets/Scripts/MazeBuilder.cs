@@ -26,32 +26,13 @@ public class MazeBuilder : UdonSharpBehaviour {
         this.controller = controller;
     }
 
-    public void BuildRooms(RoomTypeEnum[][] rooms) {
-        MazeReady = false;
-        controller.Utils.RemoveAllChildGameObjects(mazeContainer);
-
-        MazeSize = rooms.Length;
-        h = MazeSize;
-
-        for (int y = 0; y < h; y++) {
-            w = rooms[y].Length;
-
-            for (int x = 0; x < w; x++) {
-                if (rooms[y][x] == RoomTypeEnum.Room || rooms[y][x] == RoomTypeEnum.Corridor) {
-                    SpawnFloor(x, y, rooms);
-                }
-            }
-        }
-        MazeReady = true;
-    }
-
-    public void BuildRoomsBegin(MazeController controller, RoomTypeEnum[][] rooms) {
+    public void BuildRoomsBegin() {
         MazeReady = false;
         controller.Utils.RemoveAllChildGameObjects(mazeContainer, 0.1f);
         iterX = -1;
         iterY = 0;
         buildLeft = 0;
-        MazeSize = rooms.Length;
+        MazeSize = controller.GeneratorV2.Size;
         h = MazeSize;
         controller.UI.SetProgressValue(0f);
     }
@@ -59,11 +40,14 @@ public class MazeBuilder : UdonSharpBehaviour {
     /// <summary>
     /// Run BuildRoomsBegin before. Iteration building. true = completed.
     /// </summary>
-    public bool BuildRoomsIter(RoomTypeEnum[][] rooms) {
+    public bool BuildRoomsIter() {
+        Cell[][] cells = controller.GeneratorV2.GetCells;
+        //int[][] ids = controller.GeneratorV2.GetIds;
+
         while (buildLeft > 0 && !MazeReady) {
             // step
             iterX++;
-            if (iterX >= rooms[iterY].Length) {
+            if (iterX >= cells[iterY].Length) {
                 iterX = 0;
                 iterY++;
                 if (iterY >= h) {
@@ -71,13 +55,13 @@ public class MazeBuilder : UdonSharpBehaviour {
                     MazeReady = true;
                     break;
                 }
-                w = rooms[iterY].Length;
+                w = cells[iterY].Length;
             }
 
             // build
-            RoomTypeEnum roomType = rooms[iterY][iterX];
-            if (roomType == RoomTypeEnum.Room || roomType == RoomTypeEnum.Corridor) {
-                SpawnFloor(iterX, iterY, rooms);
+            Cell roomType = cells[iterX][iterY];
+            if (roomType != Cell.Wall) {
+                SpawnFloor(iterX, iterY, cells);
                 buildLeft--;
             }
         }
@@ -87,7 +71,7 @@ public class MazeBuilder : UdonSharpBehaviour {
         return MazeReady;
     }
 
-    private void SpawnFloor(int x, int y, RoomTypeEnum[][] rooms) {
+    private void SpawnFloor(int x, int y, Cell[][] cells) {
         GameObject obj_floor = Instantiate(floorPrefab, mazeContainer);
         Vector3 floorPos = obj_floor.transform.position;
         floorPos.x = (x - w / 2) * ROOMS_OFFSET;
@@ -96,7 +80,7 @@ public class MazeBuilder : UdonSharpBehaviour {
         obj_floor.transform.position = floorPos;
 
         obj_floor.transform.localScale = new Vector3(ROOM_SCALE, ROOM_SCALE, ROOM_SCALE);
-
+        int[][] ids = controller.GeneratorV2.GetIds;
 
         for (int direction = 1; direction <= 4; direction++) {
             int dx = (direction == 1) ? 1 : (direction == 3) ? -1 : 0;
@@ -106,17 +90,28 @@ public class MazeBuilder : UdonSharpBehaviour {
             // не ругайте меня пж
             if (direction == 1) rotation = 90;
             if (direction == 2) rotation = 0;
-            if (direction == 4) rotation = 180;
             if (direction == 3) rotation = 270;
+            if (direction == 4) rotation = 180;
 
-            RoomTypeEnum neighbor = rooms[y + dy][x + dx];
+            Cell neighbor = Cell.Wall;
+            int nearId = 0;
+            if (y + dy >= 0 && y + dy < MazeSize && x + dx > 0 && x + dx < MazeSize) {
+                neighbor = cells[x + dx][y + dy];
+                nearId = ids[x + dx][y + dy];
+            }
+
             GameObject obj = null;
-            if (neighbor == RoomTypeEnum.Nothing) {
+            if (neighbor == Cell.Wall) {
                 // spawn wall
                 obj = Instantiate(wallPrefab, mazeContainer);
-            } else if (neighbor != rooms[y][x]) {
-                // spawn door
-                obj = Instantiate(doorPrefab, mazeContainer);
+            } else if (nearId > 0 && nearId != ids[x][y]) {
+                // wall or door?
+                if ((cells[x][y] == Cell.DoorEnterance || cells[x][y] == Cell.DoorExit)
+                    && (neighbor == Cell.DoorEnterance || neighbor == Cell.DoorExit)) {
+                    obj = Instantiate(doorPrefab, mazeContainer);
+                } else {
+                    obj = Instantiate(wallPrefab, mazeContainer);
+                }
             } else {
                 // nothing to spawn - clear passage
                 continue;

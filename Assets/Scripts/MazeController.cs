@@ -5,9 +5,10 @@ using VRC.SDKBase;
 [UdonBehaviourSyncMode(BehaviourSyncMode.Manual)]
 public class MazeController : UdonSharpBehaviour {
     [SerializeField] private bool buildOnStart;
+    [SerializeField] private int maxRooms = 100; // test
 
     public MazeBuilder Builder;
-    public MazeGenerator Generator;
+    public MazeV2 GeneratorV2;
     public Utils Utils;
     public MazeUI UI;
 
@@ -15,10 +16,7 @@ public class MazeController : UdonSharpBehaviour {
 
     [UdonSynced] private int seed;
 
-    private RoomTypeEnum[][] maze;
-
     private void Start() {
-        Generator.Init(this);
         Builder.Init(this);
         UI.Init(this);
 
@@ -45,9 +43,10 @@ public class MazeController : UdonSharpBehaviour {
     }
 
     public void Build() {
-        maze = Generator.Generate(seed);
+        GeneratorV2.Init(maxRooms);
+        GeneratorV2.Generate();
         PrintRooms();
-        Builder.BuildRoomsBegin(this, maze);
+        Builder.BuildRoomsBegin();
 
         //Vector2 pos = Builder.GetMainRoomPos(rooms);
         //Networking.LocalPlayer.TeleportTo(new Vector3(pos.x, 1, pos.y), Quaternion.identity);
@@ -57,12 +56,13 @@ public class MazeController : UdonSharpBehaviour {
         if (Input.GetKeyDown(KeyCode.O)) {
             //debugText.text += $"Pressed!!!\n";
             seed++;
-            maze = Generator.Generate(seed);
+            GeneratorV2.Init(maxRooms);
+            GeneratorV2.Generate();
             PrintRooms();
         }
 
-        if (maze != null && !Builder.MazeReady)
-            if (Builder.BuildRoomsIter(maze))
+        if (!Builder.MazeReady)
+            if (Builder.BuildRoomsIter())
                 UI.HideProgress();
 
         UI.ManualUpdate();
@@ -70,12 +70,12 @@ public class MazeController : UdonSharpBehaviour {
 
     public void PrintRooms() {
         debugText.text = "";
-        for (int x = 0; x < maze.Length; x++) {
-            for (int y = 0; y < maze[x].Length; y++) {
-                debugText.text += (maze[x][y] == RoomTypeEnum.Nothing) ? " " : "#";
-            }
-            debugText.text += "\n";
-        }
+        //for (int x = 0; x < maze.Length; x++) {
+        //    for (int y = 0; y < maze[x].Length; y++) {
+        //        debugText.text += (maze[x][y] == RoomTypeEnum.Nothing) ? " " : "#";
+        //    }
+        //    debugText.text += "\n";
+        //}
         bool isOwner = Networking.LocalPlayer.IsOwner(gameObject);
         debugText.text += $"\nBuild seed: {seed}\n{(isOwner ? "Owner" : "")}";
     }
