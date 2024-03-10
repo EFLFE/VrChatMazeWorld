@@ -42,10 +42,13 @@ public class MazeController : UdonSharpBehaviour {
         RequestSerialization();
     }
 
+    public bool generator_is_ready = false;
+
     public void Build() {
         GeneratorV2.Init(maxRooms, seed);
-        GeneratorV2.Generate();
-        PrintRooms();
+        generator_is_ready = false;
+        //GeneratorV2.Generate();
+        //PrintRooms();
         Builder.BuildRoomsBegin();
 
         //Vector2 pos = Builder.GetMainRoomPos(rooms);
@@ -53,15 +56,20 @@ public class MazeController : UdonSharpBehaviour {
     }
 
     public void Update() {
-        if (Input.GetKeyDown(KeyCode.O)) {
-            //debugText.text += $"Pressed!!!\n";
-            seed++;
-            GeneratorV2.Init(maxRooms, seed);
-            GeneratorV2.Generate();
-            PrintRooms();
+        //if (Input.GetKeyDown(KeyCode.O)) {
+        //    //debugText.text += $"Pressed!!!\n";
+        //    seed++;
+        //    GeneratorV2.Init(maxRooms, seed);
+        //    GeneratorV2.Generate();
+        //    PrintRooms();
+        //}
+
+        if (!generator_is_ready) {
+            generator_is_ready = GeneratorV2.Generate();
+            UI.SetProgressValue((float) GeneratorV2.current_id / GeneratorV2.max_rooms);
         }
 
-        if (!Builder.MazeReady)
+        if (!Builder.MazeReady && generator_is_ready)
             if (Builder.BuildRoomsIter())
                 UI.HideProgress();
 
