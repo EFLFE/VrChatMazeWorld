@@ -24,9 +24,6 @@ public class MazeBuilder : UdonSharpBehaviour {
 
     public void Init(MazeController controller) {
         this.controller = controller;
-    }
-
-    public void BuildRoomsBegin() {
         MazeReady = false;
         controller.Utils.RemoveAllChildGameObjects(mazeContainer, 0.1f);
         iterX = -1;
@@ -43,6 +40,12 @@ public class MazeBuilder : UdonSharpBehaviour {
     public bool BuildRoomsIter() {
         Cell[][] cells = controller.GeneratorV2.GetCells;
         int[][] ids = controller.GeneratorV2.GetIds;
+
+        // epic костыль
+        if (cells == null) {
+            //controller.debugText.text += "\n OH SH~! NO CELLS!!! : ";
+            return MazeReady;
+        }
 
         while (buildLeft > 0 && !MazeReady) {
             // step

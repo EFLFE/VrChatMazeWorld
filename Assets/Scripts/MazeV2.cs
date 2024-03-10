@@ -19,25 +19,21 @@ public class MazeV2 : UdonSharpBehaviour {
     public int[][] GetIds => ids;
     public int Size => size;
 
+    private int size = 49;
+    private int max_rooms;
 
+    private int[][] ids;
+    private Cell[][] types;
 
-    public int size = 49;
-    public int max_rooms;
-
-    public int[][] ids;
-    public Cell[][] types;
-    public bool[][] doors;
-
-    public int[][] ids2;
-    public Cell[][] types2;
-    public bool[][] doors2;
+    private int[][] ids2;
+    private Cell[][] types2;
 
     // ----------- PossibleDoors Stack
-    public int[] possible_doors2_x = new int[10000];
-    public int[] possible_doors2_y = new int[10000];
-    public int[] possible_doors2_d = new int[10000]; // d - direction, 0 - up, 1 - right, 2 - down, 3 - left
-    public int possible_doors2_head = 0;
-    public int possible_doors2_tail = 0;
+    private int[] possible_doors2_x = new int[10000];
+    private int[] possible_doors2_y = new int[10000];
+    private int[] possible_doors2_d = new int[10000]; // d - direction, 0 - up, 1 - right, 2 - down, 3 - left
+    private int possible_doors2_head = 0;
+    private int possible_doors2_tail = 0;
 
     private int[][] cache_cells_x;
     private int[][] cache_cells_y;
@@ -91,15 +87,11 @@ public class MazeV2 : UdonSharpBehaviour {
         for (int i = 0; i < size; i++) ids[i] = new int[size];
         types = new Cell[size][];
         for (int i = 0; i < size; i++) types[i] = new Cell[size];
-        doors = new bool[size][];
-        for (int i = 0; i < size; i++) doors[i] = new bool[size];
 
         ids2 = new int[size][];
         for (int i = 0; i < size; i++) ids2[i] = new int[size];
         types2 = new Cell[size][];
         for (int i = 0; i < size; i++) types2[i] = new Cell[size];
-        doors2 = new bool[size][];
-        for (int i = 0; i < size; i++) doors2[i] = new bool[size];
 
         GenerateFirstRoom();
     }
@@ -110,7 +102,6 @@ public class MazeV2 : UdonSharpBehaviour {
             for (int y = 0; y < size; y++) {
                 ids2[x][y] = ids[x][y];
                 types2[x][y] = types[x][y];
-                doors2[x][y] = doors[x][y];
             }
         }
     }
@@ -120,7 +111,6 @@ public class MazeV2 : UdonSharpBehaviour {
             for (int y = 0; y < size; y++) {
                 ids[x][y] = ids2[x][y];
                 types[x][y] = types2[x][y];
-                doors[x][y] = doors2[x][y];
             }
         }
     }

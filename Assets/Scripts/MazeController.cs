@@ -5,7 +5,7 @@ using VRC.SDKBase;
 [UdonBehaviourSyncMode(BehaviourSyncMode.Manual)]
 public class MazeController : UdonSharpBehaviour {
     [SerializeField] private bool buildOnStart;
-    [SerializeField] private int maxRooms = 100; // test
+    [SerializeField] private int maxRooms = 20; // test
 
     public MazeBuilder Builder;
     public MazeV2 GeneratorV2;
@@ -42,17 +42,13 @@ public class MazeController : UdonSharpBehaviour {
         RequestSerialization();
     }
 
-    public bool generator_is_ready = false;
+    private bool generator_is_ready = false;
 
     public void Build() {
+        debugText.text = $"Build(), seed: {seed}";
+        Builder.Init(this);
         GeneratorV2.Init(maxRooms, seed);
         generator_is_ready = false;
-        //GeneratorV2.Generate();
-        //PrintRooms();
-        Builder.BuildRoomsBegin();
-
-        //Vector2 pos = Builder.GetMainRoomPos(rooms);
-        //Networking.LocalPlayer.TeleportTo(new Vector3(pos.x, 1, pos.y), Quaternion.identity);
     }
 
     public void Update() {
@@ -66,7 +62,7 @@ public class MazeController : UdonSharpBehaviour {
 
         if (!generator_is_ready) {
             generator_is_ready = GeneratorV2.Generate();
-            UI.SetProgressValue((float) GeneratorV2.current_id / GeneratorV2.max_rooms);
+            UI.SetProgressValue((float) GeneratorV2.current_id / maxRooms);
         }
 
         if (!Builder.MazeReady && generator_is_ready)
