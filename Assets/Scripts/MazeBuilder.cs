@@ -116,15 +116,18 @@ public class MazeBuilder : UdonSharpBehaviour {
 
             Cell neighbor = Cell.Wall;
             int nearId = 0;
-            if (y + dy >= 0 && y + dy < MazeSize && x + dx > 0 && x + dx < MazeSize) {
+            string debug = $"out of bounds: x + dx, y + dy, dx, dy: {x + dx}, {y + dy}, {dx}, {dy}";
+            if (y + dy >= 0 && y + dy < MazeSize && x + dx >= 0 && x + dx < MazeSize) {
                 neighbor = cells[x + dx][y + dy];
                 nearId = ids[x + dx][y + dy];
+                debug = "in bounds";
             }
 
             GameObject obj = null;
             if (neighbor == Cell.Wall || nearId == 0) {
                 // spawn wall
                 obj = Instantiate(wallPrefab, mazeContainer);
+                obj.name = $"id={ids[x][y]}, type 1, {debug}";
             } else if (nearId > 0 && nearId != ids[x][y]) {
                 // wall or door?
                 if (
@@ -133,15 +136,15 @@ public class MazeBuilder : UdonSharpBehaviour {
                     (cells[x][y] == Cell.DoorExit && neighbor == Cell.DoorEnterance)
                     ) {
                     obj = Instantiate(doorPrefab, mazeContainer);
+                    obj.name = $"id={ids[x][y]}, type 2A, {debug}";
                 } else {
                     obj = Instantiate(wallPrefab, mazeContainer);
+                    obj.name = $"id={ids[x][y]}, type 2B, {debug}";
                 }
             } else {
                 // nothing to spawn - clear passage
                 continue;
             }
-
-            obj.name = $"id={ids[x][y]}";
 
             Vector3 pos = obj.transform.position;
             pos.x = (x - w / 2) * ROOMS_OFFSET;
