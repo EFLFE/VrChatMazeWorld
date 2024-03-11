@@ -1,4 +1,5 @@
-﻿using UdonSharp;
+﻿using System.Collections.Generic;
+using UdonSharp;
 using UnityEngine;
 
 [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
@@ -18,9 +19,29 @@ public class MazeBuilder : UdonSharpBehaviour {
     public int MazeSize { get; private set; }
 
     private MazeController controller;
-    private int w, h, iterX, iterY;
+    private int w, h, iterX, iterY, iter;
     private const int BUILD_COUNT = 3;
     private int buildLeft;
+
+    public static void Spiral(int size, int step, out int x, out int y) {
+        x = 0;
+        y = 0;
+        int dx = 0, dy = -1;
+        int maxI = size * size;
+
+        for (int i = 0; i < maxI && i < step; i++) {
+            if ((x == y) || ((x < 0) && (x == -y)) || ((x > 0) && (x == 1 - y))) {
+                int t = dx;
+                dx = -dy;
+                dy = t;
+            }
+            x += dx;
+            y += dy;
+        }
+
+        x += size / 2;
+        y += size / 2;
+    }
 
     public void Init(MazeController controller) {
         this.controller = controller;
@@ -28,9 +49,11 @@ public class MazeBuilder : UdonSharpBehaviour {
         controller.Utils.RemoveAllChildGameObjects(mazeContainer, 0.1f);
         iterX = -1;
         iterY = 0;
+        iter = 0;
         buildLeft = 0;
         MazeSize = controller.GeneratorV2.Size;
         h = MazeSize;
+        w = MazeSize;
         controller.UI.SetProgressValue(0f);
     }
 
@@ -47,29 +70,22 @@ public class MazeBuilder : UdonSharpBehaviour {
             return MazeReady;
         }
 
+        buildLeft = BUILD_COUNT;
         while (buildLeft > 0 && !MazeReady) {
-            // step
-            iterX++;
-            if (iterX >= cells[iterY].Length) {
-                iterX = 0;
-                iterY++;
-                if (iterY >= h) {
-                    // end
-                    MazeReady = true;
-                    break;
-                }
-                w = cells[iterY].Length;
-            }
-
-            // build
-            Cell roomType = cells[iterX][iterY];
-            if (roomType != Cell.Wall && ids[iterX][iterY] != 0) {
-                SpawnFloor(iterX, iterY, cells);
+            iter++;
+            Spiral(MazeSize, iter - 1, out int x, out int y);
+            //Debug.Log($"iter, x, y, MazeSize: {iter},, {x}, {y},, {MazeSize}");
+            if (cells[x][y] != Cell.Wall && ids[x][y] != 0) {
+                SpawnFloor(x, y, cells);
                 buildLeft--;
+            }
+            if (iter >= MazeSize * MazeSize) {
+                MazeReady = true;
+                break;
             }
         }
 
-        buildLeft = BUILD_COUNT;
+
         controller.UI.SetProgressValue((float) iterY / h);
         return MazeReady;
     }

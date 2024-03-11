@@ -65,6 +65,7 @@ public class MazeController : UdonSharpBehaviour {
             UI.SetProgressValue((float) GeneratorV2.current_id / maxRooms);
         }
 
+        // if (Input.GetKeyDown(KeyCode.O))
         if (!Builder.MazeReady && generator_is_ready)
             if (Builder.BuildRoomsIter())
                 UI.HideProgress();
