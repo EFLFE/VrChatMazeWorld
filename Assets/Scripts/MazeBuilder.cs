@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics;
 using UdonSharp;
 using UnityEngine;
 
@@ -14,6 +15,7 @@ public class MazeBuilder : UdonSharpBehaviour {
     [SerializeField] private GameObject wallPrefab;
     [SerializeField] private GameObject doorPrefab;
     [SerializeField] private GameObject floorPrefab;
+    [SerializeField] private GameObject cornerPrefab;
 
     public bool MazeReady { get; private set; }
     public int MazeSize { get; private set; }
@@ -108,6 +110,9 @@ public class MazeBuilder : UdonSharpBehaviour {
 
         obj_floor.name = $"floor {floorId}";
 
+        Cell current_cell = cells[x][y];
+        int current_id = ids[x][y];
+
         for (int direction = 1; direction <= 4; direction++) {
             int dx = (direction == 1) ? 1 : (direction == 3) ? -1 : 0;
             int dy = (direction == 2) ? 1 : (direction == 4) ? -1 : 0;
@@ -159,6 +164,58 @@ public class MazeBuilder : UdonSharpBehaviour {
             obj.transform.SetPositionAndRotation(pos, Quaternion.Euler(-90, rotation, 0));
             obj.transform.localScale = new Vector3(ROOM_SCALE, ROOM_SCALE, ROOM_SCALE);
         }
+
+        // спавн уголков только поверх чистых проходов без дверей
+        if (current_cell == Cell.Passage) {
+            for (int direction1 = 1; direction1 <= 4; direction1++) {
+                int dx1 = (direction1 == 1) ? 1 : (direction1 == 3) ? -1 : 0;
+                int dy1 = (direction1 == 2) ? 1 : (direction1 == 4) ? -1 : 0;
+
+                int rotation = 0;
+                // не ругайте меня пж
+                if (direction1 == 1) rotation = 90;
+                if (direction1 == 2) rotation = 0;
+                if (direction1 == 3) rotation = 270;
+                if (direction1 == 4) rotation = 180;
+
+                Cell near1_cell = Cell.Wall;
+                int near1_id = 0;
+                if (y + dy1 >= 0 && y + dy1 < MazeSize && x + dx1 >= 0 && x + dx1 < MazeSize) {
+                    near1_cell = cells[x + dx1][y + dy1];
+                    near1_id = ids[x + dx1][y + dy1];
+                }
+
+                int direction2 = GetClockwiseDirection(direction1);
+                int dx2 = (direction2 == 1) ? 1 : (direction2 == 3) ? -1 : 0;
+                int dy2 = (direction2 == 2) ? 1 : (direction2 == 4) ? -1 : 0;
+
+                //UnityEngine.Debug.Log($"dir: {direction1} -> {direction2}");
+
+                Cell near2_cell = Cell.Wall;
+                int near2_id = 0;
+                if (y + dy2 >= 0 && y + dy2 < MazeSize && x + dx2 >= 0 && x + dx2 < MazeSize) {
+                    near2_cell = cells[x + dx2][y + dy2];
+                    near2_id = ids[x + dx2][y + dy2];
+                }
+
+                if (current_id != near1_id && current_id != near2_id) {
+                    GameObject obj333 = Instantiate(cornerPrefab, mazeContainer);
+                    obj333.name = $"corner={ids[x][y]}";
+
+                    Vector3 pos = obj333.transform.position;
+                    pos.x = (x - w / 2) * ROOMS_OFFSET;
+                    pos.z = (y - w / 2) * ROOMS_OFFSET;
+                    pos.y = 0;
+
+                    obj333.transform.SetPositionAndRotation(pos, Quaternion.Euler(-90, rotation, 0));
+                    obj333.transform.localScale = new Vector3(ROOM_SCALE, ROOM_SCALE, ROOM_SCALE);
+                }
+            }
+        }
+    }
+
+    private int GetClockwiseDirection(int dir) {
+        return (dir - 1 + 1) % 4 + 1;
     }
 
     private void ColorizeFloor(GameObject floor, int id) {
@@ -181,25 +238,5 @@ public class MazeBuilder : UdonSharpBehaviour {
         matProp.SetColor("_Color", clr);
         floorMesh.SetPropertyBlock(matProp);
     }
-
-    private GameObject CreateRoom(RoomTypeEnum roomType) {
-        GameObject prefab = GetRoomTypePrefab(roomType);
-        if (prefab == null)
-            return null;
-
-        GameObject obj = Instantiate(prefab, mazeContainer);
-        return obj;
-    }
-
-    private GameObject GetRoomTypePrefab(RoomTypeEnum roomType) {
-        switch (roomType) {
-            case RoomTypeEnum.Nothing: return null;
-            case RoomTypeEnum.Room: return baseRoomPrefab;
-            case RoomTypeEnum.Corridor: return corridorPrefab;
-            default:
-                Debug.LogError($"RoomType '{roomType}' not defined!");
-                return null;
-        }
-    }
-
 }
+

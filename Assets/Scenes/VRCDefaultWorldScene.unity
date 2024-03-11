@@ -815,6 +815,8 @@ MonoBehaviour:
     type: 3}
   floorPrefab: {fileID: 7466882519704946436, guid: cfed6a43b1aefd047b77f3e416bbd7fd,
     type: 3}
+  cornerPrefab: {fileID: 2241460406191565827, guid: bb24006ff97c09f4da69aa3cc3c24f38,
+    type: 3}
 --- !u!114 &1027156426
 MonoBehaviour:
   m_ObjectHideFlags: 2

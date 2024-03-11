@@ -60,7 +60,7 @@ public class MazeV2 : UdonSharpBehaviour {
 
 
     public int RandomSign() {
-        return (RandomInclusive(0,1) % 2 == 0) ? +1 : -1;
+        return (RandomInclusive(0, 1) % 2 == 0) ? +1 : -1;
     }
 
     public int RandomInclusive(int min_inclusive, int max_inclusive) {
@@ -158,6 +158,23 @@ public class MazeV2 : UdonSharpBehaviour {
             PossibleDoorsPopFromHead(out int x, out int y, out int d);
             if (TryToGenerateRoom(x, y, d)) {
                 current_id++;
+            }
+
+            // finishing
+            if (current_id >= max_rooms) {
+                // remove all possible doors
+                while (PossibleDoorsAmont() > 0) {
+                    PossibleDoorsPopFromHead(out x, out y, out d);
+                    //d = GetOppositeDirection(d);
+                    GetDirectionsVector(d, out int dx, out int dy);
+                    if (ids[x][y] == 0) {
+                        types[x][y] = Cell.Wall;
+                        types[x + dx][y + dy] = Cell.Passage;
+                    } else {
+                        types[x][y] = Cell.Passage;
+                        types[x + dx][y + dy] = Cell.Passage;
+                    }
+                }
             }
         }
         return current_id >= max_rooms || PossibleDoorsAmont() <= 0;
