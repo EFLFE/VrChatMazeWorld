@@ -4,8 +4,8 @@ using UnityEngine;
 
 [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
 public class MazeBuilder : UdonSharpBehaviour {
-    public const float ROOMS_OFFSET = 5f;
-    public const float ROOM_SCALE = 0.75f / 4;
+    public const float ROOMS_OFFSET = 4f;
+    public const float ROOM_SCALE = 1; // 0,1875
 
     [Header("Rooms")]
     [SerializeField] private Transform mazeContainer;
