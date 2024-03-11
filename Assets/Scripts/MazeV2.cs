@@ -19,7 +19,7 @@ public class MazeV2 : UdonSharpBehaviour {
     public int[][] GetIds => ids;
     public int Size => size;
 
-    private int size = 19;
+    private int size = 49;
     private int max_rooms;
 
     private int[][] ids;

@@ -86,7 +86,7 @@ public class MazeBuilder : UdonSharpBehaviour {
         }
 
 
-        controller.UI.SetProgressValue((float) iterY / h);
+        controller.UI.SetProgressValue((float) iter / (MazeSize * MazeSize));
         return MazeReady;
     }
 

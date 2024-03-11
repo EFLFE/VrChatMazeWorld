@@ -5,7 +5,7 @@ using VRC.SDKBase;
 [UdonBehaviourSyncMode(BehaviourSyncMode.Manual)]
 public class MazeController : UdonSharpBehaviour {
     [SerializeField] private bool buildOnStart;
-    [SerializeField] private int maxRooms = 20; // test
+    [SerializeField] private int maxRooms = 200; // test
 
     public MazeBuilder Builder;
     public MazeV2 GeneratorV2;
@@ -69,8 +69,6 @@ public class MazeController : UdonSharpBehaviour {
         if (!Builder.MazeReady && generator_is_ready)
             if (Builder.BuildRoomsIter())
                 UI.HideProgress();
-
-        UI.ManualUpdate();
     }
 
     public void PrintRooms() {

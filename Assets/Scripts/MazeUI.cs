@@ -16,12 +16,6 @@ public class MazeUI : UdonSharpBehaviour {
         loadProgressBarContent.SetActive(false);
     }
 
-    public void ManualUpdate() {
-        if (controller == null)
-            return;
-
-    }
-
     public void HideProgress() {
         loadProgressBarContent.SetActive(false);
     }
