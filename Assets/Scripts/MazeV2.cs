@@ -68,8 +68,16 @@ public class MazeV2 : UdonSharpBehaviour {
         return UnityEngine.Random.Range(min_inclusive, max_inclusive + 1);
     }
 
+    private int seed;
+    public void ReSeed() {
+        UnityEngine.Random.InitState(seed);
+        seed = RandomInclusive(100000, 999999);
+        UnityEngine.Random.InitState(seed);
+    }
+
 
     public void Init(int max_rooms, int seed) {
+        this.seed = seed;
         UnityEngine.Random.InitState(seed);
         this.max_rooms = max_rooms;
 
@@ -143,6 +151,7 @@ public class MazeV2 : UdonSharpBehaviour {
     }
 
     public bool Generate() {
+        ReSeed();
         int steps = 1;
         while (PossibleDoorsAmont() > 0 && steps > 0 && current_id < max_rooms) {
             steps--;
