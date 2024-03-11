@@ -91,6 +91,9 @@ public class MazeBuilder : UdonSharpBehaviour {
     }
 
     private void SpawnFloor(int x, int y, Cell[][] cells) {
+        int[][] ids = controller.GeneratorV2.GetIds;
+        int floorId = ids[x][y];
+
         GameObject obj_floor = Instantiate(floorPrefab, mazeContainer);
         Vector3 floorPos = obj_floor.transform.position;
         floorPos.x = (x - w / 2) * ROOMS_OFFSET;
@@ -98,10 +101,12 @@ public class MazeBuilder : UdonSharpBehaviour {
         floorPos.y = 0;
         obj_floor.transform.position = floorPos;
 
-        obj_floor.transform.localScale = new Vector3(ROOM_SCALE, ROOM_SCALE, ROOM_SCALE);
-        int[][] ids = controller.GeneratorV2.GetIds;
+        // colorize floor (demo)
+        ColorizeFloor(obj_floor, floorId);
 
-        obj_floor.name = $"floor {ids[x][y]}";
+        obj_floor.transform.localScale = new Vector3(ROOM_SCALE, ROOM_SCALE, ROOM_SCALE);
+
+        obj_floor.name = $"floor {floorId}";
 
         for (int direction = 1; direction <= 4; direction++) {
             int dx = (direction == 1) ? 1 : (direction == 3) ? -1 : 0;
@@ -154,6 +159,27 @@ public class MazeBuilder : UdonSharpBehaviour {
             obj.transform.SetPositionAndRotation(pos, Quaternion.Euler(-90, rotation, 0));
             obj.transform.localScale = new Vector3(ROOM_SCALE, ROOM_SCALE, ROOM_SCALE);
         }
+    }
+
+    private void ColorizeFloor(GameObject floor, int id) {
+        var floorMesh = (MeshRenderer) floor.GetComponent(typeof(MeshRenderer));
+        var matProp = new MaterialPropertyBlock();
+
+        Color clr;
+        switch (id % 8) {
+            case 0: clr = Color.yellow; break;
+            case 1: clr = Color.red; break;
+            case 2: clr = Color.magenta; break;
+            case 3: clr = Color.grey; break;
+            case 4: clr = Color.green; break;
+            case 5: clr = Color.cyan; break;
+            case 6: clr = Color.blue; break;
+            case 7: clr = Color.black; break;
+            default: clr = Color.white; break;
+        }
+
+        matProp.SetColor("_Color", clr);
+        floorMesh.SetPropertyBlock(matProp);
     }
 
     private GameObject CreateRoom(RoomTypeEnum roomType) {
