@@ -10,18 +10,18 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: c333ccfdd0cbdbc4ca30cef2dd6e6b9b, type: 3}
-  m_Name: InteractToggle
+  m_Name: FingerPistol
   m_EditorClassIdentifier: 
-  serializedUdonProgramAsset: {fileID: 11400000, guid: 0648f8c92e5c39943be7f471bd320da5,
+  serializedUdonProgramAsset: {fileID: 11400000, guid: 4049eae69d8bfb547afb5b49f63f28d1,
     type: 2}
   udonAssembly: 
   assemblyError: 
-  sourceCsScript: {fileID: 11500000, guid: c145dd4792c31da4b83d542b11ca2b66, type: 3}
+  sourceCsScript: {fileID: 11500000, guid: ec2fce72eea09c349a8bc398b31c1663, type: 3}
   scriptVersion: 2
   compiledVersion: 2
-  behaviourSyncMode: 2
-  hasInteractEvent: 1
-  scriptID: 2484734778703140822
+  behaviourSyncMode: 0
+  hasInteractEvent: 0
+  scriptID: 5378984749592872582
   serializationData:
     SerializedFormat: 2
     SerializedBytes: 
@@ -50,19 +50,19 @@ MonoBehaviour:
       Data: 
     - Name: $k
       Entry: 1
-      Data: toggleObjects
+      Data: projectilePrefab
     - Name: $v
       Entry: 7
       Data: 2|UdonSharp.Compiler.FieldDefinition, UdonSharp.Editor
     - Name: <Name>k__BackingField
       Entry: 1
-      Data: toggleObjects
+      Data: projectilePrefab
     - Name: <UserType>k__BackingField
       Entry: 7
       Data: 3|System.RuntimeType, mscorlib
     - Name: 
       Entry: 1
-      Data: UnityEngine.GameObject[], UnityEngine.CoreModule
+      Data: UnityEngine.GameObject, UnityEngine.CoreModule
     - Name: 
       Entry: 8
       Data: 
@@ -89,10 +89,7 @@ MonoBehaviour:
       Data: 1
     - Name: 
       Entry: 7
-      Data: 5|UnityEngine.TooltipAttribute, UnityEngine.CoreModule
-    - Name: tooltip
-      Entry: 1
-      Data: List of objects to toggle on and off
+      Data: 5|UnityEngine.SerializeField, UnityEngine.CoreModule
     - Name: 
       Entry: 8
       Data: 

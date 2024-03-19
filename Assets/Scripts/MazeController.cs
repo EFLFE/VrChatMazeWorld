@@ -6,6 +6,8 @@ using VRC.SDKBase;
 public class MazeController : UdonSharpBehaviour {
     [SerializeField] private bool buildOnStart;
     [SerializeField] private int maxRooms = 200; // test
+    [SerializeField] private GameObject enemyPrefab;
+    [SerializeField] private Transform enemySpawn;
 
     public MazeBuilder Builder;
     public MazeV2 GeneratorV2;
@@ -13,6 +15,8 @@ public class MazeController : UdonSharpBehaviour {
     public MazeUI UI;
 
     public TMPro.TextMeshProUGUI debugText;
+
+    private bool generator_is_ready = false;
 
     [UdonSynced] private int seed;
 
@@ -35,6 +39,7 @@ public class MazeController : UdonSharpBehaviour {
         Build();
     }
 
+    // event
     public void SendRebuild() {
         seed = Random.Range(0, 9999);
         if (Networking.LocalPlayer.IsOwner(gameObject))
@@ -42,7 +47,13 @@ public class MazeController : UdonSharpBehaviour {
         RequestSerialization();
     }
 
-    private bool generator_is_ready = false;
+    // event
+    public void SpawnEnemy() {
+        if (Networking.LocalPlayer.IsOwner(gameObject)) {
+            var obj = Instantiate(enemyPrefab, enemySpawn);
+            obj.transform.localPosition = Vector3.zero;
+        }
+    }
 
     public void Build() {
         debugText.text = $"Build(), seed: {seed}";

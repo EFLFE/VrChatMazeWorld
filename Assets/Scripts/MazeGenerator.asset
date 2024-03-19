@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c333ccfdd0cbdbc4ca30cef2dd6e6b9b, type: 3}
   m_Name: MazeGenerator
   m_EditorClassIdentifier: 
-  serializedUdonProgramAsset: {fileID: 11400000, guid: 4904ecc0415d52f4fadb96e92bab16d0,
+  serializedUdonProgramAsset: {fileID: 11400000, guid: 6036021b3615458459a870deac2a80f0,
     type: 2}
   udonAssembly: 
   assemblyError: 
