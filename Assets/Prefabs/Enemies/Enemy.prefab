@@ -141,7 +141,7 @@ MonoBehaviour:
     PrefabModifications: []
     SerializationNodes: []
   _udonSharpBackingUdonBehaviour: {fileID: 5983010584036756638}
-  health: 1
+  health: 3
   speed: 0.2
 --- !u!114 &5983010584036756638
 MonoBehaviour:
