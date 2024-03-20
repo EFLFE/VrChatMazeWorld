@@ -29,4 +29,20 @@ public class Utils : UdonSharpBehaviour {
         }
     }
 
+    public static Color GetRandomColor() {
+        Color clr;
+        switch (Random.Range(0,8)) {
+            case 0: clr = Color.yellow; break;
+            case 1: clr = Color.red; break;
+            case 2: clr = Color.magenta; break;
+            case 3: clr = Color.grey; break;
+            case 4: clr = Color.green; break;
+            case 5: clr = Color.cyan; break;
+            case 6: clr = Color.blue; break;
+            case 7: clr = Color.black; break;
+            default: clr = Color.white; break;
+        }
+        return clr;
+    }
+
 }

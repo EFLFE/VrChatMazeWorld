@@ -47,11 +47,13 @@ public class MazeController : UdonSharpBehaviour {
         RequestSerialization();
     }
 
-    // event
+    // event (test)
     public void SpawnEnemy() {
         if (Networking.LocalPlayer.IsOwner(gameObject)) {
             var obj = Instantiate(enemyPrefab, enemySpawn);
             obj.transform.localPosition = Vector3.zero;
+            var script = obj.GetComponent<BaseEnemy>();
+            script.Init();
         }
     }
 
