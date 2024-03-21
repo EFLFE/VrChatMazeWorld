@@ -14,6 +14,7 @@ public class MazeBuilder : UdonSharpBehaviour {
     [SerializeField] private GameObject doorPrefab;
     [SerializeField] private GameObject floorPrefab;
     [SerializeField] private GameObject[] cornerPrefabs;
+    [SerializeField] private GameObject[] deadendPrefabs;
 
     public bool MazeReady { get; private set; }
     public int MazeSize { get; private set; }
@@ -132,10 +133,15 @@ public class MazeBuilder : UdonSharpBehaviour {
                 debug = "in bounds";
             }
 
-            int wall_variant = ids[x][y] % wallPrefabs.Length;
+            
             GameObject obj = null;
-            if (neighbor == Cell.Wall || nearId == 0) {
+            if (current_cell == Cell.DoorDeadEnd && neighbor == Cell.Wall) {
+                int deadend_variant = ids[x][y] % deadendPrefabs.Length;
+                obj = Instantiate(deadendPrefabs[deadend_variant], mazeContainer);
+                obj.name = $"id={ids[x][y]}, type deadend, variant {deadend_variant}, {debug}";
+            } else if (neighbor == Cell.Wall || nearId == 0) {
                 // spawn wall
+                int wall_variant = ids[x][y] % wallPrefabs.Length;
                 obj = Instantiate(wallPrefabs[wall_variant], mazeContainer);
                 obj.name = $"id={ids[x][y]}, type 1, {debug}";
             } else if (nearId > 0 && nearId != ids[x][y]) {
@@ -148,6 +154,7 @@ public class MazeBuilder : UdonSharpBehaviour {
                     obj = Instantiate(doorPrefab, mazeContainer);
                     obj.name = $"id={ids[x][y]}, type 2A, {debug}";
                 } else {
+                    int wall_variant = ids[x][y] % wallPrefabs.Length;
                     obj = Instantiate(wallPrefabs[wall_variant], mazeContainer);
                     obj.name = $"id={ids[x][y]}, type 2B, {debug}";
                 }

@@ -904,6 +904,9 @@ MonoBehaviour:
   - {fileID: 2241460406191565827, guid: bb24006ff97c09f4da69aa3cc3c24f38, type: 3}
   - {fileID: 4976898629553075264, guid: b65fd0052d6850b4797969987866036f, type: 3}
   - {fileID: 7145658197873208521, guid: 63353cd1bfa705e418e6ba10ec51350c, type: 3}
+  deadendPrefabs:
+  - {fileID: 1031017309054864295, guid: d43d1358a37fc8d49a65c4bea22b4072, type: 3}
+  - {fileID: 7776998025279200682, guid: 9e95766f587da244ebe8ceb6c421abe0, type: 3}
 --- !u!114 &1027156426
 MonoBehaviour:
   m_ObjectHideFlags: 2
