@@ -10,12 +10,10 @@ public class MazeBuilder : UdonSharpBehaviour {
 
     [Header("Rooms")]
     [SerializeField] private Transform mazeContainer;
-    [SerializeField] private GameObject baseRoomPrefab;
-    [SerializeField] private GameObject corridorPrefab;
-    [SerializeField] private GameObject wallPrefab;
+    [SerializeField] private GameObject[] wallPrefabs;
     [SerializeField] private GameObject doorPrefab;
     [SerializeField] private GameObject floorPrefab;
-    [SerializeField] private GameObject cornerPrefab;
+    [SerializeField] private GameObject[] cornerPrefabs;
 
     public bool MazeReady { get; private set; }
     public int MazeSize { get; private set; }
@@ -94,6 +92,7 @@ public class MazeBuilder : UdonSharpBehaviour {
 
     private void SpawnFloor(int x, int y, Cell[][] cells) {
         int[][] ids = controller.GeneratorV2.GetIds;
+        Room[] rooms = controller.GeneratorV2.GetRooms;
         int floorId = ids[x][y];
 
         GameObject obj_floor = Instantiate(floorPrefab, mazeContainer);
@@ -133,10 +132,11 @@ public class MazeBuilder : UdonSharpBehaviour {
                 debug = "in bounds";
             }
 
+            int wall_variant = ids[x][y] % wallPrefabs.Length;
             GameObject obj = null;
             if (neighbor == Cell.Wall || nearId == 0) {
                 // spawn wall
-                obj = Instantiate(wallPrefab, mazeContainer);
+                obj = Instantiate(wallPrefabs[wall_variant], mazeContainer);
                 obj.name = $"id={ids[x][y]}, type 1, {debug}";
             } else if (nearId > 0 && nearId != ids[x][y]) {
                 // wall or door?
@@ -148,7 +148,7 @@ public class MazeBuilder : UdonSharpBehaviour {
                     obj = Instantiate(doorPrefab, mazeContainer);
                     obj.name = $"id={ids[x][y]}, type 2A, {debug}";
                 } else {
-                    obj = Instantiate(wallPrefab, mazeContainer);
+                    obj = Instantiate(wallPrefabs[wall_variant], mazeContainer);
                     obj.name = $"id={ids[x][y]}, type 2B, {debug}";
                 }
             } else {
@@ -165,8 +165,8 @@ public class MazeBuilder : UdonSharpBehaviour {
             obj.transform.localScale = new Vector3(ROOM_SCALE, ROOM_SCALE, ROOM_SCALE);
         }
 
-        // спавн уголков только поверх чистых проходов без дверей
-        if (current_cell == Cell.Passage) {
+        // спавн уголков только поверх чистых проходов без дверей и только для пещер
+        if (current_cell == Cell.Passage && rooms[current_id] == Room.Cave) {
             for (int direction1 = 1; direction1 <= 4; direction1++) {
                 int dx1 = (direction1 == 1) ? 1 : (direction1 == 3) ? -1 : 0;
                 int dy1 = (direction1 == 2) ? 1 : (direction1 == 4) ? -1 : 0;
@@ -199,7 +199,8 @@ public class MazeBuilder : UdonSharpBehaviour {
                 }
 
                 if (current_id != near1_id && current_id != near2_id) {
-                    GameObject obj333 = Instantiate(cornerPrefab, mazeContainer);
+                    int corner_variant = ids[x][y] % cornerPrefabs.Length;
+                    GameObject obj333 = Instantiate(cornerPrefabs[corner_variant], mazeContainer);
                     obj333.name = $"corner={ids[x][y]}";
 
                     Vector3 pos = obj333.transform.position;

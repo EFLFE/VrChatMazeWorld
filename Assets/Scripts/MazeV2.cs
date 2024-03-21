@@ -10,23 +10,31 @@ public enum Cell {
     Hole,
     Something,
     DoorEnterance,
-    DoorExit
+    DoorExit,
+    DoorDeadEnd,
+}
+
+public enum Room {
+    Square,
+    Cave
 }
 
 public class MazeV2 : UdonSharpBehaviour {
 
-    public Cell[][] GetCells => types;
-    public int[][] GetIds => ids;
     public int Size => size;
+    public int[][] GetIds => ids;
+    public Cell[][] GetCells => cells;
+    public Room[] GetRooms => rooms;
 
     private int size = 49;
     private int max_rooms;
 
     private int[][] ids;
-    private Cell[][] types;
+    private Cell[][] cells;
+    private Room[] rooms;
 
-    private int[][] ids2;
-    private Cell[][] types2;
+    private int[][] ids_backup;
+    private Cell[][] cells_backup;
 
     // ----------- PossibleDoors Stack
     private int[] possible_doors2_x = new int[10000];
@@ -91,15 +99,17 @@ public class MazeV2 : UdonSharpBehaviour {
         possible_doors2_head = 0;
         possible_doors2_tail = 0;
 
+        rooms = new Room[max_rooms];
+
         ids = new int[size][];
         for (int i = 0; i < size; i++) ids[i] = new int[size];
-        types = new Cell[size][];
-        for (int i = 0; i < size; i++) types[i] = new Cell[size];
+        cells = new Cell[size][];
+        for (int i = 0; i < size; i++) cells[i] = new Cell[size];
 
-        ids2 = new int[size][];
-        for (int i = 0; i < size; i++) ids2[i] = new int[size];
-        types2 = new Cell[size][];
-        for (int i = 0; i < size; i++) types2[i] = new Cell[size];
+        ids_backup = new int[size][];
+        for (int i = 0; i < size; i++) ids_backup[i] = new int[size];
+        cells_backup = new Cell[size][];
+        for (int i = 0; i < size; i++) cells_backup[i] = new Cell[size];
 
         GenerateFirstRoom();
     }
@@ -108,8 +118,8 @@ public class MazeV2 : UdonSharpBehaviour {
     public void Backup() {
         for (int x = 0; x < size; x++) {
             for (int y = 0; y < size; y++) {
-                ids2[x][y] = ids[x][y];
-                types2[x][y] = types[x][y];
+                ids_backup[x][y] = ids[x][y];
+                cells_backup[x][y] = cells[x][y];
             }
         }
     }
@@ -117,8 +127,8 @@ public class MazeV2 : UdonSharpBehaviour {
     public void Restore() {
         for (int x = 0; x < size; x++) {
             for (int y = 0; y < size; y++) {
-                ids[x][y] = ids2[x][y];
-                types[x][y] = types2[x][y];
+                ids[x][y] = ids_backup[x][y];
+                cells[x][y] = cells_backup[x][y];
             }
         }
     }
@@ -129,18 +139,18 @@ public class MazeV2 : UdonSharpBehaviour {
         for (int x = size / 2 - 2; x <= size / 2 + 2; x++) {
             for (int y = size / 2 - 2; y <= size / 2 + 2; y++) {
                 ids[x][y] = 1;
-                types[x][y] = Cell.Passage;
+                cells[x][y] = Cell.Passage;
             }
         }
-        types[size / 2 - 2][size / 2] = Cell.DoorEnterance;
-        types[size / 2 + 2][size / 2] = Cell.DoorEnterance;
-        types[size / 2][size / 2 - 2] = Cell.DoorEnterance;
-        types[size / 2][size / 2 + 2] = Cell.DoorEnterance;
+        cells[size / 2 - 2][size / 2] = Cell.DoorEnterance;
+        cells[size / 2 + 2][size / 2] = Cell.DoorEnterance;
+        cells[size / 2][size / 2 - 2] = Cell.DoorEnterance;
+        cells[size / 2][size / 2 + 2] = Cell.DoorEnterance;
 
-        types[size / 2 - 3][size / 2] = Cell.DoorExit;
-        types[size / 2 + 3][size / 2] = Cell.DoorExit;
-        types[size / 2][size / 2 - 3] = Cell.DoorExit;
-        types[size / 2][size / 2 + 3] = Cell.DoorExit;
+        cells[size / 2 - 3][size / 2] = Cell.DoorExit;
+        cells[size / 2 + 3][size / 2] = Cell.DoorExit;
+        cells[size / 2][size / 2 - 3] = Cell.DoorExit;
+        cells[size / 2][size / 2 + 3] = Cell.DoorExit;
 
         PossibleDoorsPushToTail(size / 2 + 0, size / 2 - 3, 2);
         PossibleDoorsPushToTail(size / 2 + 3, size / 2 + 0, 3);
@@ -168,11 +178,11 @@ public class MazeV2 : UdonSharpBehaviour {
                     //d = GetOppositeDirection(d);
                     GetDirectionsVector(d, out int dx, out int dy);
                     if (ids[x][y] == 0) {
-                        types[x][y] = Cell.Wall;
-                        types[x + dx][y + dy] = Cell.Passage;
+                        cells[x][y] = Cell.Wall;
+                        cells[x + dx][y + dy] = Cell.DoorDeadEnd;
                     } else {
-                        types[x][y] = Cell.Passage;
-                        types[x + dx][y + dy] = Cell.Passage;
+                        cells[x][y] = Cell.Passage;
+                        cells[x + dx][y + dy] = Cell.Passage;
                     }
                 }
             }
@@ -189,19 +199,24 @@ public class MazeV2 : UdonSharpBehaviour {
             if (door_x == -1) break;
             GetDirectionsVector(door_d, out int dx, out int dy);
 
-            types[door_x][door_y] = Cell.DoorEnterance;
-            types[door_x + dx][door_y + dy] = Cell.DoorExit;
+            cells[door_x][door_y] = Cell.DoorEnterance;
+            cells[door_x + dx][door_y + dy] = Cell.DoorExit;
             PossibleDoorsPushToTail(door_x + dx, door_y + dy, GetOppositeDirection(door_d));
         }
     }
 
     private bool TryToGenerateRoom(int start_x, int start_y, int except_dir) {
-        if (types[start_x][start_y] != Cell.DoorExit || ids[start_x][start_y] != 0) {
+        if (cells[start_x][start_y] != Cell.DoorExit || ids[start_x][start_y] != 0) {
             return false;
         }
-
-        if (TryToGenerateRoomSquare(start_x, start_y, except_dir)) return true;
-        if (TryToGenerateRoomCave(start_x, start_y, except_dir)) return true;
+        if (TryToGenerateRoomSquare(start_x, start_y, except_dir)) {
+            rooms[current_id] = Room.Square;
+            return true;
+        }
+        if (TryToGenerateRoomCave(start_x, start_y, except_dir)) {
+            rooms[current_id] = Room.Cave;
+            return true;
+        }
         return false;
     }
 
@@ -260,8 +275,8 @@ public class MazeV2 : UdonSharpBehaviour {
             for (int x = room_x_start; x < room_x_start + x_length; x++) {
                 for (int y = room_y_start; y < room_y_start + y_length; y++) {
                     ids[x][y] = current_id;
-                    if (types[x][y] == Cell.Wall) {
-                        types[x][y] = Cell.Passage;
+                    if (cells[x][y] == Cell.Wall) {
+                        cells[x][y] = Cell.Passage;
                     }
                     // cache
                     int cache_id = cache_cells_ammounts[current_id];
@@ -295,7 +310,7 @@ public class MazeV2 : UdonSharpBehaviour {
             cache_cells_ammounts[current_id] = 0;
             Backup();
 
-            types[start_x][start_y] = Cell.DoorExit;
+            cells[start_x][start_y] = Cell.DoorExit;
             ids[start_x][start_y] = current_id;
             cache_cells_x[current_id][0] = start_x;
             cache_cells_y[current_id][0] = start_y;
@@ -322,9 +337,9 @@ public class MazeV2 : UdonSharpBehaviour {
                     continue;
                 }
 
-                if (types[x][y] == Cell.Wall) {
+                if (cells[x][y] == Cell.Wall) {
                     // вошли в стену
-                    types[x][y] = Cell.Passage;
+                    cells[x][y] = Cell.Passage;
                     ids[x][y] = current_id;
                     fails = 0;
 
@@ -420,14 +435,14 @@ public class MazeV2 : UdonSharpBehaviour {
             if (x < 1 || y < 1 || x >= size - 1 || y >= size - 1) {
                 continue;
             }
-            if (types[x][y] == Cell.DoorExit) {
+            if (cells[x][y] == Cell.DoorExit) {
                 continue;
             }
             int random_direction = RandomInclusive(0, 3);
             for (int fantom_direction = random_direction; fantom_direction < random_direction + 4; fantom_direction++) {
                 int real_direction = fantom_direction % 4;
                 GetDirectionsVector(real_direction, out int dx, out int dy);
-                if (types[x + dx][y + dy] == Cell.Wall) {
+                if (cells[x + dx][y + dy] == Cell.Wall) {
                     room_x = x;
                     room_y = y;
                     room_d = real_direction;
