@@ -15,6 +15,8 @@ public class MazeBuilder : UdonSharpBehaviour {
     [SerializeField] private GameObject floorPrefab;
     [SerializeField] private GameObject[] cornerPrefabs;
     [SerializeField] private GameObject[] deadendPrefabs;
+    [SerializeField] private GameObject ceiling_general;
+    [SerializeField] private GameObject ceiling_cave;
 
     public bool MazeReady { get; private set; }
     public int MazeSize { get; private set; }
@@ -104,9 +106,9 @@ public class MazeBuilder : UdonSharpBehaviour {
 
         Cell current_cell = cells[x][y];
         int current_id = ids[x][y];
+        Room current_room = rooms[current_id];
 
         if (current_cell != Cell.Hole) {
-
             bool need_to_spawn_floor = false;
             if (current_id != 0) {
                 need_to_spawn_floor = true;
@@ -115,9 +117,7 @@ public class MazeBuilder : UdonSharpBehaviour {
             if (!need_to_spawn_floor) {
                 for (int dir = 0; dir < 4; dir++) {
                     controller.GeneratorV2.GetDirectionsVector(dir, out int dx, out int dy);
-                    dx += x;
-                    dy += y;
-                    if (GetCell(dx, dy) == Cell.Hole) {
+                    if (GetCell(x + dx, y + dy) == Cell.Hole) {
                         need_to_spawn_floor = true;
                         break;
                     }
@@ -136,6 +136,22 @@ public class MazeBuilder : UdonSharpBehaviour {
         }
         // ------------- next, spawn walls and corners
 
+        // spawn ceiling
+        GameObject ceiling_prefab_to_spawn = null;
+        if (current_room == Room.Cave) {
+            ceiling_prefab_to_spawn = ceiling_cave;
+        }
+        if (current_room == Room.Square || current_room == Room.Turn) {
+            ceiling_prefab_to_spawn = ceiling_general;
+        }
+        if (ceiling_prefab_to_spawn != null) {
+            int rotation = controller.GeneratorV2.RandomInclusive(0, 3) * 90;
+            // TODO make admin button to remove all ceilings
+            // Spawn(ceiling_prefab_to_spawn, x, y, rotation, "ceiling");
+        }
+
+
+        // spawn 4 walls
         for (int direction = 1; direction <= 4; direction++) {
             int dx = (direction == 1) ? 1 : (direction == 3) ? -1 : 0;
             int dy = (direction == 2) ? 1 : (direction == 4) ? -1 : 0;
@@ -187,7 +203,7 @@ public class MazeBuilder : UdonSharpBehaviour {
         }
 
         // спавн уголков только поверх чистых проходов без дверей и только для пещер
-        if (current_cell == Cell.Passage && rooms[current_id] == Room.Cave) {
+        if (current_cell == Cell.Passage && current_room == Room.Cave) {
             for (int direction1 = 1; direction1 <= 4; direction1++) {
                 int dx1 = (direction1 == 1) ? 1 : (direction1 == 3) ? -1 : 0;
                 int dy1 = (direction1 == 2) ? 1 : (direction1 == 4) ? -1 : 0;
