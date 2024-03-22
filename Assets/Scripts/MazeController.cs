@@ -76,6 +76,11 @@ public class MazeController : UdonSharpBehaviour {
         if (!generator_is_ready) {
             generator_is_ready = GeneratorV2.Generate();
             UI.SetProgressValue((float) GeneratorV2.current_id / maxRooms);
+            debugText.text = $"Build(), seed: {seed}, max_room_id: {GeneratorV2.current_id}";
+        }
+
+        if (generator_is_ready) {
+            
         }
 
         // if (Input.GetKeyDown(KeyCode.O))

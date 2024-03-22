@@ -96,22 +96,26 @@ public class MazeBuilder : UdonSharpBehaviour {
         Room[] rooms = controller.GeneratorV2.GetRooms;
         int floorId = ids[x][y];
 
-        GameObject obj_floor = Instantiate(floorPrefab, mazeContainer);
-        Vector3 floorPos = obj_floor.transform.position;
-        floorPos.x = (x - w / 2) * ROOMS_OFFSET;
-        floorPos.z = (y - w / 2) * ROOMS_OFFSET;
-        floorPos.y = 0;
-        obj_floor.transform.position = floorPos;
-
-        // colorize floor (demo)
-        ColorizeFloor(obj_floor, floorId);
-
-        obj_floor.transform.localScale = new Vector3(ROOM_SCALE, ROOM_SCALE, ROOM_SCALE);
-
-        obj_floor.name = $"floor {floorId}";
-
         Cell current_cell = cells[x][y];
         int current_id = ids[x][y];
+
+        if (current_cell != Cell.Hole) {
+            GameObject obj_floor = Instantiate(floorPrefab, mazeContainer);
+            Vector3 floorPos = obj_floor.transform.position;
+            floorPos.x = (x - w / 2) * ROOMS_OFFSET;
+            floorPos.z = (y - w / 2) * ROOMS_OFFSET;
+            floorPos.y = 0;
+            obj_floor.transform.position = floorPos;
+
+            // colorize floor (demo)
+            ColorizeFloor(obj_floor, floorId);
+
+            obj_floor.transform.localScale = new Vector3(ROOM_SCALE, ROOM_SCALE, ROOM_SCALE);
+
+            obj_floor.name = $"floor {floorId}";
+        }
+
+
 
         for (int direction = 1; direction <= 4; direction++) {
             int dx = (direction == 1) ? 1 : (direction == 3) ? -1 : 0;
@@ -133,7 +137,7 @@ public class MazeBuilder : UdonSharpBehaviour {
                 debug = "in bounds";
             }
 
-            
+
             GameObject obj = null;
             if (current_cell == Cell.DoorDeadEnd && neighbor == Cell.Wall) {
                 int deadend_variant = ids[x][y] % deadendPrefabs.Length;

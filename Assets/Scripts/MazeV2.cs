@@ -1,4 +1,5 @@
-﻿using System;
+﻿using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.X500;
+using System;
 using UdonSharp;
 using UnityEngine;
 using VRC.SDKBase;
@@ -16,7 +17,8 @@ public enum Cell {
 
 public enum Room {
     Square,
-    Cave
+    Cave,
+    Turn
 }
 
 public class MazeV2 : UdonSharpBehaviour {
@@ -209,10 +211,20 @@ public class MazeV2 : UdonSharpBehaviour {
         if (cells[start_x][start_y] != Cell.DoorExit || ids[start_x][start_y] != 0) {
             return false;
         }
-        if (TryToGenerateRoomSquare(start_x, start_y, except_dir)) {
-            rooms[current_id] = Room.Square;
-            return true;
+
+        int room_type = RandomInclusive(1, 3);
+        if (room_type == 1) {
+            if (TryToGenerateRoomTurn(start_x, start_y, except_dir)) {
+                rooms[current_id] = Room.Turn;
+                return true;
+            }
+        } else {
+            if (TryToGenerateRoomSquare(start_x, start_y, except_dir)) {
+                rooms[current_id] = Room.Square;
+                return true;
+            }
         }
+
         if (TryToGenerateRoomCave(start_x, start_y, except_dir)) {
             rooms[current_id] = Room.Cave;
             return true;
@@ -220,11 +232,134 @@ public class MazeV2 : UdonSharpBehaviour {
         return false;
     }
 
+    private bool TryToGenerateRoomTurn(int start_x, int start_y, int except_dir) {
+        int tries = 2;
+        int dir1 = GetOppositeDirection(except_dir);
+        GetDirectionsVector(dir1, out int dx1, out int dy1);
+
+        while (tries > 0) {
+            tries--;
+
+            int len1 = RandomInclusive(2, 4);
+            int middle_x = start_x + dx1 * len1;
+            int middle_y = start_y + dy1 * len1;
+
+            int start_middle_corner1_x = (start_x == middle_x) ? start_x - 1 : Math.Min(start_x, middle_x);
+            int start_middle_corner1_y = (start_y == middle_y) ? start_y - 1 : Math.Min(start_y, middle_y);
+            int start_middle_corner2_x = (start_x == middle_x) ? start_x + 1 : Math.Max(start_x, middle_x);
+            int start_middle_corner2_y = (start_y == middle_y) ? start_y + 1 : Math.Max(start_y, middle_y);
+
+            if (start_middle_corner1_x < 0 || start_middle_corner1_y < 0 || start_middle_corner2_x >= size || start_middle_corner2_y >= size) {
+                continue; // next try
+            }
+
+            bool can_spawn_room = true;
+            for (int x = start_middle_corner1_x; x <= start_middle_corner2_x; x++) {
+                for (int y = start_middle_corner1_y; y <= start_middle_corner2_y; y++) {
+                    if (ids[x][y] != 0) {
+                        can_spawn_room = false;
+                        x = start_middle_corner2_x + 1;
+                        y = start_middle_corner2_y + 1;
+                    }
+                }
+            }
+            if (!can_spawn_room) {
+                continue; // next try
+            }
+
+            int dir2 = GetRandomTurn(dir1);
+            GetDirectionsVector(dir2, out int dx2, out int dy2);
+            int len2 = RandomInclusive(2, 4);
+            int end_x = middle_x + dx2 * len2;
+            int end_y = middle_y + dy2 * len2;
+
+            int middle_end_corner1_x = (end_x == middle_x) ? middle_x - 1 : Math.Min(end_x, middle_x) - 1;
+            int middle_end_corner1_y = (end_y == middle_y) ? middle_y - 1 : Math.Min(end_y, middle_y) - 1;
+            int middle_end_corner2_x = (end_x == middle_x) ? middle_x + 1 : Math.Max(end_x, middle_x) + 1;
+            int middle_end_corner2_y = (end_y == middle_y) ? middle_y + 1 : Math.Max(end_y, middle_y) + 1;
+
+            if (middle_end_corner1_x < 0 || middle_end_corner1_y < 0 || middle_end_corner2_x >= size || middle_end_corner2_y >= size) {
+                continue; // next try
+            }
+
+            can_spawn_room = true;
+            for (int x = middle_end_corner1_x; x <= middle_end_corner2_x; x++) {
+                for (int y = middle_end_corner1_y; y <= middle_end_corner2_y; y++) {
+                    if (ids[x][y] != 0) {
+                        can_spawn_room = false;
+                        x = middle_end_corner2_x + 1;
+                        y = middle_end_corner2_y + 1;
+                    }
+                }
+            }
+            if (!can_spawn_room) {
+                continue; // next try
+            }
+
+            // it is possible to spawn the room
+            for (int x = start_middle_corner1_x; x <= start_middle_corner2_x; x++) {
+                for (int y = start_middle_corner1_y; y <= start_middle_corner2_y; y++) {
+                    if (cells[x][y] == Cell.Wall) {
+                        cells[x][y] = Cell.Passage;
+                    }
+                    ids[x][y] = current_id;
+                    if (x != middle_x && y != middle_y) {
+                        cells[x][y] = Cell.Hole;
+                    }
+                }
+            }
+            for (int x = middle_end_corner1_x; x <= middle_end_corner2_x; x++) {
+                for (int y = middle_end_corner1_y; y <= middle_end_corner2_y; y++) {
+                    if (cells[x][y] == Cell.Wall) {
+                        cells[x][y] = Cell.Passage;
+                    }
+                    ids[x][y] = current_id;
+                    if (x != middle_x && y != middle_y) {
+                        cells[x][y] = Cell.Hole;
+                    }
+                }
+            }
+
+            TryToSpawnPossibleDoor(
+                dx2 + end_x,
+                dy2 + end_y,
+                dx2 + end_x + dx2,
+                dy2 + end_y + dy2,
+                dir2
+            );
+
+            return true;
+
+        }
+        return false;
+    }
+
+    bool TryToSpawnPossibleDoor(int x1, int y1, int x2, int y2, int dir) {
+        if (
+            x1 < 0 || x1 >= size
+            || y1 < 0 || y1 >= size
+            || x2 < 0 || x2 >= size
+            || y2 < 0 || y2 >= size
+            ) {
+            return false;
+        }
+
+        cells[x1][y1] = Cell.DoorEnterance;
+        cells[x2][y2] = Cell.DoorExit;
+        PossibleDoorsPushToTail(x2, y2, GetOppositeDirection(dir));
+        return true;
+    }
+
+    private int GetRandomTurn(int dir) {
+        int diff = RandomInclusive(0, 1) == 0 ? -1 : +1;
+        return (dir + 4 + diff) % 4;
+    }
+
     private bool TryToGenerateRoomSquare(int start_x, int start_y, int except_dir) {
         int tries = 5;
         while (tries > 0) {
             tries--;
-            Backup();
+            //Backup();
 
             int x_length = RandomInclusive(3, 5);
             int y_length = RandomInclusive(3, 5);
@@ -457,3 +592,4 @@ public class MazeV2 : UdonSharpBehaviour {
         return false;
     }
 }
+
