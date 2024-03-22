@@ -527,7 +527,7 @@ public class MazeV2 : UdonSharpBehaviour {
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private void GetDirectionsVector(int dir, out int dx, out int dy) {
+    public void GetDirectionsVector(int dir, out int dx, out int dy) {
         if (dir == 0) {
             dx = +0; dy = -1;
         } else if (dir == 1) {

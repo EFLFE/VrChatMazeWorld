@@ -75,11 +75,9 @@ public class MazeBuilder : UdonSharpBehaviour {
         while (buildLeft > 0 && !MazeReady) {
             iter++;
             Spiral(MazeSize, iter - 1, out int x, out int y);
-            //Debug.Log($"iter, x, y, MazeSize: {iter},, {x}, {y},, {MazeSize}");
-            if (cells[x][y] != Cell.Wall && ids[x][y] != 0) {
-                SpawnFloor(x, y, cells);
-                buildLeft--;
-            }
+            SpawnCell(x, y);
+            buildLeft--;
+
             if (iter >= MazeSize * MazeSize) {
                 MazeReady = true;
                 break;
@@ -91,31 +89,52 @@ public class MazeBuilder : UdonSharpBehaviour {
         return MazeReady;
     }
 
-    private void SpawnFloor(int x, int y, Cell[][] cells) {
+    private Cell GetCell(int x, int y) {
+        if (x < 0 || y < 0 || x >= controller.GeneratorV2.Size || y >= controller.GeneratorV2.Size) {
+            return Cell.Wall;
+        } else {
+            return controller.GeneratorV2.GetCells[x][y];
+        }
+    }
+
+    private void SpawnCell(int x, int y) {
+        Cell[][] cells = controller.GeneratorV2.GetCells;
         int[][] ids = controller.GeneratorV2.GetIds;
         Room[] rooms = controller.GeneratorV2.GetRooms;
-        int floorId = ids[x][y];
 
         Cell current_cell = cells[x][y];
         int current_id = ids[x][y];
 
         if (current_cell != Cell.Hole) {
-            GameObject obj_floor = Instantiate(floorPrefab, mazeContainer);
-            Vector3 floorPos = obj_floor.transform.position;
-            floorPos.x = (x - w / 2) * ROOMS_OFFSET;
-            floorPos.z = (y - w / 2) * ROOMS_OFFSET;
-            floorPos.y = 0;
-            obj_floor.transform.position = floorPos;
 
-            // colorize floor (demo)
-            ColorizeFloor(obj_floor, floorId);
+            bool need_to_spawn_floor = false;
+            if (current_id != 0) {
+                need_to_spawn_floor = true;
+            }
 
-            obj_floor.transform.localScale = new Vector3(ROOM_SCALE, ROOM_SCALE, ROOM_SCALE);
+            if (!need_to_spawn_floor) {
+                for (int dir = 0; dir < 4; dir++) {
+                    controller.GeneratorV2.GetDirectionsVector(dir, out int dx, out int dy);
+                    dx += x;
+                    dy += y;
+                    if (GetCell(dx, dy) == Cell.Hole) {
+                        need_to_spawn_floor = true;
+                        break;
+                    }
+                }
+            }
 
-            obj_floor.name = $"floor {floorId}";
+            if (need_to_spawn_floor) {
+                GameObject obj_floor = Spawn(floorPrefab, x, y, 0, $"floor {current_id}");
+                ColorizeFloor(obj_floor, current_id);
+            }
         }
 
-
+        // ------------- next, spawn walls and corners
+        if (current_id == 0) {
+            return; // spawn floor only
+        }
+        // ------------- next, spawn walls and corners
 
         for (int direction = 1; direction <= 4; direction++) {
             int dx = (direction == 1) ? 1 : (direction == 3) ? -1 : 0;
@@ -137,16 +156,15 @@ public class MazeBuilder : UdonSharpBehaviour {
                 debug = "in bounds";
             }
 
-
             GameObject obj = null;
             if (current_cell == Cell.DoorDeadEnd && neighbor == Cell.Wall) {
                 int deadend_variant = ids[x][y] % deadendPrefabs.Length;
-                obj = Instantiate(deadendPrefabs[deadend_variant], mazeContainer);
+                obj = Spawn(deadendPrefabs[deadend_variant], x, y, rotation);
                 obj.name = $"id={ids[x][y]}, type deadend, variant {deadend_variant}, {debug}";
             } else if (neighbor == Cell.Wall || nearId == 0) {
                 // spawn wall
                 int wall_variant = ids[x][y] % wallPrefabs.Length;
-                obj = Instantiate(wallPrefabs[wall_variant], mazeContainer);
+                obj = Spawn(wallPrefabs[wall_variant], x, y, rotation);
                 obj.name = $"id={ids[x][y]}, type 1, {debug}";
             } else if (nearId > 0 && nearId != ids[x][y]) {
                 // wall or door?
@@ -155,25 +173,17 @@ public class MazeBuilder : UdonSharpBehaviour {
                     ||
                     (cells[x][y] == Cell.DoorExit && neighbor == Cell.DoorEnterance)
                     ) {
-                    obj = Instantiate(doorPrefab, mazeContainer);
+                    obj = Spawn(doorPrefab, x, y, rotation);
                     obj.name = $"id={ids[x][y]}, type 2A, {debug}";
                 } else {
                     int wall_variant = ids[x][y] % wallPrefabs.Length;
-                    obj = Instantiate(wallPrefabs[wall_variant], mazeContainer);
+                    obj = Spawn(wallPrefabs[wall_variant], x, y, rotation);
                     obj.name = $"id={ids[x][y]}, type 2B, {debug}";
                 }
             } else {
                 // nothing to spawn - clear passage
                 continue;
             }
-
-            Vector3 pos = obj.transform.position;
-            pos.x = (x - w / 2) * ROOMS_OFFSET;
-            pos.z = (y - w / 2) * ROOMS_OFFSET;
-            pos.y = 0;
-
-            obj.transform.SetPositionAndRotation(pos, Quaternion.Euler(-90, rotation, 0));
-            obj.transform.localScale = new Vector3(ROOM_SCALE, ROOM_SCALE, ROOM_SCALE);
         }
 
         // спавн уголков только поверх чистых проходов без дверей и только для пещер
@@ -211,16 +221,8 @@ public class MazeBuilder : UdonSharpBehaviour {
 
                 if (current_id != near1_id && current_id != near2_id) {
                     int corner_variant = ids[x][y] % cornerPrefabs.Length;
-                    GameObject obj333 = Instantiate(cornerPrefabs[corner_variant], mazeContainer);
+                    GameObject obj333 = Spawn(cornerPrefabs[corner_variant], x, y, rotation);
                     obj333.name = $"corner={ids[x][y]}";
-
-                    Vector3 pos = obj333.transform.position;
-                    pos.x = (x - w / 2) * ROOMS_OFFSET;
-                    pos.z = (y - w / 2) * ROOMS_OFFSET;
-                    pos.y = 0;
-
-                    obj333.transform.SetPositionAndRotation(pos, Quaternion.Euler(-90, rotation, 0));
-                    obj333.transform.localScale = new Vector3(ROOM_SCALE, ROOM_SCALE, ROOM_SCALE);
                 }
             }
         }
@@ -235,7 +237,7 @@ public class MazeBuilder : UdonSharpBehaviour {
         var matProp = new MaterialPropertyBlock();
 
         Color clr;
-        switch (id % 8) {
+        switch (id % 7) {
             case 0: clr = Color.yellow; break;
             case 1: clr = Color.red; break;
             case 2: clr = Color.magenta; break;
@@ -243,12 +245,28 @@ public class MazeBuilder : UdonSharpBehaviour {
             case 4: clr = Color.green; break;
             case 5: clr = Color.cyan; break;
             case 6: clr = Color.blue; break;
-            case 7: clr = Color.black; break;
             default: clr = Color.white; break;
+        }
+
+        if (id == 0) {
+            clr = Color.black;
         }
 
         matProp.SetColor("_Color", clr);
         floorMesh.SetPropertyBlock(matProp);
+    }
+
+    private GameObject Spawn(GameObject prefab, int x, int y, int rotation, string name = "") {
+        GameObject GO = Instantiate(prefab, mazeContainer);
+        Vector3 position = GO.transform.position;
+        position.x = (x - w / 2) * ROOMS_OFFSET;
+        position.z = (y - w / 2) * ROOMS_OFFSET;
+        position.y = 0;
+        //GO.transform.position = position;
+        GO.transform.SetPositionAndRotation(position, Quaternion.Euler(-90, rotation, 0));
+        GO.transform.localScale = new Vector3(ROOM_SCALE, ROOM_SCALE, ROOM_SCALE);
+        GO.name = name;
+        return GO;
     }
 }
 
