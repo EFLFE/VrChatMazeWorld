@@ -1,9 +1,7 @@
-﻿using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.X500;
-using System;
+﻿using System;
+using System.Runtime.CompilerServices;
 using UdonSharp;
 using UnityEngine;
-using VRC.SDKBase;
-using VRC.Udon;
 
 public enum Cell {
     Wall,
@@ -21,12 +19,16 @@ public enum Room {
     Turn
 }
 
+[RequireComponent(typeof(URandom))]
 public class MazeV2 : UdonSharpBehaviour {
+    [SerializeField] URandom udonRandom;
 
     public int Size => size;
     public int[][] GetIds => ids;
     public Cell[][] GetCells => cells;
     public Room[] GetRooms => rooms;
+
+    public int current_id = 0;
 
     private int size = 49;
     private int max_rooms;
@@ -68,27 +70,29 @@ public class MazeV2 : UdonSharpBehaviour {
     }
     // ----------- PossibleDoors Stack
 
-
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public int RandomSign() {
         return (RandomInclusive(0, 1) % 2 == 0) ? +1 : -1;
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public int RandomInclusive(int min_inclusive, int max_inclusive) {
         //return rnd.Next(min_inclusive, max_inclusive + 1);
-        return UnityEngine.Random.Range(min_inclusive, max_inclusive + 1);
+        //return UnityEngine.Random.Range(min_inclusive, max_inclusive + 1);
+        return udonRandom.Next(min_inclusive, max_inclusive + 1);
     }
 
     private int seed;
     public void ReSeed() {
-        UnityEngine.Random.InitState(seed);
+        //udonRandom.SetSeed(seed);
         seed = RandomInclusive(100000, 999999);
-        UnityEngine.Random.InitState(seed);
+        udonRandom.SetSeed(seed);
     }
 
 
     public void Init(int max_rooms, int seed) {
         this.seed = seed;
-        UnityEngine.Random.InitState(seed);
+        udonRandom.SetSeed(seed);
         this.max_rooms = max_rooms;
 
         cache_cells_x = new int[max_rooms + 1][];
@@ -191,8 +195,6 @@ public class MazeV2 : UdonSharpBehaviour {
         }
         return current_id >= max_rooms || PossibleDoorsAmont() <= 0;
     }
-
-    public int current_id = 0;
 
     private void TryToSpawnRandomDoorsInRoomByID(int room_id) {
         int amount_of_doors = RandomInclusive(1, 3);
@@ -350,6 +352,7 @@ public class MazeV2 : UdonSharpBehaviour {
         return true;
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private int GetRandomTurn(int dir) {
         int diff = RandomInclusive(0, 1) == 0 ? -1 : +1;
         return (dir + 4 + diff) % 4;
@@ -518,10 +521,12 @@ public class MazeV2 : UdonSharpBehaviour {
         return true;
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private int GetOppositeDirection(int dir) {
         return (dir + 4 - 2) % 4;
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private void GetDirectionsVector(int dir, out int dx, out int dy) {
         if (dir == 0) {
             dx = +0; dy = -1;
@@ -536,6 +541,7 @@ public class MazeV2 : UdonSharpBehaviour {
         }
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private int GetRandomDirectionExceptProvided(int dir) {
         int answer = RandomInclusive(0, 3);
         while (answer == dir) {
@@ -544,6 +550,7 @@ public class MazeV2 : UdonSharpBehaviour {
         return answer;
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private void GetAllCellsOfRoomByID(int room_id, out int[] cells_x, out int[] cells_y, out int cells_amount) {
         cells_x = cache_cells_x[room_id];
         cells_y = cache_cells_y[room_id];

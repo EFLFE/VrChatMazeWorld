@@ -1,4 +1,5 @@
-﻿using UdonSharp;
+﻿using System.Diagnostics;
+using UdonSharp;
 using UnityEngine;
 using VRC.SDKBase;
 
@@ -17,10 +18,13 @@ public class MazeController : UdonSharpBehaviour {
     public TMPro.TextMeshProUGUI debugText;
 
     private bool generator_is_ready = false;
+    private Stopwatch genStopwatch;
 
     [UdonSynced] private int seed;
 
     private void Start() {
+        genStopwatch = new Stopwatch();
+
         Builder.Init(this);
         UI.Init(this);
 
@@ -58,6 +62,7 @@ public class MazeController : UdonSharpBehaviour {
     }
 
     public void Build() {
+        genStopwatch.Restart();
         debugText.text = $"Build(), seed: {seed}";
         Builder.Init(this);
         GeneratorV2.Init(maxRooms, seed);
@@ -65,22 +70,16 @@ public class MazeController : UdonSharpBehaviour {
     }
 
     public void Update() {
-        //if (Input.GetKeyDown(KeyCode.O)) {
-        //    //debugText.text += $"Pressed!!!\n";
-        //    seed++;
-        //    GeneratorV2.Init(maxRooms, seed);
-        //    GeneratorV2.Generate();
-        //    PrintRooms();
-        //}
-
         if (!generator_is_ready) {
             generator_is_ready = GeneratorV2.Generate();
-            UI.SetProgressValue((float) GeneratorV2.current_id / maxRooms);
-            debugText.text = $"Build(), seed: {seed}, max_room_id: {GeneratorV2.current_id}";
-        }
 
-        if (generator_is_ready) {
-            
+            if (generator_is_ready) {
+                genStopwatch.Stop();
+                debugText.text = $"Build(), seed: {seed}, max_room_id: {GeneratorV2.current_id}" +
+                    $"\nGen time sec: {System.Math.Round(genStopwatch.Elapsed.TotalSeconds, 2)}";
+            }
+
+            UI.SetProgressValue((float) GeneratorV2.current_id / maxRooms);
         }
 
         // if (Input.GetKeyDown(KeyCode.O))
@@ -91,7 +90,7 @@ public class MazeController : UdonSharpBehaviour {
 
     public void PrintRooms() {
         debugText.text = "";
-        var maze = GeneratorV2.GetCells;
+        Cell[][] maze = GeneratorV2.GetCells;
         for (int x = 0; x < maze.Length; x++) {
             for (int y = 0; y < maze[x].Length; y++) {
                 if (maze[x][y] == Cell.DoorEnterance)
