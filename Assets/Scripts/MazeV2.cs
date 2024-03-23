@@ -41,9 +41,9 @@ public class MazeV2 : UdonSharpBehaviour {
     private Cell[][] cells_backup;
 
     // ----------- PossibleDoors Stack
-    private int[] possible_doors2_x = new int[10000];
-    private int[] possible_doors2_y = new int[10000];
-    private int[] possible_doors2_d = new int[10000]; // d - direction, 0 - up, 1 - right, 2 - down, 3 - left
+    private int[] possible_doors2_x;
+    private int[] possible_doors2_y;
+    private int[] possible_doors2_d; // d - direction, 0 - up, 1 - right, 2 - down, 3 - left
     private int possible_doors2_head = 0;
     private int possible_doors2_tail = 0;
 
@@ -99,9 +99,9 @@ public class MazeV2 : UdonSharpBehaviour {
         cache_cells_y = new int[max_rooms + 1][];
         cache_cells_ammounts = new int[max_rooms + 1];
 
-        possible_doors2_x = new int[10000];
-        possible_doors2_y = new int[10000];
-        possible_doors2_d = new int[10000]; // d - direction, 0 - up, 1 - right, 2 - down, 3 - left
+        possible_doors2_x = new int[max_rooms * 2];
+        possible_doors2_y = new int[max_rooms * 2];
+        possible_doors2_d = new int[max_rooms * 2]; // d - direction, 0 - up, 1 - right, 2 - down, 3 - left
         possible_doors2_head = 0;
         possible_doors2_tail = 0;
 
@@ -122,46 +122,40 @@ public class MazeV2 : UdonSharpBehaviour {
 
 
     public void Backup() {
-        for (int x = 0; x < size; x++) {
-            for (int y = 0; y < size; y++) {
-                ids_backup[x][y] = ids[x][y];
-                cells_backup[x][y] = cells[x][y];
-            }
-        }
+        Array.Copy(ids, ids_backup, size);
+        Array.Copy(cells, cells_backup, size);
     }
 
     public void Restore() {
-        for (int x = 0; x < size; x++) {
-            for (int y = 0; y < size; y++) {
-                ids[x][y] = ids_backup[x][y];
-                cells[x][y] = cells_backup[x][y];
-            }
-        }
+        Array.Copy(ids_backup, ids, size);
+        Array.Copy(cells_backup, cells, size);
     }
 
     public void GenerateFirstRoom() {
         // make central room 5 by 5 with 4 doors
         current_id = 1;
-        for (int x = size / 2 - 2; x <= size / 2 + 2; x++) {
-            for (int y = size / 2 - 2; y <= size / 2 + 2; y++) {
+        int halfSize = size / 2;
+
+        for (int x = halfSize - 2; x <= halfSize + 2; x++) {
+            for (int y = halfSize - 2; y <= halfSize + 2; y++) {
                 ids[x][y] = 1;
                 cells[x][y] = Cell.Passage;
             }
         }
-        cells[size / 2 - 2][size / 2] = Cell.DoorEnterance;
-        cells[size / 2 + 2][size / 2] = Cell.DoorEnterance;
-        cells[size / 2][size / 2 - 2] = Cell.DoorEnterance;
-        cells[size / 2][size / 2 + 2] = Cell.DoorEnterance;
+        cells[halfSize - 2][halfSize] = Cell.DoorEnterance;
+        cells[halfSize + 2][halfSize] = Cell.DoorEnterance;
+        cells[halfSize][halfSize - 2] = Cell.DoorEnterance;
+        cells[halfSize][halfSize + 2] = Cell.DoorEnterance;
 
-        cells[size / 2 - 3][size / 2] = Cell.DoorExit;
-        cells[size / 2 + 3][size / 2] = Cell.DoorExit;
-        cells[size / 2][size / 2 - 3] = Cell.DoorExit;
-        cells[size / 2][size / 2 + 3] = Cell.DoorExit;
+        cells[halfSize - 3][halfSize] = Cell.DoorExit;
+        cells[halfSize + 3][halfSize] = Cell.DoorExit;
+        cells[halfSize][halfSize - 3] = Cell.DoorExit;
+        cells[halfSize][halfSize + 3] = Cell.DoorExit;
 
-        PossibleDoorsPushToTail(size / 2 + 0, size / 2 - 3, 2);
-        PossibleDoorsPushToTail(size / 2 + 3, size / 2 + 0, 3);
-        PossibleDoorsPushToTail(size / 2 + 0, size / 2 + 3, 0);
-        PossibleDoorsPushToTail(size / 2 - 3, size / 2 + 0, 1);
+        PossibleDoorsPushToTail(halfSize + 0, halfSize - 3, 2);
+        PossibleDoorsPushToTail(halfSize + 3, halfSize + 0, 3);
+        PossibleDoorsPushToTail(halfSize + 0, halfSize + 3, 0);
+        PossibleDoorsPushToTail(halfSize - 3, halfSize + 0, 1);
 
         current_id++;
     }
@@ -193,7 +187,9 @@ public class MazeV2 : UdonSharpBehaviour {
                 }
             }
         }
-        return current_id >= max_rooms || PossibleDoorsAmont() <= 0;
+
+        bool genIsReady = current_id >= max_rooms || PossibleDoorsAmont() <= 0;
+        return genIsReady;
     }
 
     private void TryToSpawnRandomDoorsInRoomByID(int room_id) {
@@ -432,10 +428,7 @@ public class MazeV2 : UdonSharpBehaviour {
     }
 
     private bool TryToGenerateRoomCave(int start_x, int start_y, int except_dir) {
-
         int amount_of_tries_left_to_generate_room = 0;
-        int x = start_x;
-        int y = start_y;
         bool result_of_room_generation = false;
         int amount_of_desired_cells = RandomInclusive(20, 40);
 
@@ -455,14 +448,10 @@ public class MazeV2 : UdonSharpBehaviour {
             cache_cells_ammounts[current_id]++;
 
             int amount_of_cells = amount_of_desired_cells - amount_of_tries_left_to_generate_room;
-            x = start_x;
-            y = start_y;
-
             int fails = 0;
 
             for (int i = 1; i < amount_of_cells; i++) {
-
-                GetRandomCellFromRoomByID(current_id, out x, out y);
+                GetRandomCellFromRoomByID(current_id, out int x, out int y);
                 int dir = GetRandomDirectionExceptProvided(except_dir);
                 GetDirectionsVector(dir, out int dx, out int dy);
                 x += dx;

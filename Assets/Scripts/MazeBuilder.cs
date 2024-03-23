@@ -23,7 +23,7 @@ public class MazeBuilder : UdonSharpBehaviour {
 
     private MazeController controller;
     private int w, h, iterX, iterY, iter;
-    private const int BUILD_COUNT = 3;
+    private const int BUILD_COUNT = 4;
     private int buildLeft;
 
     public static void Spiral(int size, int step, out int x, out int y) {
@@ -65,7 +65,6 @@ public class MazeBuilder : UdonSharpBehaviour {
     /// </summary>
     public bool BuildRoomsIter() {
         Cell[][] cells = controller.GeneratorV2.GetCells;
-        int[][] ids = controller.GeneratorV2.GetIds;
 
         // epic костыль
         if (cells == null) {
