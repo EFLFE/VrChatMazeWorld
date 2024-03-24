@@ -30,7 +30,7 @@ public class MazeV2 : UdonSharpBehaviour {
 
     public int current_id = 0;
 
-    private int size = 49;
+    public int size = 49;
     private int max_rooms;
 
     private int[][] ids;
@@ -193,7 +193,8 @@ public class MazeV2 : UdonSharpBehaviour {
     }
 
     private void TryToSpawnRandomDoorsInRoomByID(int room_id) {
-        int amount_of_doors = RandomInclusive(1, 3);
+        int min_amount_of_doors = current_id <= 5 ? 3 : 1;
+        int amount_of_doors = RandomInclusive(min_amount_of_doors, 3);
         for (int i = 0; i < amount_of_doors; i++) {
             TryToGetRandomCellFromRoomByIDOnTheEdge(room_id, out int door_x, out int door_y, out int door_d);
             if (door_x == -1) break;
@@ -210,13 +211,15 @@ public class MazeV2 : UdonSharpBehaviour {
             return false;
         }
 
-        int room_type = RandomInclusive(1, 3);
-        if (room_type == 1) {
+        int room_type = RandomInclusive(1, 5);
+        if (room_type == 1 && current_id > 10) {
+            // 20% chance
             if (TryToGenerateRoomTurn(start_x, start_y, except_dir)) {
                 rooms[current_id] = Room.Turn;
                 return true;
             }
         } else {
+            // 80% chance
             if (TryToGenerateRoomSquare(start_x, start_y, except_dir)) {
                 rooms[current_id] = Room.Square;
                 return true;

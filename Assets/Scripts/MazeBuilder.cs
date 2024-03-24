@@ -76,8 +76,7 @@ public class MazeBuilder : UdonSharpBehaviour {
         while (buildLeft > 0 && !MazeReady) {
             iter++;
             Spiral(MazeSize, iter - 1, out int x, out int y);
-            SpawnCell(x, y);
-            buildLeft--;
+            if (SpawnCell(x, y)) buildLeft--;
 
             if (iter >= MazeSize * MazeSize) {
                 MazeReady = true;
@@ -98,7 +97,7 @@ public class MazeBuilder : UdonSharpBehaviour {
         }
     }
 
-    private void SpawnCell(int x, int y) {
+    private bool SpawnCell(int x, int y) {
         Cell[][] cells = controller.GeneratorV2.GetCells;
         int[][] ids = controller.GeneratorV2.GetIds;
         Room[] rooms = controller.GeneratorV2.GetRooms;
@@ -131,7 +130,7 @@ public class MazeBuilder : UdonSharpBehaviour {
 
         // ------------- next, spawn walls and corners
         if (current_id == 0) {
-            return; // spawn floor only
+            return false; // spawn floor only
         }
         // ------------- next, spawn walls and corners
 
@@ -241,6 +240,8 @@ public class MazeBuilder : UdonSharpBehaviour {
                 }
             }
         }
+
+        return true;
     }
 
     private int GetClockwiseDirection(int dir) {

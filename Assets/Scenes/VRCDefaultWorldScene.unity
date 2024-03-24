@@ -1679,6 +1679,7 @@ MonoBehaviour:
   _udonSharpBackingUdonBehaviour: {fileID: 1990344164}
   udonRandom: {fileID: 1990344167}
   current_id: 0
+  size: 49
 --- !u!114 &1990344166
 MonoBehaviour:
   m_ObjectHideFlags: 2
