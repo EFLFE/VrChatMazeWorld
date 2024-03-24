@@ -76,7 +76,8 @@ public class MazeBuilder : UdonSharpBehaviour {
         while (buildLeft > 0 && !MazeReady) {
             iter++;
             Spiral(MazeSize, iter - 1, out int x, out int y);
-            if (SpawnCell(x, y)) buildLeft--;
+            SpawnCell(x, y);
+            buildLeft--;
 
             if (iter >= MazeSize * MazeSize) {
                 MazeReady = true;
