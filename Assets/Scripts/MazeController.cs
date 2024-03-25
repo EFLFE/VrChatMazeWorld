@@ -1,7 +1,9 @@
-﻿using System.Diagnostics;
+﻿using QvPen.UdonScript;
+using System.Diagnostics;
 using UdonSharp;
 using UnityEngine;
 using VRC.SDKBase;
+using VRC.Udon.Common.Interfaces;
 
 [UdonBehaviourSyncMode(BehaviourSyncMode.Manual)]
 public class MazeController : UdonSharpBehaviour {
@@ -21,6 +23,8 @@ public class MazeController : UdonSharpBehaviour {
     private Stopwatch genStopwatch;
 
     [UdonSynced] private int seed;
+    [SerializeField]
+    private QvPen_Settings QV_PEN_Settings;
 
     private void Start() {
         genStopwatch = new Stopwatch();
@@ -49,6 +53,20 @@ public class MazeController : UdonSharpBehaviour {
         if (Networking.LocalPlayer.IsOwner(gameObject))
             Build();
         RequestSerialization();
+
+        // clear all pens
+        if (QV_PEN_Settings) {
+
+            foreach (var penManager in QV_PEN_Settings.penManagers)
+                if (penManager)
+                    penManager.Clear();
+            foreach (var penManager in QV_PEN_Settings.penManagers)
+                if (penManager)
+                    penManager.SendCustomNetworkEvent(NetworkEventTarget.All, nameof(QvPen_PenManager.ResetPen));
+            foreach (var eraserManager in QV_PEN_Settings.eraserManagers)
+                if (eraserManager)
+                    eraserManager.SendCustomNetworkEvent(NetworkEventTarget.All, nameof(QvPen_EraserManager.ResetEraser));
+        }
     }
 
     // event (test)
