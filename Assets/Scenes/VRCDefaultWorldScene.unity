@@ -2417,6 +2417,8 @@ MonoBehaviour:
     type: 3}
   ceiling_cave: {fileID: 5439447328683318313, guid: 8242c27f73c0ab24ea8c9ac7b8334714,
     type: 3}
+  chestPrefab: {fileID: 335640645278907704, guid: 57bf87c33c680e7428b7e0946254a10b,
+    type: 3}
 --- !u!114 &1027156426
 MonoBehaviour:
   m_ObjectHideFlags: 2
@@ -3468,6 +3470,9 @@ MonoBehaviour:
   udonRandom: {fileID: 1990344167}
   current_id: 0
   size: 49
+  chests_amount: 0
+  chests_x: 
+  chests_y: 
 --- !u!114 &1990344166
 MonoBehaviour:
   m_ObjectHideFlags: 2

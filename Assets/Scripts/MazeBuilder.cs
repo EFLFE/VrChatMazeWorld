@@ -17,6 +17,7 @@ public class MazeBuilder : UdonSharpBehaviour {
     [SerializeField] private GameObject[] deadendPrefabs;
     [SerializeField] private GameObject ceiling_general;
     [SerializeField] private GameObject ceiling_cave;
+    [SerializeField] private GameObject chestPrefab;
 
     public bool MazeReady { get; private set; }
     public int MazeSize { get; private set; }
@@ -64,6 +65,7 @@ public class MazeBuilder : UdonSharpBehaviour {
     /// Run BuildRoomsBegin before. Iteration building. true = completed.
     /// </summary>
     public bool BuildRoomsIter() {
+        var maze = controller.GeneratorV2;
         Cell[][] cells = controller.GeneratorV2.GetCells;
 
         // epic костыль
@@ -77,6 +79,13 @@ public class MazeBuilder : UdonSharpBehaviour {
             iter++;
             Spiral(MazeSize, iter - 1, out int x, out int y);
             SpawnCell(x, y);
+
+            for (int i = 0; i < maze.chests_amount; i++) {
+                if (x == maze.chests_x[i] && y == maze.chests_y[i]) {
+                    Spawn(chestPrefab, x, y, 0);
+                }
+            }
+
             buildLeft--;
 
             if (iter >= MazeSize * MazeSize) {

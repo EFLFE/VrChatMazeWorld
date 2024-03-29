@@ -1,4 +1,5 @@
-﻿using System;
+﻿using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.X500;
+using System;
 using System.Runtime.CompilerServices;
 using UdonSharp;
 using UnityEngine;
@@ -39,6 +40,10 @@ public class MazeV2 : UdonSharpBehaviour {
 
     private int[][] ids_backup;
     private Cell[][] cells_backup;
+
+    public int chests_amount;
+    public int[] chests_x;
+    public int[] chests_y;
 
     // ----------- PossibleDoors Stack
     private int[] possible_doors2_x;
@@ -85,12 +90,12 @@ public class MazeV2 : UdonSharpBehaviour {
     private int seed;
     public void ReSeed() {
         //udonRandom.SetSeed(seed);
-        seed = RandomInclusive(100000, 999999);
-        udonRandom.SetSeed(seed);
+        //seed = RandomInclusive(100000, 999999);
+        //udonRandom.SetSeed(seed);
     }
 
 
-    public void Init(int max_rooms, int seed) {
+    public void Init(int max_rooms, int seed, int chests_amount = 4) {
         this.seed = seed;
         udonRandom.SetSeed(seed);
         //rnd = new Random(seed);
@@ -119,6 +124,10 @@ public class MazeV2 : UdonSharpBehaviour {
         cells_backup = new Cell[size][];
         for (int i = 0; i < size; i++) cells_backup[i] = new Cell[size];
         */
+
+        this.chests_amount = chests_amount;
+        chests_x = new int[chests_amount];
+        chests_y = new int[chests_amount];
 
         GenerateFirstRoom();
     }
@@ -197,6 +206,15 @@ public class MazeV2 : UdonSharpBehaviour {
                         cells[x][y] = Cell.Passage;
                         cells[x - dx][y - dy] = Cell.Passage;
                     }
+                }
+
+                // spawn final chests
+                for (int i = 0; i < chests_amount; i++) {
+                    int room_id = max_rooms - 1 - i * 4;
+                    GetRandomCellFromRoomByID(room_id, out int room_x, out int room_y);
+                    chests_x[i] = room_x;
+                    chests_y[i] = room_y;
+                    cells[room_x][room_y] = Cell.Passage;
                 }
             }
         }
@@ -310,6 +328,11 @@ public class MazeV2 : UdonSharpBehaviour {
             }
 
             // it is possible to spawn the room
+            cache_cells_ammounts[current_id] = 0;
+            int cache_cells_ammount = 100;
+            cache_cells_x[current_id] = new int[cache_cells_ammount];
+            cache_cells_y[current_id] = new int[cache_cells_ammount];
+
             for (int x = start_middle_corner1_x; x <= start_middle_corner2_x; x++) {
                 for (int y = start_middle_corner1_y; y <= start_middle_corner2_y; y++) {
                     if (cells[x][y] == Cell.Wall) {
@@ -319,6 +342,10 @@ public class MazeV2 : UdonSharpBehaviour {
                     if (x != middle_x && y != middle_y) {
                         cells[x][y] = Cell.Hole;
                     }
+                    // cache
+                    cache_cells_x[current_id][cache_cells_ammounts[current_id]] = x;
+                    cache_cells_y[current_id][cache_cells_ammounts[current_id]] = y;
+                    cache_cells_ammounts[current_id]++;
                 }
             }
             for (int x = middle_end_corner1_x; x <= middle_end_corner2_x; x++) {
@@ -330,6 +357,10 @@ public class MazeV2 : UdonSharpBehaviour {
                     if (x != middle_x && y != middle_y) {
                         cells[x][y] = Cell.Hole;
                     }
+                    // cache
+                    cache_cells_x[current_id][cache_cells_ammounts[current_id]] = x;
+                    cache_cells_y[current_id][cache_cells_ammounts[current_id]] = y;
+                    cache_cells_ammounts[current_id]++;
                 }
             }
 
