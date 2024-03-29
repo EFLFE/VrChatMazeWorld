@@ -214,7 +214,9 @@ public class MazeV2 : UdonSharpBehaviour {
                     GetRandomCellFromRoomByID(room_id, out int room_x, out int room_y);
                     chests_x[i] = room_x;
                     chests_y[i] = room_y;
-                    cells[room_x][room_y] = Cell.Passage;
+                    if (cells[room_x][room_y] == Cell.Hole) {
+                        cells[room_x][room_y] = Cell.Passage;
+                    }
                 }
             }
         }
