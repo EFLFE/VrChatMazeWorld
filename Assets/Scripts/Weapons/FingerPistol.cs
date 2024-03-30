@@ -1,23 +1,44 @@
 ﻿using UdonSharp;
 using UnityEngine;
 using VRC.SDKBase;
-using VRC.Udon;
 
+// global script
 public class FingerPistol : UdonSharpBehaviour {
+    [SerializeField] MazeController controller;
     [SerializeField] GameObject projectilePrefab;
 
+    private VRCPlayerApi localPlayer;
+    private bool vrMode;
+    private bool reloaded;
+
+    private void Start() {
+        localPlayer = Networking.LocalPlayer;
+        vrMode = localPlayer.IsUserInVR();
+        reloaded = true;
+    }
+
     private void Update() {
-        if (Input.GetMouseButtonDown(1) || Input.GetMouseButton(2)) {
-            Shot();
+        if (vrMode) {
+            float secondaryIndexTrigger = Input.GetAxis("Oculus_CrossPlatform_SecondaryIndexTrigger");
+
+            if (reloaded && secondaryIndexTrigger == 1f) {
+                Shot();
+                reloaded = controller.UI.IsNoReload;
+            } else if (!reloaded && secondaryIndexTrigger < 1f) {
+                reloaded = true;
+            }
+        } else {
+            if (Input.GetMouseButtonDown(1) || Input.GetMouseButton(2)) {
+                Shot();
+            }
         }
     }
 
     private void Shot() {
-        VRCPlayerApi localPlayer = Networking.LocalPlayer;
-        bool vrMode = localPlayer.IsUserInVR();
-        VRCPlayerApi.TrackingData trackData = localPlayer.GetTrackingData(vrMode ? VRCPlayerApi.TrackingDataType.RightHand : VRCPlayerApi.TrackingDataType.Head);
+        VRCPlayerApi.TrackingData trackData = localPlayer.GetTrackingData(
+            vrMode ? VRCPlayerApi.TrackingDataType.RightHand : VRCPlayerApi.TrackingDataType.Head);
         GameObject projectileObj = Instantiate(projectilePrefab, trackData.position, trackData.rotation);
         var script = projectileObj.GetComponent<SimpleProjectile>();
-        script.Init(trackData.rotation, vrMode);
+        script.Init(controller, trackData.rotation, vrMode);
     }
 }
