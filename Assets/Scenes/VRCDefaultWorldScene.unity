@@ -222,7 +222,9 @@ MonoBehaviour:
     SerializationNodes: []
   _udonSharpBackingUdonBehaviour: {fileID: 112654832}
   buildOnStart: 1
-  maxRooms: 20
+  mazeSize: 29
+  mazeRoomsAmount: 33
+  mazeChestsAmount: 7
   enemyPrefab: {fileID: 2077515443966962100, guid: 948bd9ede0180384c8819c62e1241293,
     type: 3}
   enemySpawn: {fileID: 1385585398}
@@ -3017,11 +3019,6 @@ MonoBehaviour:
     SerializationNodes: []
   _udonSharpBackingUdonBehaviour: {fileID: 1990344164}
   udonRandom: {fileID: 1990344167}
-  current_id: 0
-  size: 49
-  chests_amount: 0
-  chests_x: 
-  chests_y: 
 --- !u!114 &1990344166
 MonoBehaviour:
   m_ObjectHideFlags: 2

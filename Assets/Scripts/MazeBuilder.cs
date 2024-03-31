@@ -72,28 +72,29 @@ public class MazeBuilder : UdonSharpBehaviour {
     /// </summary>
     public bool BuildRoomsIter() {
         var maze = controller.MazeGenerator;
-        Cell[][] cells = controller.MazeGenerator.GetCells;
 
         // epic костыль
-        if (cells == null) {
-            //controller.debugText.text += "\n OH SH~! NO CELLS!!! : ";
+        if (maze.Cells == null) {
+            controller.MazeUI.Log("BuildRoomsIter: OH SH~! NO CELLS!!!");
             return MazeReady;
         }
 
         buildLeft = BUILD_COUNT;
         while (buildLeft > 0 && !MazeReady) {
+            //controller.MazeUI.Log($"Iter: {iter}");
             iter++;
             Spiral(MazeSize, iter - 1, out int x, out int y);
             SpawnCell(x, y);
 
-            for (int i = 0; i < maze.chests_amount; i++) {
-                if (x == maze.chests_x[i] && y == maze.chests_y[i]) {
+            for (int i = 0; i < maze.ChestsAmount; i++) {
+                if (x == maze.ChestsX[i] && y == maze.ChestsY[i]) {
                     Spawn(chestPrefab, x, y, 0);
                 }
             }
 
             buildLeft--;
 
+            //controller.MazeUI.Log($"MazeSize: {MazeSize}");
             if (iter >= MazeSize * MazeSize) {
                 MazeReady = true;
                 break;
@@ -109,14 +110,14 @@ public class MazeBuilder : UdonSharpBehaviour {
         if (x < 0 || y < 0 || x >= controller.MazeGenerator.Size || y >= controller.MazeGenerator.Size) {
             return Cell.Wall;
         } else {
-            return controller.MazeGenerator.GetCells[x][y];
+            return controller.MazeGenerator.Cells[x][y];
         }
     }
 
     private bool SpawnCell(int x, int y) {
-        Cell[][] cells = controller.MazeGenerator.GetCells;
-        int[][] ids = controller.MazeGenerator.GetIds;
-        Room[] rooms = controller.MazeGenerator.GetRooms;
+        Cell[][] cells = controller.MazeGenerator.Cells;
+        int[][] ids = controller.MazeGenerator.Ids;
+        Room[] rooms = controller.MazeGenerator.Rooms;
 
         Cell current_cell = cells[x][y];
         int current_id = ids[x][y];

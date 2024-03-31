@@ -24,13 +24,19 @@ public class MazeGenerator : UdonSharpBehaviour {
     [SerializeField] UdonRandom udonRandom;
 
     public int Size => size;
-    public int[][] GetIds => ids;
-    public Cell[][] GetCells => cells;
-    public Room[] GetRooms => rooms;
+    public int[][] Ids => ids;
+    public Cell[][] Cells => cells;
+    public Room[] Rooms => rooms;
+    public int ChestsAmount => chests_amount;
+    public int[] ChestsX => chests_x;
+    public int[] ChestsY => chests_y;
+    public int CurrentId => current_id;
 
-    public int current_id = 0;
+    // ================================================================= //
 
-    public int size = 49;
+    private int current_id = 0;
+
+    private int size;
     private int max_rooms;
 
     private int[][] ids;
@@ -40,9 +46,9 @@ public class MazeGenerator : UdonSharpBehaviour {
     private int[][] ids_backup;
     private Cell[][] cells_backup;
 
-    public int chests_amount;
-    public int[] chests_x;
-    public int[] chests_y;
+    private int chests_amount;
+    private int[] chests_x;
+    private int[] chests_y;
 
     // ----------- PossibleDoors Stack
     private int[] possible_doors2_x;
@@ -94,23 +100,24 @@ public class MazeGenerator : UdonSharpBehaviour {
     }
 
 
-    public void Init(int max_rooms, int seed, int chests_amount = 4) {
+    public void Init(int seed, int size, int rooms, int chests) {
         this.seed = seed;
         udonRandom.SetSeed(seed);
         //rnd = new Random(seed);
-        this.max_rooms = max_rooms;
+        this.size = size;
+        this.max_rooms = rooms;
 
-        cache_cells_x = new int[max_rooms + 1][];
-        cache_cells_y = new int[max_rooms + 1][];
-        cache_cells_ammounts = new int[max_rooms + 1];
+        cache_cells_x = new int[rooms + 1][];
+        cache_cells_y = new int[rooms + 1][];
+        cache_cells_ammounts = new int[rooms + 1];
 
-        possible_doors2_x = new int[max_rooms * 5];
-        possible_doors2_y = new int[max_rooms * 5];
-        possible_doors2_d = new int[max_rooms * 5]; // d - direction, 0 - up, 1 - right, 2 - down, 3 - left
+        possible_doors2_x = new int[rooms * 5];
+        possible_doors2_y = new int[rooms * 5];
+        possible_doors2_d = new int[rooms * 5]; // d - direction, 0 - up, 1 - right, 2 - down, 3 - left
         possible_doors2_head = 0;
         possible_doors2_tail = 0;
 
-        rooms = new Room[max_rooms];
+        this.rooms = new Room[rooms];
 
         ids = new int[size][];
         for (int i = 0; i < size; i++) ids[i] = new int[size];
@@ -124,9 +131,9 @@ public class MazeGenerator : UdonSharpBehaviour {
         for (int i = 0; i < size; i++) cells_backup[i] = new Cell[size];
         */
 
-        this.chests_amount = chests_amount;
-        chests_x = new int[chests_amount];
-        chests_y = new int[chests_amount];
+        this.chests_amount = chests;
+        chests_x = new int[chests];
+        chests_y = new int[chests];
 
         GenerateFirstRoom();
     }

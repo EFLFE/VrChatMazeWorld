@@ -8,7 +8,13 @@ using VRC.Udon.Common.Interfaces;
 [UdonBehaviourSyncMode(BehaviourSyncMode.Manual)]
 public class MazeController : UdonSharpBehaviour {
     [SerializeField] private bool buildOnStart;
-    [SerializeField] private int maxRooms = 200; // test
+
+    [Space]
+    [SerializeField] private int mazeSize;
+    [SerializeField] private int mazeRoomsAmount;
+    [SerializeField] private int mazeChestsAmount;
+    [Space]
+
     [SerializeField] private GameObject enemyPrefab;
     [SerializeField] private Transform enemySpawn;
 
@@ -80,11 +86,12 @@ public class MazeController : UdonSharpBehaviour {
 
     public void Build() {
         genStopwatch.Restart();
-        debugText.text = $"Build(), seed: {seed}";
+        MazeUI.Log($"Build Start, seed: {seed}");
+        MazeGenerator.Init(seed, mazeSize, mazeRoomsAmount, mazeChestsAmount);
         MazeBuilder.Init(this);
-        MazeGenerator.Init(maxRooms, seed);
         generator_is_ready = false;
     }
+
 
     public void Update() {
         if (!generator_is_ready) {
@@ -92,11 +99,17 @@ public class MazeController : UdonSharpBehaviour {
 
             if (generator_is_ready) {
                 genStopwatch.Stop();
-                debugText.text = $"Build(), seed: {seed}, max_room_id: {MazeGenerator.current_id}" +
-                    $"\nGen time sec: {System.Math.Round(genStopwatch.Elapsed.TotalSeconds, 2)}";
+                MazeUI.Log($"Build Complete, " +
+                    $"\n seed: {seed}, " +
+                    $"\n mazeSize: {mazeSize}" +
+                    $"\n mazeRoomsAmount: {mazeRoomsAmount}" +
+                    $"\n mazeChestsAmount: {mazeChestsAmount}" +
+                    $"\n MazeBuilder.MazeReady: {MazeBuilder.MazeReady}" +
+                    $"\n Gen time sec: {System.Math.Round(genStopwatch.Elapsed.TotalSeconds, 2)}"
+                );
             }
 
-            MazeUI.SetProgressValue((float) MazeGenerator.current_id / maxRooms);
+            MazeUI.SetProgressValue((float) MazeGenerator.CurrentId / mazeRoomsAmount);
         }
 
         // if (Input.GetKeyDown(KeyCode.O))
@@ -107,7 +120,7 @@ public class MazeController : UdonSharpBehaviour {
 
     public void PrintRooms() {
         debugText.text = "";
-        Cell[][] maze = MazeGenerator.GetCells;
+        Cell[][] maze = MazeGenerator.Cells;
         for (int x = 0; x < maze.Length; x++) {
             for (int y = 0; y < maze[x].Length; y++) {
                 if (maze[x][y] == Cell.DoorEnterance)
