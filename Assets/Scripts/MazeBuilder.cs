@@ -20,7 +20,6 @@ public class MazeBuilder : UdonSharpBehaviour {
     [SerializeField] private GameObject chestPrefab;
 
     public bool MazeReady { get; private set; }
-    public int MazeSize { get; private set; }
 
     private MazeController controller;
     private int w, h, iterX, iterY, iter;
@@ -56,14 +55,10 @@ public class MazeBuilder : UdonSharpBehaviour {
             GameObject.Destroy(child, 0.1f);
         }
 
-
         iterX = -1;
         iterY = 0;
         iter = 0;
         buildLeft = 0;
-        MazeSize = controller.MazeGenerator.Size;
-        h = MazeSize;
-        w = MazeSize;
         controller.MazeUI.SetProgressValue(0f);
     }
 
@@ -83,7 +78,7 @@ public class MazeBuilder : UdonSharpBehaviour {
         while (buildLeft > 0 && !MazeReady) {
             //controller.MazeUI.Log($"Iter: {iter}");
             iter++;
-            Spiral(MazeSize, iter - 1, out int x, out int y);
+            Spiral(maze.Size, iter - 1, out int x, out int y);
             SpawnCell(x, y);
 
             for (int i = 0; i < maze.ChestsAmount; i++) {
@@ -95,14 +90,14 @@ public class MazeBuilder : UdonSharpBehaviour {
             buildLeft--;
 
             //controller.MazeUI.Log($"MazeSize: {MazeSize}");
-            if (iter >= MazeSize * MazeSize) {
+            if (iter >= maze.Size * maze.Size) {
                 MazeReady = true;
                 break;
             }
         }
 
 
-        controller.MazeUI.SetProgressValue((float) iter / (MazeSize * MazeSize));
+        controller.MazeUI.SetProgressValue((float) iter / (maze.Size * maze.Size));
         return MazeReady;
     }
 
@@ -115,9 +110,10 @@ public class MazeBuilder : UdonSharpBehaviour {
     }
 
     private bool SpawnCell(int x, int y) {
-        Cell[][] cells = controller.MazeGenerator.Cells;
-        int[][] ids = controller.MazeGenerator.Ids;
-        Room[] rooms = controller.MazeGenerator.Rooms;
+        var maze = controller.MazeGenerator;
+        Cell[][] cells = maze.Cells;
+        int[][] ids = maze.Ids;
+        Room[] rooms = maze.Rooms;
 
         Cell current_cell = cells[x][y];
         int current_id = ids[x][y];
@@ -181,7 +177,7 @@ public class MazeBuilder : UdonSharpBehaviour {
             Cell neighbor = Cell.Wall;
             int nearId = 0;
             string debug = $"out of bounds: x + dx, y + dy, dx, dy: {x + dx}, {y + dy}, {dx}, {dy}";
-            if (y + dy >= 0 && y + dy < MazeSize && x + dx >= 0 && x + dx < MazeSize) {
+            if (y + dy >= 0 && y + dy < maze.Size && x + dx >= 0 && x + dx < maze.Size) {
                 neighbor = cells[x + dx][y + dy];
                 nearId = ids[x + dx][y + dy];
                 debug = "in bounds";
@@ -232,7 +228,7 @@ public class MazeBuilder : UdonSharpBehaviour {
 
                 Cell near1_cell = Cell.Wall;
                 int near1_id = 0;
-                if (y + dy1 >= 0 && y + dy1 < MazeSize && x + dx1 >= 0 && x + dx1 < MazeSize) {
+                if (y + dy1 >= 0 && y + dy1 < maze.Size && x + dx1 >= 0 && x + dx1 < maze.Size) {
                     near1_cell = cells[x + dx1][y + dy1];
                     near1_id = ids[x + dx1][y + dy1];
                 }
@@ -245,7 +241,7 @@ public class MazeBuilder : UdonSharpBehaviour {
 
                 Cell near2_cell = Cell.Wall;
                 int near2_id = 0;
-                if (y + dy2 >= 0 && y + dy2 < MazeSize && x + dx2 >= 0 && x + dx2 < MazeSize) {
+                if (y + dy2 >= 0 && y + dy2 < maze.Size && x + dx2 >= 0 && x + dx2 < maze.Size) {
                     near2_cell = cells[x + dx2][y + dy2];
                     near2_id = ids[x + dx2][y + dy2];
                 }
@@ -292,8 +288,8 @@ public class MazeBuilder : UdonSharpBehaviour {
     private GameObject Spawn(GameObject prefab, int x, int y, int rotation, string name = "") {
         GameObject GO = Instantiate(prefab, mazeContainer);
         Vector3 position = GO.transform.position;
-        position.x = (x - w / 2) * ROOMS_OFFSET;
-        position.z = (y - w / 2) * ROOMS_OFFSET;
+        position.x = (x - controller.MazeGenerator.Size / 2) * ROOMS_OFFSET;
+        position.z = (y - controller.MazeGenerator.Size / 2) * ROOMS_OFFSET;
         position.y = 0;
         //GO.transform.position = position;
         GO.transform.SetPositionAndRotation(position, Quaternion.Euler(-90, rotation, 0));
