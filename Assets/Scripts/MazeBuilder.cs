@@ -50,23 +50,29 @@ public class MazeBuilder : UdonSharpBehaviour {
     public void Init(MazeController controller) {
         this.controller = controller;
         MazeReady = false;
-        controller.Utils.RemoveAllChildGameObjects(mazeContainer, 0.1f);
+        //controller.Utils.RemoveAllChildGameObjects(mazeContainer, 0.1f);
+        for (int i = mazeContainer.childCount - 1; i >= 0; --i) {
+            GameObject child = mazeContainer.GetChild(i).gameObject;
+            GameObject.Destroy(child, 0.1f);
+        }
+
+
         iterX = -1;
         iterY = 0;
         iter = 0;
         buildLeft = 0;
-        MazeSize = controller.GeneratorV2.Size;
+        MazeSize = controller.MazeGenerator.Size;
         h = MazeSize;
         w = MazeSize;
-        controller.UI.SetProgressValue(0f);
+        controller.MazeUI.SetProgressValue(0f);
     }
 
     /// <summary>
     /// Run BuildRoomsBegin before. Iteration building. true = completed.
     /// </summary>
     public bool BuildRoomsIter() {
-        var maze = controller.GeneratorV2;
-        Cell[][] cells = controller.GeneratorV2.GetCells;
+        var maze = controller.MazeGenerator;
+        Cell[][] cells = controller.MazeGenerator.GetCells;
 
         // epic костыль
         if (cells == null) {
@@ -95,22 +101,22 @@ public class MazeBuilder : UdonSharpBehaviour {
         }
 
 
-        controller.UI.SetProgressValue((float) iter / (MazeSize * MazeSize));
+        controller.MazeUI.SetProgressValue((float) iter / (MazeSize * MazeSize));
         return MazeReady;
     }
 
     private Cell GetCell(int x, int y) {
-        if (x < 0 || y < 0 || x >= controller.GeneratorV2.Size || y >= controller.GeneratorV2.Size) {
+        if (x < 0 || y < 0 || x >= controller.MazeGenerator.Size || y >= controller.MazeGenerator.Size) {
             return Cell.Wall;
         } else {
-            return controller.GeneratorV2.GetCells[x][y];
+            return controller.MazeGenerator.GetCells[x][y];
         }
     }
 
     private bool SpawnCell(int x, int y) {
-        Cell[][] cells = controller.GeneratorV2.GetCells;
-        int[][] ids = controller.GeneratorV2.GetIds;
-        Room[] rooms = controller.GeneratorV2.GetRooms;
+        Cell[][] cells = controller.MazeGenerator.GetCells;
+        int[][] ids = controller.MazeGenerator.GetIds;
+        Room[] rooms = controller.MazeGenerator.GetRooms;
 
         Cell current_cell = cells[x][y];
         int current_id = ids[x][y];
@@ -124,7 +130,7 @@ public class MazeBuilder : UdonSharpBehaviour {
 
             if (!need_to_spawn_floor) {
                 for (int dir = 0; dir < 4; dir++) {
-                    controller.GeneratorV2.GetDirectionsVector(dir, out int dx, out int dy);
+                    controller.MazeGenerator.GetDirectionsVector(dir, out int dx, out int dy);
                     if (GetCell(x + dx, y + dy) == Cell.Hole) {
                         need_to_spawn_floor = true;
                         break;
@@ -153,7 +159,7 @@ public class MazeBuilder : UdonSharpBehaviour {
             ceiling_prefab_to_spawn = ceiling_general;
         }
         if (ceiling_prefab_to_spawn != null) {
-            int rotation = controller.GeneratorV2.RandomInclusive(0, 3) * 90;
+            int rotation = controller.MazeGenerator.RandomInclusive(0, 3) * 90;
             // TODO make admin button to remove all ceilings
             // Spawn(ceiling_prefab_to_spawn, x, y, rotation, "ceiling");
         }

@@ -11,13 +11,13 @@ public class SimpleProjectile : UdonSharpBehaviour {
     public void Init(MazeController controller, Quaternion look, bool vrMode) {
         Vector3 e = look.eulerAngles;
         if (vrMode) {
-            e.x += controller.UI.GetHandXOffset();
+            e.x += controller.MazeUI.GetHandXOffset();
             //e.x = (e.x + 360f) % 360f;
         } else {
             // спавн под глазами
             transform.position -= new Vector3(0, 0.143f, 0);
         }
-        controller.UI.Log("e=" + e.ToString());
+        controller.MazeUI.Log("e=" + e.ToString());
         transform.rotation = Quaternion.Euler(e);
     }
 
@@ -31,8 +31,7 @@ public class SimpleProjectile : UdonSharpBehaviour {
         transform.position += speed * Time.deltaTime * transform.forward;
     }
 
-    private void OnTriggerEnter(Collider other)
-    {
+    private void OnTriggerEnter(Collider other) {
         liveTime = 0f;
     }
 }

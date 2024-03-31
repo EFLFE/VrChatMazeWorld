@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c333ccfdd0cbdbc4ca30cef2dd6e6b9b, type: 3}
   m_Name: QvPen_ResetAllButton
   m_EditorClassIdentifier: 
-  serializedUdonProgramAsset: {fileID: 11400000, guid: 70b404cd7190b4b4a8a428666fab96d2,
+  serializedUdonProgramAsset: {fileID: 11400000, guid: 32b9c2f974a5542469dbf0069565cadb,
     type: 2}
   udonAssembly: 
   assemblyError: 

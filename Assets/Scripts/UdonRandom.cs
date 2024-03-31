@@ -6,7 +6,7 @@ using UdonSharp;
 /// System.Random for udon.
 /// </summary>
 [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
-public class URandom : UdonSharpBehaviour {
+public class UdonRandom : UdonSharpBehaviour {
     private const int MBIG = int.MaxValue;
     private const int MSEED = 161803398;
 

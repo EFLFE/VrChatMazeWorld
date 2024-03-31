@@ -23,7 +23,7 @@ public class FingerPistol : UdonSharpBehaviour {
 
             if (reloaded && secondaryIndexTrigger == 1f) {
                 Shot();
-                reloaded = controller.UI.IsNoReload;
+                reloaded = controller.MazeUI.IsNoReload;
             } else if (!reloaded && secondaryIndexTrigger < 1f) {
                 reloaded = true;
             }
@@ -36,7 +36,10 @@ public class FingerPistol : UdonSharpBehaviour {
 
     private void Shot() {
         VRCPlayerApi.TrackingData trackData = localPlayer.GetTrackingData(
-            vrMode ? VRCPlayerApi.TrackingDataType.RightHand : VRCPlayerApi.TrackingDataType.Head);
+            vrMode
+            ? VRCPlayerApi.TrackingDataType.RightHand
+            : VRCPlayerApi.TrackingDataType.Head
+        );
         GameObject projectileObj = Instantiate(projectilePrefab, trackData.position, trackData.rotation);
         var script = projectileObj.GetComponent<SimpleProjectile>();
         script.Init(controller, trackData.rotation, vrMode);

@@ -12,10 +12,9 @@ public class MazeController : UdonSharpBehaviour {
     [SerializeField] private GameObject enemyPrefab;
     [SerializeField] private Transform enemySpawn;
 
-    public MazeBuilder Builder;
-    public MazeV2 GeneratorV2;
-    public Utils Utils;
-    public MazeUI UI;
+    public MazeBuilder MazeBuilder;
+    public MazeGenerator MazeGenerator;
+    public MazeUI MazeUI;
 
     public TMPro.TextMeshProUGUI debugText;
 
@@ -29,8 +28,8 @@ public class MazeController : UdonSharpBehaviour {
     private void Start() {
         genStopwatch = new Stopwatch();
 
-        Builder.Init(this);
-        UI.Init(this);
+        MazeBuilder.Init(this);
+        MazeUI.Init(this);
 
         if (buildOnStart) {
             bool isOwner = Networking.LocalPlayer.IsOwner(gameObject);
@@ -82,33 +81,33 @@ public class MazeController : UdonSharpBehaviour {
     public void Build() {
         genStopwatch.Restart();
         debugText.text = $"Build(), seed: {seed}";
-        Builder.Init(this);
-        GeneratorV2.Init(maxRooms, seed);
+        MazeBuilder.Init(this);
+        MazeGenerator.Init(maxRooms, seed);
         generator_is_ready = false;
     }
 
     public void Update() {
         if (!generator_is_ready) {
-            generator_is_ready = GeneratorV2.Generate();
+            generator_is_ready = MazeGenerator.Generate();
 
             if (generator_is_ready) {
                 genStopwatch.Stop();
-                debugText.text = $"Build(), seed: {seed}, max_room_id: {GeneratorV2.current_id}" +
+                debugText.text = $"Build(), seed: {seed}, max_room_id: {MazeGenerator.current_id}" +
                     $"\nGen time sec: {System.Math.Round(genStopwatch.Elapsed.TotalSeconds, 2)}";
             }
 
-            UI.SetProgressValue((float) GeneratorV2.current_id / maxRooms);
+            MazeUI.SetProgressValue((float) MazeGenerator.current_id / maxRooms);
         }
 
         // if (Input.GetKeyDown(KeyCode.O))
-        if (!Builder.MazeReady && generator_is_ready)
-            if (Builder.BuildRoomsIter())
-                UI.HideProgress();
+        if (!MazeBuilder.MazeReady && generator_is_ready)
+            if (MazeBuilder.BuildRoomsIter())
+                MazeUI.HideProgress();
     }
 
     public void PrintRooms() {
         debugText.text = "";
-        Cell[][] maze = GeneratorV2.GetCells;
+        Cell[][] maze = MazeGenerator.GetCells;
         for (int x = 0; x < maze.Length; x++) {
             for (int y = 0; y < maze[x].Length; y++) {
                 if (maze[x][y] == Cell.DoorEnterance)

@@ -13,10 +13,26 @@ public class Slime : BaseEnemy {
     public override void Init() {
         base.Init();
         rigidbodyField = GetComponent<Rigidbody>();
-        Color clr = Utils.GetRandomColor();
+        Color clr = GetRandomColor();
         clr.a = .7f;
         SetMaterialColor(clr);
         jumpTimer = 3f;
+    }
+
+    public static Color GetRandomColor() {
+        Color clr;
+        switch (Random.Range(0, 8)) {
+            case 0: clr = Color.yellow; break;
+            case 1: clr = Color.red; break;
+            case 2: clr = Color.magenta; break;
+            case 3: clr = Color.grey; break;
+            case 4: clr = Color.green; break;
+            case 5: clr = Color.cyan; break;
+            case 6: clr = Color.blue; break;
+            case 7: clr = Color.black; break;
+            default: clr = Color.white; break;
+        }
+        return clr;
     }
 
     private void Update() {
