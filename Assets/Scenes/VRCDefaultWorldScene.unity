@@ -294,6 +294,12 @@ PrefabInstance:
       propertyPath: m_Convex
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 4149297960618081067, guid: 57bf87c33c680e7428b7e0946254a10b,
+        type: 3}
+      propertyPath: serializationData.Prefab
+      value: 
+      objectReference: {fileID: 4149297960618081067, guid: 57bf87c33c680e7428b7e0946254a10b,
+        type: 3}
     - target: {fileID: 4400542831400470000, guid: 57bf87c33c680e7428b7e0946254a10b,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -3894,11 +3900,11 @@ SceneRoots:
   - {fileID: 1787983411}
   - {fileID: 7606902903243430487}
   - {fileID: 358170790}
+  - {fileID: 834705088}
   - {fileID: 112654836}
   - {fileID: 578185170}
   - {fileID: 1650641560357803738}
   - {fileID: 869819604}
   - {fileID: 1490954322}
   - {fileID: 1385585398}
-  - {fileID: 834705088}
   - {fileID: 232376794}

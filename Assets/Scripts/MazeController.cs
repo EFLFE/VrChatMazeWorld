@@ -11,10 +11,13 @@ public class MazeController : UdonSharpBehaviour {
     [SerializeField] private bool buildOnStart;
 
     [Space]
-    [SerializeField] private int mazeSize;
-    [SerializeField] private int mazeRoomsAmount;
-    [SerializeField] private int mazeChestsAmount;
+    [UdonSynced] private int mazeSize;
+    [UdonSynced] private int mazeRoomsAmount;
+    [UdonSynced] private int mazeChestsAmount;
     [Space]
+
+    [UdonSynced] private int level = 0;
+    [UdonSynced] private int mazeChestsAmountGathered = 0;
 
     [SerializeField] private GameObject enemyPrefab;
     [SerializeField] private Transform enemySpawn;
@@ -33,6 +36,7 @@ public class MazeController : UdonSharpBehaviour {
     [UdonSynced] private int seed;
     [SerializeField] private QvPen_Settings QV_PEN_Settings;
 
+
     private void Start() {
         genStopwatch = new Stopwatch();
 
@@ -40,20 +44,25 @@ public class MazeController : UdonSharpBehaviour {
         MazeUI.Init(this);
         CentralZone.Init(this);
 
-
-        if (buildOnStart) {
-            bool isOwner = Networking.LocalPlayer.IsOwner(gameObject);
-            if (isOwner) {
-                seed = Random.Range(0, 9999);
-                Build();
-            }
-            RequestSerialization();
-        }
+        GenerateNewLevel();
     }
 
-    public override void OnDeserialization() {
-        base.OnDeserialization();
-        Build();
+    private void GenerateNewLevel() {
+        level++;
+        mazeChestsAmountGathered = 0;
+
+        mazeSize = 49;
+        mazeRoomsAmount = 15 + 5 * level;
+        mazeChestsAmount = 4 + level;
+
+        MazeUI.Log(
+            $"GenerateNewLevel, level = {level} "
+            + $"mazeSize = {mazeSize}"
+            + $"mazeRoomsAmount = {mazeRoomsAmount}"
+            + $"mazeChestsAmount = {mazeChestsAmount}"
+        );
+
+        SendRebuild();
     }
 
     // event
@@ -62,10 +71,25 @@ public class MazeController : UdonSharpBehaviour {
         if (Networking.LocalPlayer.IsOwner(gameObject))
             Build();
         RequestSerialization();
+    }
 
-        // clear all pens
-        if (QV_PEN_Settings) {
+    public override void OnDeserialization() {
+        base.OnDeserialization();
+        Build();
+    }
 
+    public void Build() {
+        ClearQVPens();
+
+        genStopwatch.Restart();
+        MazeUI.Log($"Build Start, seed: {seed}");
+        MazeGenerator.Init(seed, mazeSize, mazeRoomsAmount, mazeChestsAmount);
+        MazeBuilder.Init(this);
+        generator_is_ready = false;
+    }
+
+    public void ClearQVPens() {
+        if (level > 1) {
             foreach (var penManager in QV_PEN_Settings.penManagers)
                 if (penManager)
                     penManager.Clear();
@@ -76,24 +100,6 @@ public class MazeController : UdonSharpBehaviour {
                 if (eraserManager)
                     eraserManager.SendCustomNetworkEvent(NetworkEventTarget.All, nameof(QvPen_EraserManager.ResetEraser));
         }
-    }
-
-    // event (test)
-    public void SpawnEnemy() {
-        if (Networking.LocalPlayer.IsOwner(gameObject)) {
-            var obj = Instantiate(enemyPrefab, enemySpawn);
-            obj.transform.localPosition = Vector3.zero;
-            var script = obj.GetComponent<BaseEnemy>();
-            script.Init();
-        }
-    }
-
-    public void Build() {
-        genStopwatch.Restart();
-        MazeUI.Log($"Build Start, seed: {seed}");
-        MazeGenerator.Init(seed, mazeSize, mazeRoomsAmount, mazeChestsAmount);
-        MazeBuilder.Init(this);
-        generator_is_ready = false;
     }
 
 
@@ -148,4 +154,13 @@ public class MazeController : UdonSharpBehaviour {
         debugText.text += $"\nBuild seed: {seed}\n{(isOwner ? "Owner" : "")}";
     }
 
+    // event (test)
+    public void SpawnEnemy() {
+        if (Networking.LocalPlayer.IsOwner(gameObject)) {
+            var obj = Instantiate(enemyPrefab, enemySpawn);
+            obj.transform.localPosition = Vector3.zero;
+            var script = obj.GetComponent<BaseEnemy>();
+            script.Init();
+        }
+    }
 }
