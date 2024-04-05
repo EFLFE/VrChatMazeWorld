@@ -41,14 +41,18 @@ public class MazeUI : UdonSharpBehaviour {
     }
 
     public void Log(string text) {
-        Debug.Log(text);
-        logText += $"{DateTime.Now.ToString("HH:mm:ss")} {text}\n";
-        logLines++;
-        //logLines += text.Count(x => x == '\n'); // UDON FAILURE
-        if (logLines > 15) {
-            logLines--;
-            logText = logText.Remove(0, logText.IndexOf('\n') + 1);
+        string[] textArr = text.Split('\n');
+
+        for (int i = 0; i < textArr.Length; i++) {
+            string item = textArr[i];
+            Debug.Log(item);
+            logText += $"[{DateTime.Now.ToString("HH:mm:ss")}] {item}\n";
+            logLines++;
+            if (logLines > 15) {
+                logLines--;
+                logText = logText.Remove(0, logText.IndexOf('\n') + 1);
+            }
+            _debugText.text = logText;
         }
-        _debugText.text = logText;
     }
 }

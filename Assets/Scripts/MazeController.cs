@@ -63,6 +63,12 @@ public class MazeController : UdonSharpBehaviour {
         );
 
         SendRebuild();
+
+        VRCPlayerApi[] players = new VRCPlayerApi[VRCPlayerApi.GetPlayerCount()];
+        players = VRCPlayerApi.GetPlayers(players);
+        foreach (var player in players) {
+            player.Respawn();
+        }
     }
 
     // event
