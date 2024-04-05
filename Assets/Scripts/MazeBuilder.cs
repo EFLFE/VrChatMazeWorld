@@ -22,7 +22,7 @@ public class MazeBuilder : UdonSharpBehaviour {
     public bool MazeReady { get; private set; }
 
     private MazeController controller;
-    private int w, h, iterX, iterY, iter;
+    private int iter;
     private const int BUILD_COUNT = 4;
     private int buildLeft;
 
@@ -55,8 +55,6 @@ public class MazeBuilder : UdonSharpBehaviour {
             GameObject.Destroy(child, 0.1f);
         }
 
-        iterX = -1;
-        iterY = 0;
         iter = 0;
         buildLeft = 0;
         controller.MazeUI.SetProgressValue(0f);

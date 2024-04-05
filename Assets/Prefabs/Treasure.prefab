@@ -133,7 +133,7 @@ MonoBehaviour:
   ExactGun: {fileID: 0}
   ExactGrip: {fileID: 0}
   allowManipulationWhenEquipped: 0
-  orientation: 0
+  orientation: 2
   AutoHold: 0
   InteractionText: Treasure
   UseText: Treasure
@@ -147,7 +147,7 @@ MonoBehaviour:
   ThrowVelocityBoostScale: 1
   currentlyHeldBy: {fileID: 0}
   pickupable: 1
-  proximity: 2
+  proximity: 1
 --- !u!64 &2167725970000971179
 MeshCollider:
   m_ObjectHideFlags: 0

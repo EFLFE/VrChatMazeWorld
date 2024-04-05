@@ -222,9 +222,6 @@ MonoBehaviour:
     SerializationNodes: []
   _udonSharpBackingUdonBehaviour: {fileID: 112654832}
   buildOnStart: 1
-  mazeSize: 29
-  mazeRoomsAmount: 33
-  mazeChestsAmount: 7
   enemyPrefab: {fileID: 2077515443966962100, guid: 948bd9ede0180384c8819c62e1241293,
     type: 3}
   enemySpawn: {fileID: 1385585398}
@@ -288,6 +285,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Layer
       value: 13
+      objectReference: {fileID: 0}
+    - target: {fileID: 335640645278907704, guid: 57bf87c33c680e7428b7e0946254a10b,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2167725970000971179, guid: 57bf87c33c680e7428b7e0946254a10b,
         type: 3}
@@ -1985,7 +1987,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &869819599
 MonoBehaviour:
   m_ObjectHideFlags: 2
@@ -3294,7 +3296,7 @@ PrefabInstance:
     - target: {fileID: 8472427510048586432, guid: 66a095de31b91ff46b6db71551f0b1f3,
         type: 3}
       propertyPath: m_SizeDelta.y
-      value: 600
+      value: 800
       objectReference: {fileID: 0}
     - target: {fileID: 8472427510048586432, guid: 66a095de31b91ff46b6db71551f0b1f3,
         type: 3}
@@ -3309,12 +3311,12 @@ PrefabInstance:
     - target: {fileID: 8472427510048586432, guid: 66a095de31b91ff46b6db71551f0b1f3,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: 0
+      value: 6.09
       objectReference: {fileID: 0}
     - target: {fileID: 8472427510048586432, guid: 66a095de31b91ff46b6db71551f0b1f3,
         type: 3}
       propertyPath: m_LocalRotation.w
-      value: 1
+      value: 0.9238797
       objectReference: {fileID: 0}
     - target: {fileID: 8472427510048586432, guid: 66a095de31b91ff46b6db71551f0b1f3,
         type: 3}
@@ -3324,7 +3326,7 @@ PrefabInstance:
     - target: {fileID: 8472427510048586432, guid: 66a095de31b91ff46b6db71551f0b1f3,
         type: 3}
       propertyPath: m_LocalRotation.y
-      value: -0
+      value: -0.38268322
       objectReference: {fileID: 0}
     - target: {fileID: 8472427510048586432, guid: 66a095de31b91ff46b6db71551f0b1f3,
         type: 3}
@@ -3334,12 +3336,12 @@ PrefabInstance:
     - target: {fileID: 8472427510048586432, guid: 66a095de31b91ff46b6db71551f0b1f3,
         type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 0
+      value: -4.76
       objectReference: {fileID: 0}
     - target: {fileID: 8472427510048586432, guid: 66a095de31b91ff46b6db71551f0b1f3,
         type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 2.28
+      value: 3.45
       objectReference: {fileID: 0}
     - target: {fileID: 8472427510048586432, guid: 66a095de31b91ff46b6db71551f0b1f3,
         type: 3}
@@ -3349,7 +3351,7 @@ PrefabInstance:
     - target: {fileID: 8472427510048586432, guid: 66a095de31b91ff46b6db71551f0b1f3,
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
+      value: -45
       objectReference: {fileID: 0}
     - target: {fileID: 8472427510048586432, guid: 66a095de31b91ff46b6db71551f0b1f3,
         type: 3}

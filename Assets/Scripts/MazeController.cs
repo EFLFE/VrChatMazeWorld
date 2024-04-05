@@ -57,9 +57,9 @@ public class MazeController : UdonSharpBehaviour {
 
         MazeUI.Log(
             $"GenerateNewLevel, level = {level} "
-            + $"mazeSize = {mazeSize}"
-            + $"mazeRoomsAmount = {mazeRoomsAmount}"
-            + $"mazeChestsAmount = {mazeChestsAmount}"
+            + $"\n mazeSize = {mazeSize}"
+            + $"\n mazeRoomsAmount = {mazeRoomsAmount}"
+            + $"\n mazeChestsAmount = {mazeChestsAmount}"
         );
 
         SendRebuild();
@@ -86,6 +86,15 @@ public class MazeController : UdonSharpBehaviour {
         MazeGenerator.Init(seed, mazeSize, mazeRoomsAmount, mazeChestsAmount);
         MazeBuilder.Init(this);
         generator_is_ready = false;
+    }
+
+    public void OnTreasureGathered() {
+        mazeChestsAmountGathered++;
+        MazeUI.Log($"mazeChestsAmountGathered: {mazeChestsAmountGathered} / {mazeChestsAmount}");
+
+        if (mazeChestsAmountGathered >= mazeChestsAmount) {
+            GenerateNewLevel();
+        }
     }
 
     public void ClearQVPens() {

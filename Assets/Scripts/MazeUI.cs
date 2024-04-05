@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using TMPro;
 using UdonSharp;
 using UnityEngine;
@@ -43,6 +44,7 @@ public class MazeUI : UdonSharpBehaviour {
         Debug.Log(text);
         logText += $"{DateTime.Now.ToString("HH:mm:ss")} {text}\n";
         logLines++;
+        //logLines += text.Count(x => x == '\n'); // UDON FAILURE
         if (logLines > 15) {
             logLines--;
             logText = logText.Remove(0, logText.IndexOf('\n') + 1);
