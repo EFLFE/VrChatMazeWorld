@@ -1,4 +1,5 @@
-﻿using QvPen.UdonScript;
+﻿using Cysharp.Threading.Tasks.Triggers;
+using QvPen.UdonScript;
 using System.Diagnostics;
 using UdonSharp;
 using UnityEngine;
@@ -24,18 +25,21 @@ public class MazeController : UdonSharpBehaviour {
 
     public TMPro.TextMeshProUGUI debugText;
 
+    public CentralZone CentralZone;
+
     private bool generator_is_ready = false;
     private Stopwatch genStopwatch;
 
     [UdonSynced] private int seed;
-    [SerializeField]
-    private QvPen_Settings QV_PEN_Settings;
+    [SerializeField] private QvPen_Settings QV_PEN_Settings;
 
     private void Start() {
         genStopwatch = new Stopwatch();
 
         MazeBuilder.Init(this);
         MazeUI.Init(this);
+        CentralZone.Init(this);
+
 
         if (buildOnStart) {
             bool isOwner = Networking.LocalPlayer.IsOwner(gameObject);
