@@ -103,6 +103,8 @@ public class MazeController : UdonSharpBehaviour {
         if (mazeChestsAmountGathered >= mazeChestsAmount) {
             GenerateNewLevel();
         }
+
+        RequestSerialization();
     }
 
     public void ClearQVPens() {
