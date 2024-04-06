@@ -8,6 +8,7 @@ public class Treasure : MazeObject {
     public override void OnReturnToPool() {
         base.OnReturnToPool();
         Taked = false;
+        RequestSerialization();
     }
 
     public override void OnDeserialization() {
@@ -18,6 +19,7 @@ public class Treasure : MazeObject {
 
     public void Despawn() {
         Taked = true;
+        RequestSerialization();
         Controller.OnTreasureGathered();
         Controller.GetChestPool.Return(this);
     }
