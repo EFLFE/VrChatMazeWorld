@@ -52,7 +52,7 @@ public class MazeUI : UdonSharpBehaviour {
             Debug.Log(item);
             logText += $"[{DateTime.Now.ToString("HH:mm:ss")}] {item}\n";
             logLines++;
-            if (logLines > 15) {
+            if (logLines > 30) {
                 logLines--;
                 logText = logText.Remove(0, logText.IndexOf('\n') + 1);
             }

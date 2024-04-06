@@ -1,25 +1,13 @@
 ﻿using UdonSharp;
+using VRC.SDKBase;
 
 public class Treasure : MazeObject {
     public int value = 100;
 
-    [UdonSynced] private bool Taked;
-
-    public override void OnReturnToPool() {
-        base.OnReturnToPool();
-        Taked = false;
-        RequestSerialization();
-    }
-
-    public override void OnDeserialization() {
-        base.OnDeserialization();
-        if (Taked)
-            Despawn();
-    }
+    private VRC_Pickup _pickup;
+    public VRC_Pickup pickup => _pickup ? _pickup : (_pickup = (VRC_Pickup) GetComponent(typeof(VRC_Pickup)));
 
     public void Despawn() {
-        Taked = true;
-        RequestSerialization();
         Controller.OnTreasureGathered();
         Controller.GetChestPool.Return(this);
     }

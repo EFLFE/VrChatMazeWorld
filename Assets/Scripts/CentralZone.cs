@@ -20,6 +20,7 @@ public class CentralZone : UdonSharpBehaviour {
 
         var component = other.gameObject.GetComponent<Treasure>();
         if (component != null) {
+            component.pickup.Drop();
             component.SendCustomNetworkEvent(VRC.Udon.Common.Interfaces.NetworkEventTarget.All, nameof(Treasure.Despawn));
         }
     }

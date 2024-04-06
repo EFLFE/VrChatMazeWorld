@@ -53,9 +53,9 @@ public class MazeController : UdonSharpBehaviour {
         level++;
         mazeChestsAmountGathered = 0;
 
-        mazeSize = 49;
+        mazeSize = 19 + level * 2;
         mazeRoomsAmount = 15 + 5 * level;
-        mazeChestsAmount = 4 + level;
+        mazeChestsAmount = 1 + level;
 
         MazeUI.Log(
             $"GenerateNewLevel, level = {level} "
@@ -69,7 +69,7 @@ public class MazeController : UdonSharpBehaviour {
         VRCPlayerApi[] players = new VRCPlayerApi[VRCPlayerApi.GetPlayerCount()];
         players = VRCPlayerApi.GetPlayers(players);
         foreach (var player in players) {
-            player.Respawn();
+            //player.Respawn();
         }
     }
 
@@ -103,8 +103,6 @@ public class MazeController : UdonSharpBehaviour {
         if (mazeChestsAmountGathered >= mazeChestsAmount) {
             GenerateNewLevel();
         }
-
-        RequestSerialization();
     }
 
     public void ClearQVPens() {
