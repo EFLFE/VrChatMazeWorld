@@ -49,6 +49,7 @@ public class PoolObjects : UdonSharpBehaviour {
         if (ManageOwners && !Networking.IsOwner(obj.gameObject))
             return;
         obj.gameObject.SetActive(false);
+        obj.transform.SetPositionAndRotation(Vector3.zero, Quaternion.identity);
     }
 
     public void ReturnAll() {
