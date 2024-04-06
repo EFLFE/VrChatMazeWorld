@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Diagnostics;
-using UdonSharp;
+﻿using UdonSharp;
 using UnityEngine;
 
 [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
@@ -17,7 +15,7 @@ public class MazeBuilder : UdonSharpBehaviour {
     [SerializeField] private GameObject[] deadendPrefabs;
     [SerializeField] private GameObject ceiling_general;
     [SerializeField] private GameObject ceiling_cave;
-    [SerializeField] private GameObject chestPrefab;
+    [SerializeField] private PoolObjects chestPool;
 
     public bool MazeReady { get; private set; }
 
@@ -54,7 +52,7 @@ public class MazeBuilder : UdonSharpBehaviour {
             GameObject child = mazeContainer.GetChild(i).gameObject;
             GameObject.Destroy(child, 0.1f);
         }
-
+        chestPool.ReturnAll();
         iter = 0;
         buildLeft = 0;
         controller.MazeUI.SetProgressValue(0f);
@@ -81,7 +79,7 @@ public class MazeBuilder : UdonSharpBehaviour {
 
             for (int i = 0; i < maze.ChestsAmount; i++) {
                 if (x == maze.ChestsX[i] && y == maze.ChestsY[i]) {
-                    Spawn(chestPrefab, x, y, 0);
+                    SpawnChest(x, y, 0);
                 }
             }
 
@@ -294,6 +292,24 @@ public class MazeBuilder : UdonSharpBehaviour {
         GO.transform.localScale = new Vector3(ROOM_SCALE, ROOM_SCALE, ROOM_SCALE);
         GO.name = name;
         return GO;
+    }
+
+    private MazeObject SpawnChest(int x, int y, int rotation, string name = null) {
+        if (!chestPool.TryTake(out MazeObject obj)) {
+            controller.MazeUI.Log("No more chest in pool!");
+            return null;
+        }
+
+        Vector3 position = obj.transform.position;
+        position.x = (x - controller.MazeGenerator.Size / 2) * ROOMS_OFFSET;
+        position.z = (y - controller.MazeGenerator.Size / 2) * ROOMS_OFFSET;
+        position.y = 0;
+        //GO.transform.position = position;
+        obj.transform.SetPositionAndRotation(position, Quaternion.Euler(-90, rotation, 0));
+        obj.transform.localScale = new Vector3(ROOM_SCALE, ROOM_SCALE, ROOM_SCALE);
+        if (name != null)
+            obj.name = name;
+        return obj;
     }
 }
 

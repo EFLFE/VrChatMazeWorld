@@ -1,13 +1,8 @@
-﻿
-using UdonSharp;
-using UnityEngine;
-using VRC.SDKBase;
-using VRC.Udon;
-
-public class Treasure : UdonSharpBehaviour {
-
+﻿public class Treasure : MazeObject {
     public int value = 100;
-    void Start() {
 
+    public void Despawn() {
+        Controller.OnTreasureGathered();
+        Controller.GetChestPool.Return(this);
     }
 }

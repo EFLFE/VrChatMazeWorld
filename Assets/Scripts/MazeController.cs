@@ -9,6 +9,7 @@ using VRC.Udon.Common.Interfaces;
 [UdonBehaviourSyncMode(BehaviourSyncMode.Manual)]
 public class MazeController : UdonSharpBehaviour {
     [SerializeField] private bool buildOnStart;
+    [SerializeField] private PoolObjects chestPool;
 
     [Space]
     [UdonSynced] private int mazeSize;
@@ -36,13 +37,14 @@ public class MazeController : UdonSharpBehaviour {
     [UdonSynced] private int seed;
     [SerializeField] private QvPen_Settings QV_PEN_Settings;
 
+    public PoolObjects GetChestPool { get => chestPool; }
 
     private void Start() {
         genStopwatch = new Stopwatch();
 
+        chestPool.Init(this);
         MazeBuilder.Init(this);
         MazeUI.Init(this);
-        CentralZone.Init(this);
 
         GenerateNewLevel();
     }

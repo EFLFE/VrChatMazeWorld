@@ -4,6 +4,7 @@ using TMPro;
 using UdonSharp;
 using UnityEngine;
 using UnityEngine.UI;
+using VRC.SDKBase;
 
 [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
 public class MazeUI : UdonSharpBehaviour {
@@ -28,6 +29,9 @@ public class MazeUI : UdonSharpBehaviour {
 
     public void Init(MazeController controller) {
         loadProgressBarContent.SetActive(false);
+
+        if (Networking.LocalPlayer.IsOwner(gameObject))
+            Log("Is Owner");
     }
 
     public void HideProgress() {
