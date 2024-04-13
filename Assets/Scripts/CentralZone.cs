@@ -23,7 +23,8 @@ public class CentralZone : UdonSharpBehaviour {
                     + $"\n name = {name}"
                 );*/
 
-        var component = other.gameObject.GetComponent<Treasure>();
+        //var component = other.gameObject.GetComponent<Treasure>();
+        var component = other.gameObject.transform.parent.GetComponent<Treasure>();
         if (component != null) {
             MazeController.MazeUI.Log("Treasure found in CentralZone!"); // one time on random amount of clients
             component.pickup.Drop();
