@@ -45,10 +45,9 @@ public class PoolObjects : UdonSharpBehaviour {
 
     public void Return(MazeObject obj) {
         // if (!obj.gameObject.activeSelf) return;
-        if (ManageOwners && !Networking.IsOwner(obj.gameObject))
-            return;
+        if (ManageOwners && !Networking.IsOwner(obj.gameObject)) return;
+        obj.transform.SetPositionAndRotation(new Vector3(0, -100, 0), Quaternion.identity);
         obj.gameObject.SetActive(false);
-        obj.transform.SetPositionAndRotation(new Vector3(0, -10000, 0), Quaternion.identity);
     }
 
     public void ReturnAll() {

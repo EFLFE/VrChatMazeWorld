@@ -7,8 +7,8 @@ public class Treasure : MazeObject {
     private VRC_Pickup _pickup;
     public VRC_Pickup pickup => _pickup ? _pickup : (_pickup = (VRC_Pickup) GetComponent(typeof(VRC_Pickup)));
 
+    // network event
     public void Despawn() {
-        Controller.OnTreasureGathered();
         Controller.GetChestPool.Return(this);
     }
 }
