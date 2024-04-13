@@ -40,10 +40,11 @@ public class MazeController : UdonSharpBehaviour {
     public PoolObjects GetChestPool { get => chestPool; }
 
     [UdonSynced] public string network_event = "";
+    private bool need_to_build_at_join = true;
 
     // called only on late-joiners (not master of this object)
     public override void OnDeserialization() {
-        MazeUI.Log(                     
+        MazeUI.Log(
             $"OnDeserialization, " +
             $"\n- network_event = {network_event}" +
             $"\n- seed = {seed}" +
@@ -52,8 +53,9 @@ public class MazeController : UdonSharpBehaviour {
         );
         base.OnDeserialization();
         if (network_event == nameof(NextLevel)) NextLevel();
-        if (network_event == nameof(Build)) Build();
+        if (network_event == nameof(Build) || need_to_build_at_join) Build();
         network_event = ""; // no need, just for clarity
+        need_to_build_at_join = false;
     }
 
     private void Start() {
@@ -74,7 +76,7 @@ public class MazeController : UdonSharpBehaviour {
             // late joiners will build via OnDeserialization + network_event = Build
         }
     }
-                        
+
 
     private void NextLevel() {
         MazeUI.Log($"NextLevel, respawning all players");
