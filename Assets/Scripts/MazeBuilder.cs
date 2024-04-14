@@ -311,6 +311,11 @@ public class MazeBuilder : UdonSharpBehaviour {
         obj.transform.localScale = new Vector3(ROOM_SCALE, ROOM_SCALE, ROOM_SCALE);
         if (name != null)
             obj.name = name;
+
+        var script = obj.GetComponent<Treasure>();
+        script.IsActiveSynced = true;
+        script.RequestSerialization();
+
         return obj;
     }
 }

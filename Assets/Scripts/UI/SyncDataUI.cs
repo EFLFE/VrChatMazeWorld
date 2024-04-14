@@ -4,8 +4,7 @@ using VRC.SDKBase;
 using VRC.Udon;
 
 [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
-public class SyncDataUI : UdonSharpBehaviour
-{
+public class SyncDataUI : UdonSharpBehaviour {
     [SerializeField] private TMPro.TextMeshProUGUI _mainText;
 
     public void Clear() {
