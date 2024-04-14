@@ -1,15 +1,14 @@
-﻿using System;
-using UdonSharp;
-using UnityEngine;
+﻿using UnityEngine;
 using VRC.SDKBase;
 
 public class Treasure : MazeObject {
     public int value = 100;
 
-    //private VRC_Pickup _pickup;
-    //public VRC_Pickup pickup => _pickup ? _pickup : (_pickup = (VRC_Pickup) GetComponent(typeof(VRC_Pickup)));
+    [SerializeField] private VRC_Pickup pickup;
 
-    [SerializeField] public VRC_Pickup pickup;
+    public void Drop() {
+        pickup.Drop();
+    }
 
     // network event
     public void Despawn() {

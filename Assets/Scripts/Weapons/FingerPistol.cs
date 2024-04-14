@@ -23,7 +23,7 @@ public class FingerPistol : UdonSharpBehaviour {
 
             if (reloaded && secondaryIndexTrigger == 1f) {
                 Shot();
-                reloaded = controller.MazeUI.IsNoReload;
+                //reloaded = controller.MazeUI.IsNoReload;
             } else if (!reloaded && secondaryIndexTrigger < 1f) {
                 reloaded = true;
             }

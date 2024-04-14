@@ -12,26 +12,16 @@ public class MazeUI : UdonSharpBehaviour {
     [SerializeField] private GameObject loadProgressBarContent;
     [SerializeField] private Image loadProgressBar;
     [SerializeField] private TextMeshProUGUI _debugText;
-    [Space]
-    [SerializeField] private InputField _handXOffset;
-    [SerializeField] private Toggle _noReload;
+    [SerializeField] private int maxLogLines = 30;
 
     private int logLines;
     private string logText;
-
-    public float GetHandXOffset() {
-        string a = _handXOffset.text;
-        float.TryParse(a, out float x);
-        return x;
-    }
-
-    public bool IsNoReload => _noReload.isOn;
 
     public void Init(MazeController controller) {
         loadProgressBarContent.SetActive(false);
 
         if (Networking.LocalPlayer.IsOwner(gameObject))
-            Log("Is Owner");
+            UILog("Is Owner");
     }
 
     public void HideProgress() {
@@ -44,7 +34,7 @@ public class MazeUI : UdonSharpBehaviour {
         loadProgressBar.fillAmount = perc;
     }
 
-    public void Log(string text) {
+    public void UILog(string text) {
         string[] textArr = text.Split('\n');
 
         for (int i = 0; i < textArr.Length; i++) {
@@ -52,7 +42,7 @@ public class MazeUI : UdonSharpBehaviour {
             Debug.Log(item);
             logText += $"[{DateTime.Now.ToString("HH:mm:ss")}] {item}\n";
             logLines++;
-            if (logLines > 30) {
+            if (logLines > maxLogLines) {
                 logLines--;
                 logText = logText.Remove(0, logText.IndexOf('\n') + 1);
             }

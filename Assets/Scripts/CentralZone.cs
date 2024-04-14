@@ -1,9 +1,7 @@
 ﻿using UdonSharp;
 using UnityEngine;
-using UnityEngine.InputSystem.XR;
-using VRC.SDK3.Components;
 using VRC.SDKBase;
-using VRC.Udon;
+using static VRC.Udon.Common.Interfaces.NetworkEventTarget;
 
 public class CentralZone : UdonSharpBehaviour {
     [SerializeField] private PoolObjects chestPool;
@@ -26,17 +24,13 @@ public class CentralZone : UdonSharpBehaviour {
         //var component = other.gameObject.GetComponent<Treasure>();
         var treasure = model.gameObject.transform.parent.GetComponent<Treasure>();
         if (treasure != null) {
-            MazeController.MazeUI.Log("Treasure found in CentralZone!"); // one time on random amount of clients
-            treasure.pickup.Drop();
+            MazeController.MazeUI.UILog("Treasure found in CentralZone!"); // one time on random amount of clients
+            treasure.Drop();
             if (Networking.IsOwner(model.gameObject)) {
-                MazeController.MazeUI.Log("We are the owner of the treasure!"); // one time on treasure owner
-                MazeController.SendCustomNetworkEvent(
-                    VRC.Udon.Common.Interfaces.NetworkEventTarget.Owner,
-                    nameof(MazeController.OnTreasureGathered)
+                MazeController.MazeUI.UILog("We are the owner of the treasure!"); // one time on treasure owner
+                MazeController.SendCustomNetworkEvent(Owner, nameof(MazeController.OnTreasureGathered)
                 );
-                treasure.SendCustomNetworkEvent(
-                    VRC.Udon.Common.Interfaces.NetworkEventTarget.All,
-                    nameof(Treasure.Despawn)
+                treasure.SendCustomNetworkEvent(All, nameof(Treasure.Despawn)
                 );
             }
         }

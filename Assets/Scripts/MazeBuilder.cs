@@ -66,7 +66,7 @@ public class MazeBuilder : UdonSharpBehaviour {
 
         // epic костыль
         if (maze.Cells == null) {
-            controller.MazeUI.Log("BuildRoomsIter: OH SH~! NO CELLS!!!");
+            controller.MazeUI.UILog("BuildRoomsIter: OH SH~! NO CELLS!!!");
             return MazeReady;
         }
 
@@ -263,7 +263,7 @@ public class MazeBuilder : UdonSharpBehaviour {
 
         Color clr;
 
-        if (id == 0) {
+        if (id == 1) {
             clr = Color.black;
         } else {
             const float D = 255f;
@@ -298,7 +298,7 @@ public class MazeBuilder : UdonSharpBehaviour {
 
     private MazeObject SpawnChest(int x, int y, int rotation, string name = null) {
         if (!chestPool.TryTake(out MazeObject obj)) {
-            controller.MazeUI.Log("No more chest in pool!");
+            controller.MazeUI.UILog("No more chest in pool!");
             return null;
         }
 
