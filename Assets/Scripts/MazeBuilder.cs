@@ -313,9 +313,13 @@ public class MazeBuilder : UdonSharpBehaviour {
             obj.name = name;
 
         var script = obj.GetComponent<Treasure>();
-        script.IsActiveSynced = true;
-        script.RequestSerialization();
-
+        controller.MazeUI.UILog($"Spawn {obj.name} IsActiveSynced = {script.IsActiveSynced}");
+        if (controller.IsOwner()) {
+            script.IsActiveSynced = true;
+        } else {
+            obj.gameObject.SetActive(script.IsActiveSynced);
+        }
+        
         return obj;
     }
 }

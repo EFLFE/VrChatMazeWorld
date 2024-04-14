@@ -9,6 +9,4 @@ public class MazeObject : UdonSharpBehaviour {
     public virtual void Init(MazeController controller) {
         Controller = controller;
     }
-
-    public virtual void OnReturnToPool() { }
 }

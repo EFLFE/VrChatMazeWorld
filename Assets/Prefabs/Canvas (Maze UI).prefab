@@ -144,7 +144,7 @@ MonoBehaviour:
   loadProgressBarContent: {fileID: 8558924296187116323}
   loadProgressBar: {fileID: 893125875674973111}
   _debugText: {fileID: 8892011853037451123}
-  maxLogLines: 28
+  maxLogLines: 35
 --- !u!223 &5105797065834654208
 Canvas:
   m_ObjectHideFlags: 0
@@ -190,7 +190,7 @@ MonoBehaviour:
   m_FallbackScreenDPI: 96
   m_DefaultSpriteDPI: 96
   m_DynamicPixelsPerUnit: 1
-  m_PresetInfoIsWorld: 1
+  m_PresetInfoIsWorld: 0
 --- !u!114 &4446620860264804800
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -347,7 +347,7 @@ MonoBehaviour:
   m_fontSizeMax: 72
   m_fontStyle: 0
   m_HorizontalAlignment: 1
-  m_VerticalAlignment: 256
+  m_VerticalAlignment: 1024
   m_textAlignment: 65535
   m_characterSpacing: 0
   m_wordSpacing: 0

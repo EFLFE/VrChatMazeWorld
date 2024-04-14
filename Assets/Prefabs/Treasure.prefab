@@ -59,6 +59,7 @@ MonoBehaviour:
   _udonSharpBackingUdonBehaviour: {fileID: 5872653174880391210}
   value: 100
   pickup: {fileID: 3433926148674995675}
+  IsActiveSynced: 0
 --- !u!114 &5872653174880391210
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -27,11 +27,10 @@ public class CentralZone : UdonSharpBehaviour {
             MazeController.MazeUI.UILog("Treasure found in CentralZone!"); // one time on random amount of clients
             treasure.Drop();
             if (Networking.IsOwner(model.gameObject)) {
+                treasure.IsActiveSynced = false;
                 MazeController.MazeUI.UILog("We are the owner of the treasure!"); // one time on treasure owner
-                MazeController.SendCustomNetworkEvent(Owner, nameof(MazeController.OnTreasureGathered)
-                );
-                treasure.SendCustomNetworkEvent(All, nameof(Treasure.Despawn)
-                );
+                MazeController.SendCustomNetworkEvent(Owner, nameof(MazeController.OnTreasureGathered));
+                treasure.SendCustomNetworkEvent(All, nameof(Treasure.Despawn));
             }
         }
     }

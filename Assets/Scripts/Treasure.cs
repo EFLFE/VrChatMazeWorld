@@ -1,6 +1,8 @@
 ﻿using UdonSharp;
 using UnityEngine;
+using VRC.SDK3.Components;
 using VRC.SDKBase;
+using VRC.Udon.Common;
 
 public class Treasure : MazeObject {
     public int value = 100;
@@ -15,14 +17,8 @@ public class Treasure : MazeObject {
 
     // network event
     public void Despawn() {
-        IsActiveSynced = false;
         Controller.GetChestPool.Return(this);
-        RequestSerialization();
-    }
-
-    public override void OnDeserialization() {
-        base.OnDeserialization();
-        gameObject.SetActive(IsActiveSynced);
+        VRCObjectSync a;
     }
 
 }
