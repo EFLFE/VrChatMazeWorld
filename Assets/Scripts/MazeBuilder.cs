@@ -62,7 +62,7 @@ public class MazeBuilder : UdonSharpBehaviour {
     /// Run BuildRoomsBegin before. Iteration building. true = completed.
     /// </summary>
     public bool BuildRoomsIter() {
-        var maze = controller.MazeGenerator;
+        MazeGenerator maze = controller.MazeGenerator;
 
         // epic костыль
         if (maze.Cells == null) {
@@ -106,7 +106,7 @@ public class MazeBuilder : UdonSharpBehaviour {
     }
 
     private bool SpawnCell(int x, int y) {
-        var maze = controller.MazeGenerator;
+        MazeGenerator maze = controller.MazeGenerator;
         Cell[][] cells = maze.Cells;
         int[][] ids = maze.Ids;
         Room[] rooms = maze.Rooms;
@@ -133,7 +133,7 @@ public class MazeBuilder : UdonSharpBehaviour {
 
             if (need_to_spawn_floor) {
                 GameObject obj_floor = Spawn(floorPrefab, x, y, 0, $"floor {current_id}");
-                //ColorizeFloor(obj_floor, current_id);
+                ColorizeFloor(obj_floor, current_id);
             }
         }
 
@@ -258,23 +258,25 @@ public class MazeBuilder : UdonSharpBehaviour {
     }
 
     private void ColorizeFloor(GameObject floor, int id) {
-        var floorMesh = (MeshRenderer) floor.GetComponent(typeof(MeshRenderer));
-        var matProp = new MaterialPropertyBlock();
+        MeshRenderer floorMesh = (MeshRenderer) floor.GetComponent(typeof(MeshRenderer));
+        MaterialPropertyBlock matProp = new MaterialPropertyBlock();
 
         Color clr;
-        switch (id % 7) {
-            case 0: clr = Color.yellow; break;
-            case 1: clr = Color.red; break;
-            case 2: clr = Color.magenta; break;
-            case 3: clr = Color.grey; break;
-            case 4: clr = Color.green; break;
-            case 5: clr = Color.cyan; break;
-            case 6: clr = Color.blue; break;
-            default: clr = Color.white; break;
-        }
 
         if (id == 0) {
             clr = Color.black;
+        } else {
+            const float D = 255f;
+            switch (id % 7) {
+                case 0: clr = new Color(225 / D, 155 / D, 155 / D); break;
+                case 1: clr = new Color(225 / D, 205 / D, 158 / D); break;
+                case 2: clr = new Color(175 / D, 225 / D, 158 / D); break;
+                case 3: clr = new Color(158 / D, 223 / D, 225 / D); break;
+                case 4: clr = new Color(158 / D, 158 / D, 225 / D); break;
+                case 5: clr = new Color(225 / D, 158 / D, 225 / D); break;
+                case 6: clr = new Color(158 / D, 158 / D, 158 / D); break;
+                default: clr = Color.white; break;
+            }
         }
 
         matProp.SetColor("_Color", clr);

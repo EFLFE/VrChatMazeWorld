@@ -43,7 +43,7 @@ public class MazeController : UdonSharpBehaviour {
 
     // called only on late-joiners (not master of this object)
     public override void OnDeserialization() {
-        MazeUI.Log(                     
+        MazeUI.Log(
             $"OnDeserialization, " +
             $"\n- network_event = {network_event}" +
             $"\n- seed = {seed}" +
@@ -74,7 +74,6 @@ public class MazeController : UdonSharpBehaviour {
             // late joiners will build via OnDeserialization + network_event = Build
         }
     }
-                        
 
     private void NextLevel() {
         MazeUI.Log($"NextLevel, respawning all players");
@@ -82,7 +81,7 @@ public class MazeController : UdonSharpBehaviour {
         // respawn all players
         VRCPlayerApi[] players = new VRCPlayerApi[VRCPlayerApi.GetPlayerCount()];
         players = VRCPlayerApi.GetPlayers(players);
-        foreach (var player in players) {
+        foreach (VRCPlayerApi player in players) {
             player.Respawn();
         }
 
@@ -118,7 +117,7 @@ public class MazeController : UdonSharpBehaviour {
 
         network_event = "";
         if (mazeChestsAmountGathered >= mazeChestsAmount) {
-            if (Networking.IsOwner(this.gameObject)) {
+            if (Networking.IsOwner(gameObject)) {
                 MazeUI.Log($"requesting NextLevel by owner, level: {level} => {level + 1}");
                 level++;
                 seed = Random.Range(0, 9999);
@@ -132,13 +131,13 @@ public class MazeController : UdonSharpBehaviour {
 
     public void ClearQVPens() {
         if (level <= 1) return;
-        foreach (var penManager in QV_PEN_Settings.penManagers)
+        foreach (QvPen_PenManager penManager in QV_PEN_Settings.penManagers)
             if (penManager)
                 penManager.Clear();
-        foreach (var penManager in QV_PEN_Settings.penManagers)
+        foreach (QvPen_PenManager penManager in QV_PEN_Settings.penManagers)
             if (penManager)
                 penManager.SendCustomNetworkEvent(NetworkEventTarget.All, nameof(QvPen_PenManager.ResetPen));
-        foreach (var eraserManager in QV_PEN_Settings.eraserManagers)
+        foreach (QvPen_EraserManager eraserManager in QV_PEN_Settings.eraserManagers)
             if (eraserManager)
                 eraserManager.SendCustomNetworkEvent(NetworkEventTarget.All, nameof(QvPen_EraserManager.ResetEraser));
     }
@@ -197,9 +196,9 @@ public class MazeController : UdonSharpBehaviour {
     // event (test)
     public void SpawnEnemy() {
         if (Networking.LocalPlayer.IsOwner(gameObject)) {
-            var obj = Instantiate(enemyPrefab, enemySpawn);
+            GameObject obj = Instantiate(enemyPrefab, enemySpawn);
             obj.transform.localPosition = Vector3.zero;
-            var script = obj.GetComponent<BaseEnemy>();
+            BaseEnemy script = obj.GetComponent<BaseEnemy>();
             script.Init();
         }
     }
