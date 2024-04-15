@@ -7,9 +7,7 @@ using VRC.Udon.Common;
 public class Treasure : MazeObject {
     public int value = 100;
 
-    [SerializeField] private VRC_Pickup pickup;
-
-    [UdonSynced, HideInInspector] public bool IsActiveSynced;
+    [SerializeField] public VRC_Pickup pickup;
 
     public void Drop() {
         pickup.Drop();
@@ -18,7 +16,6 @@ public class Treasure : MazeObject {
     // network event
     public void Despawn() {
         Controller.GetChestPool.Return(this);
-        VRCObjectSync a;
     }
 
 }

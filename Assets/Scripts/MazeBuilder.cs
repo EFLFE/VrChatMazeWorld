@@ -1,5 +1,6 @@
 ﻿using UdonSharp;
 using UnityEngine;
+using VRC.SDKBase;
 
 [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
 public class MazeBuilder : UdonSharpBehaviour {
@@ -296,6 +297,10 @@ public class MazeBuilder : UdonSharpBehaviour {
     }
 
     private MazeObject SpawnChest(int x, int y, int rotation, string name = null) {
+
+        // lets spawn treasures only on master
+        if (!Networking.IsOwner(gameObject)) return null;
+
         if (!chestPool.TryTake(out MazeObject GO)) {
             controller.MazeUI.UILog("No more chest in pool!");
             return null;
@@ -313,17 +318,9 @@ public class MazeBuilder : UdonSharpBehaviour {
 
         var treasure = GO.GetComponent<Treasure>();
         controller.MazeUI.UILog(
-            $"Spawn {GO.name} " +
-            $"\n- IsActiveSynced = {treasure.IsActiveSynced}" +
+            $"Spawn {GO.name}, id = {treasure.pool_id} " +
             $"\n- x, y = {x}, {y} => {position.x}, {position.z}"
         );
-        /*
-        if (controller.IsOwner()) {
-            treasure.IsActiveSynced = true;
-        } else {
-            GO.gameObject.SetActive(treasure.IsActiveSynced);
-        }
-        */
 
         return GO;
     }
