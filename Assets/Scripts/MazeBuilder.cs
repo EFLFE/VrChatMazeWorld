@@ -289,7 +289,6 @@ public class MazeBuilder : UdonSharpBehaviour {
         position.x = (x - controller.MazeGenerator.Size / 2) * ROOMS_OFFSET;
         position.z = (y - controller.MazeGenerator.Size / 2) * ROOMS_OFFSET;
         position.y = 0;
-        //GO.transform.position = position;
         GO.transform.SetPositionAndRotation(position, Quaternion.Euler(-90, rotation, 0));
         GO.transform.localScale = new Vector3(ROOM_SCALE, ROOM_SCALE, ROOM_SCALE);
         GO.name = name;
@@ -297,30 +296,36 @@ public class MazeBuilder : UdonSharpBehaviour {
     }
 
     private MazeObject SpawnChest(int x, int y, int rotation, string name = null) {
-        if (!chestPool.TryTake(out MazeObject obj)) {
+        if (!chestPool.TryTake(out MazeObject GO)) {
             controller.MazeUI.UILog("No more chest in pool!");
             return null;
         }
 
-        Vector3 position = obj.transform.position;
+        Vector3 position = GO.transform.position;
         position.x = (x - controller.MazeGenerator.Size / 2) * ROOMS_OFFSET;
         position.z = (y - controller.MazeGenerator.Size / 2) * ROOMS_OFFSET;
-        position.y = 0;
-        //GO.transform.position = position;
-        obj.transform.SetPositionAndRotation(position, Quaternion.Euler(-90, rotation, 0));
-        obj.transform.localScale = new Vector3(ROOM_SCALE, ROOM_SCALE, ROOM_SCALE);
+        position.y = 1;
+        GO.transform.SetPositionAndRotation(position, Quaternion.Euler(-90, rotation, 0));
+        GO.transform.localScale = new Vector3(ROOM_SCALE, ROOM_SCALE, ROOM_SCALE);
+        GO.transform.GetChild(0).SetLocalPositionAndRotation(Vector3.zero, Quaternion.Euler(0, 0, 0));
         if (name != null)
-            obj.name = name;
+            GO.name = name;
 
-        var script = obj.GetComponent<Treasure>();
-        controller.MazeUI.UILog($"Spawn {obj.name} IsActiveSynced = {script.IsActiveSynced}");
+        var treasure = GO.GetComponent<Treasure>();
+        controller.MazeUI.UILog(
+            $"Spawn {GO.name} " +
+            $"\n- IsActiveSynced = {treasure.IsActiveSynced}" +
+            $"\n- x, y = {x}, {y} => {position.x}, {position.z}"
+        );
+        /*
         if (controller.IsOwner()) {
-            script.IsActiveSynced = true;
+            treasure.IsActiveSynced = true;
         } else {
-            obj.gameObject.SetActive(script.IsActiveSynced);
+            GO.gameObject.SetActive(treasure.IsActiveSynced);
         }
-        
-        return obj;
+        */
+
+        return GO;
     }
 }
 
