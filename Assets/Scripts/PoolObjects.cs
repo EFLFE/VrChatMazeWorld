@@ -42,12 +42,7 @@ public class PoolObjects : UdonSharpBehaviour {
         MazeController.MazeUI.UILog(log);
     }
 
-    public MazeObject Take() {
-        TryTake(out MazeObject obj);
-        return obj;
-    }
-
-    public bool TryTake(out MazeObject obj) {
+    public bool TryTake(out MazeObject obj, Vector3 position, Quaternion rotation) {
         obj = null;
         for (int i = 0; i < poolItems.Length; i++) {
             MazeObject item = poolItems[i];
@@ -56,6 +51,7 @@ public class PoolObjects : UdonSharpBehaviour {
                     Networking.SetOwner(Networking.LocalPlayer, item.gameObject);
                 }
                 obj = item;
+                obj.transform.SetPositionAndRotation(position, rotation);
                 obj.gameObject.SetActive(true);
                 states[i] = true;
                 RequestSerialization();

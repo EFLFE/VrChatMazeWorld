@@ -301,16 +301,16 @@ public class MazeBuilder : UdonSharpBehaviour {
         // lets spawn treasures only on master
         if (!Networking.IsOwner(gameObject)) return null;
 
-        if (!chestPool.TryTake(out MazeObject GO)) {
+        Vector3 position;
+        position.x = (x - controller.MazeGenerator.Size / 2) * ROOMS_OFFSET;
+        position.z = (y - controller.MazeGenerator.Size / 2) * ROOMS_OFFSET;
+        position.y = 1;
+
+        if (!chestPool.TryTake(out MazeObject GO, position, Quaternion.Euler(-90, rotation, 0))) {
             controller.MazeUI.UILog("No more chest in pool!");
             return null;
         }
 
-        Vector3 position = GO.transform.position;
-        position.x = (x - controller.MazeGenerator.Size / 2) * ROOMS_OFFSET;
-        position.z = (y - controller.MazeGenerator.Size / 2) * ROOMS_OFFSET;
-        position.y = 1;
-        GO.transform.SetPositionAndRotation(position, Quaternion.Euler(-90, rotation, 0));
         GO.transform.localScale = new Vector3(ROOM_SCALE, ROOM_SCALE, ROOM_SCALE);
         GO.transform.GetChild(0).SetLocalPositionAndRotation(Vector3.zero, Quaternion.Euler(0, 0, 0));
         if (name != null)
