@@ -599,7 +599,7 @@ public class MazeGenerator : UdonSharpBehaviour {
             if (x < 1 || y < 1 || x >= size - 1 || y >= size - 1) {
                 continue;
             }
-            if (cells[x][y] == Cell.DoorExit) {
+            if (cells[x][y] == Cell.DoorExit || cells[x][y] == Cell.DoorEnterance) {
                 continue;
             }
             int random_direction = RandomInclusive(0, 3);

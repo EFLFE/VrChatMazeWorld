@@ -133,7 +133,7 @@ public class MazeBuilder : UdonSharpBehaviour {
             }
 
             if (need_to_spawn_floor) {
-                GameObject obj_floor = Spawn(floorPrefab, x, y, 0, $"floor {current_id}");
+                GameObject obj_floor = Spawn(floorPrefab, x, y, 0, $"floor {current_id}, cell type: {current_cell}");
                 ColorizeFloor(obj_floor, current_id);
             }
         }
