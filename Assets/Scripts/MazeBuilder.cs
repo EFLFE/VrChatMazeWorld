@@ -80,7 +80,7 @@ public class MazeBuilder : UdonSharpBehaviour {
 
             for (int i = 0; i < maze.ChestsAmount; i++) {
                 if (x == maze.ChestsX[i] && y == maze.ChestsY[i]) {
-                    SpawnChest(x, y, 0);
+                    SpawnChest(x, y);
                 }
             }
 
@@ -296,25 +296,20 @@ public class MazeBuilder : UdonSharpBehaviour {
         return GO;
     }
 
-    private MazeObject SpawnChest(int x, int y, int rotation, string name = null) {
+    private MazeObject SpawnChest(int x, int y) {
 
         // lets spawn treasures only on master
-        if (!Networking.IsOwner(gameObject)) return null;
+        // if (!Networking.IsOwner(gameObject)) return null; // temp test
 
         Vector3 position;
         position.x = (x - controller.MazeGenerator.Size / 2) * ROOMS_OFFSET;
         position.z = (y - controller.MazeGenerator.Size / 2) * ROOMS_OFFSET;
         position.y = 1;
 
-        if (!chestPool.TryTake(out MazeObject GO, position, Quaternion.Euler(-90, rotation, 0))) {
+        if (!chestPool.TryTake(out MazeObject GO, position, Quaternion.Euler(0, 0, 0))) {
             controller.MazeUI.UILog("No more chest in pool!");
             return null;
         }
-
-        GO.transform.localScale = new Vector3(ROOM_SCALE, ROOM_SCALE, ROOM_SCALE);
-        GO.transform.GetChild(0).SetLocalPositionAndRotation(Vector3.zero, Quaternion.Euler(0, 0, 0));
-        if (name != null)
-            GO.name = name;
 
         var treasure = GO.GetComponent<Treasure>();
         controller.MazeUI.UILog(

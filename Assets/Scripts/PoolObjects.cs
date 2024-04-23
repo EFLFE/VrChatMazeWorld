@@ -1,5 +1,6 @@
 ﻿using UdonSharp;
 using UnityEngine;
+using UnityEngine.UIElements;
 using VRC;
 using VRC.SDK3.Components;
 using VRC.SDKBase;
@@ -29,12 +30,12 @@ public class PoolObjects : UdonSharpBehaviour {
     }
 
 
-    public override void OnDeserialization() {          
+    public override void OnDeserialization() {
         base.OnDeserialization();
         MazeController.MazeUI.UILog($"PoolObjects OnDeserialization:");
         string log = "Active ids: ";
         for (int i = 0; i < poolContainer.childCount; i++) {
-            poolItems[i].gameObject.SetActive(states[i]);
+            //poolItems[i].gameObject.SetActive(states[i]); // temp test
             if (states[i]) {
                 log += $"{i}, ";
             }
@@ -47,11 +48,15 @@ public class PoolObjects : UdonSharpBehaviour {
         for (int i = 0; i < poolItems.Length; i++) {
             MazeObject item = poolItems[i];
             if (!item.gameObject.activeSelf) {
-                if (!Networking.IsOwner(item.gameObject)) {
-                    Networking.SetOwner(Networking.LocalPlayer, item.gameObject);
-                }
+                //if (!Networking.IsOwner(item.gameObject)) {
+                //    Networking.SetOwner(Networking.LocalPlayer, item.gameObject);
+                //}
                 obj = item;
                 obj.transform.SetPositionAndRotation(position, rotation);
+                for (int j = 0; j < obj.transform.childCount; j++) {
+                    obj.transform.GetChild(j).SetLocalPositionAndRotation(Vector3.zero, Quaternion.Euler(0, 0, 0));
+                }
+
                 obj.gameObject.SetActive(true);
                 states[i] = true;
                 RequestSerialization();
@@ -64,6 +69,10 @@ public class PoolObjects : UdonSharpBehaviour {
 
     public void Return(MazeObject obj) {
         states[obj.pool_id] = false;
+        obj.transform.SetPositionAndRotation(new Vector3(0, -100, 0), Quaternion.Euler(0, 0, 0));
+        for (int j = 0; j < obj.transform.childCount; j++) {
+            obj.transform.GetChild(j).SetLocalPositionAndRotation(Vector3.zero, Quaternion.Euler(0, 0, 0));
+        }
         obj.gameObject.SetActive(false);
         RequestSerialization();
     }

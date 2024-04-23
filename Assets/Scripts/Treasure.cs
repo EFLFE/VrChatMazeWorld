@@ -9,10 +9,6 @@ public class Treasure : MazeObject {
 
     [SerializeField] public VRC_Pickup pickup;
 
-    public void Drop() {
-        pickup.Drop();
-    }
-
     // network event
     public void Despawn() {
         Controller.GetChestPool.Return(this);
