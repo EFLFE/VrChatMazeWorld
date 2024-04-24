@@ -25,7 +25,7 @@ public class MazeBuilder : UdonSharpBehaviour {
     private const int BUILD_COUNT = 4;
     private int buildLeft;
 
-    public static void Spiral(int size, int step, out int x, out int y) {
+    private void Spiral(int size, int step, out int x, out int y) {
         x = 0;
         y = 0;
         int dx = 0, dy = -1;
@@ -180,7 +180,7 @@ public class MazeBuilder : UdonSharpBehaviour {
                 debug = "in bounds";
             }
 
-            GameObject obj = null;
+            GameObject obj;
             if (current_cell == Cell.DoorDeadEnd && neighbor == Cell.Wall) {
                 int deadend_variant = ids[x][y] % deadendPrefabs.Length;
                 obj = Spawn(deadendPrefabs[deadend_variant], x, y, rotation);
@@ -320,4 +320,3 @@ public class MazeBuilder : UdonSharpBehaviour {
         return GO;
     }
 }
-

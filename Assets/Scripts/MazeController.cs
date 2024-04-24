@@ -10,19 +10,17 @@ public class MazeController : UdonSharpBehaviour {
     [SerializeField] private bool buildOnStart;
     [SerializeField] private PoolObjects chestPool;
     [SerializeField] private SyncDataUI syncDataUI;
+    [SerializeField] private GameObject enemyPrefab;
+    [SerializeField] private Transform enemySpawn;
+    [SerializeField] private Map map;
 
-    [Space]
     [UdonSynced] private int mazeSize;
     [UdonSynced] private int mazeRoomsAmount;
     [UdonSynced] private int mazeChestsAmount;
-    [Space]
-
     [UdonSynced] private int level = 1;
     [UdonSynced] private int mazeChestsAmountGathered = 0;
 
-    [SerializeField] private GameObject enemyPrefab;
-    [SerializeField] private Transform enemySpawn;
-
+    [Space]
     public MazeBuilder MazeBuilder;
     public MazeGenerator MazeGenerator;
     public MazeUI MazeUI;
@@ -67,6 +65,7 @@ public class MazeController : UdonSharpBehaviour {
         chestPool.Init(this);
         MazeBuilder.Init(this);
         MazeUI.Init(this);
+        map.Init(this);
 
         seed = Random.Range(0, 9999);
         //seed = 4768; // any problem seed goes here to test
@@ -181,8 +180,10 @@ public class MazeController : UdonSharpBehaviour {
         // if (Input.GetKeyDown(KeyCode.O))
         if (!MazeBuilder.MazeReady && generator_is_ready) {
             if (MazeBuilder.BuildRoomsIter()) {
+                // completed
                 MazeUI.HideProgress();
                 CentralZone.gameObject.SetActive(true);
+                map.Render(MazeGenerator);
             }
         }
 
