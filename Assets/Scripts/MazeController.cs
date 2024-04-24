@@ -37,6 +37,8 @@ public class MazeController : UdonSharpBehaviour {
     [UdonSynced] private int seed;
     [SerializeField] private QvPen_Settings QV_PEN_Settings;
 
+    public TMPro.TextMeshProUGUI progressText;
+
     public PoolObjects GetChestPool { get => chestPool; }
 
     [UdonSynced] public string network_event = "";
@@ -56,6 +58,7 @@ public class MazeController : UdonSharpBehaviour {
         if (network_event == nameof(Build) || need_to_build_at_join) Build();
         network_event = ""; // no need, just for clarity
         need_to_build_at_join = false;
+        UpdateProgressText();
     }
 
     private void Start() {
@@ -77,6 +80,7 @@ public class MazeController : UdonSharpBehaviour {
         } else {
             // late joiners will build via OnDeserialization + network_event = Build
         }
+        UpdateProgressText();
     }
 
     public bool IsOwner() {
@@ -136,6 +140,7 @@ public class MazeController : UdonSharpBehaviour {
                 NextLevel(); // direct event call for owner of this
             }
         }
+        UpdateProgressText();
         RequestSerialization(); // send event to late-joiners (works only for owner of this)
     }
 
@@ -227,5 +232,11 @@ public class MazeController : UdonSharpBehaviour {
             BaseEnemy script = obj.GetComponent<BaseEnemy>();
             script.Init();
         }
+    }
+
+    public void UpdateProgressText() {
+        progressText.text = "Bring treasures!" +
+            $"\r\nLevel: {level}" +
+            $"\r\nTreasures: {mazeChestsAmountGathered} / {mazeChestsAmount}";
     }
 }
