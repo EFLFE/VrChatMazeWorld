@@ -1,5 +1,6 @@
 ﻿using UdonSharp;
 using UnityEngine;
+using UnityEngine.InputSystem.XR;
 using VRC.SDKBase;
 using static VRC.Udon.Common.Interfaces.NetworkEventTarget;
 
@@ -7,7 +8,7 @@ public class CentralZone : UdonSharpBehaviour {
     [SerializeField] private PoolObjects chestPool;
     [SerializeField] public MazeController MazeController;
 
-    private void OnTriggerEnter(Collider model) {
+    private void OnTriggerEnter(Collider collider) {
         /*        var type1 = other.GetType(); // MeshCollider
                 var type2 = other.gameObject.GetType(); // GameObject
                 var layer = other.gameObject.layer; // 13
@@ -21,15 +22,19 @@ public class CentralZone : UdonSharpBehaviour {
                     + $"\n name = {name}"
                 );*/
 
-        //var component = other.gameObject.GetComponent<Treasure>();
-        var treasure = model.gameObject.transform.parent.GetComponent<Treasure>();
+        var treasure = collider.gameObject.GetComponent<Treasure>();
         if (treasure != null) {
-            MazeController.MazeUI.UILog($"Treasure found in CentralZone: {model.gameObject.transform.parent.name}, id = {treasure.pool_id}"); // one time on random amount of clients
-            treasure.pickup.Drop();
-            if (Networking.IsOwner(model.gameObject)) {
-                MazeController.MazeUI.UILog("We are the owner of the treasure!"); // one time on treasure owner
+            if (Networking.IsOwner(treasure.gameObject)) {
+                // дропнуть предмет из руки текущего владельца
+                treasure.pickup.Drop();
+
+                MazeController.MazeUI.UILog($"Treasure found in CentralZone: {collider.gameObject.name}, id = {treasure.pool_id}");
+
+                treasure.SendCustomNetworkEvent(All, nameof(Treasure.Despawn));                   
+                //MazeController.GetChestPool.Return(treasure);
                 MazeController.SendCustomNetworkEvent(Owner, nameof(MazeController.OnTreasureGathered));
-                treasure.SendCustomNetworkEvent(All, nameof(Treasure.Despawn));
+                //MazeController.OnTreasureGathered();
+
             }
         }
     }

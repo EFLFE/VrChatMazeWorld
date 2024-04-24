@@ -299,7 +299,7 @@ public class MazeBuilder : UdonSharpBehaviour {
     private MazeObject SpawnChest(int x, int y) {
 
         // lets spawn treasures only on master
-        // if (!Networking.IsOwner(gameObject)) return null; // temp test
+        if (!Networking.IsOwner(gameObject)) return null;
 
         Vector3 position;
         position.x = (x - controller.MazeGenerator.Size / 2) * ROOMS_OFFSET;

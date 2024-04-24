@@ -45,7 +45,7 @@ public class MazeController : UdonSharpBehaviour {
     // called only on late-joiners (not master of this object)
     public override void OnDeserialization() {
         MazeUI.UILog(
-            $"OnDeserialization, " +
+            $"MazeController OnDeserialization, " +
             $"\n- network_event = {network_event}" +
             $"\n- seed = {seed}" +
             $"\n- level = {level}" +
@@ -92,6 +92,8 @@ public class MazeController : UdonSharpBehaviour {
         foreach (VRCPlayerApi player in players) {
             player.TeleportTo(Vector3.zero, player.GetRotation());
         }
+
+        CentralZone.gameObject.SetActive(false);
 
         mazeChestsAmountGathered = 0;
         mazeSize = 19 + level * 2;
@@ -172,9 +174,12 @@ public class MazeController : UdonSharpBehaviour {
         }
 
         // if (Input.GetKeyDown(KeyCode.O))
-        if (!MazeBuilder.MazeReady && generator_is_ready)
-            if (MazeBuilder.BuildRoomsIter())
+        if (!MazeBuilder.MazeReady && generator_is_ready) {
+            if (MazeBuilder.BuildRoomsIter()) {
                 MazeUI.HideProgress();
+                CentralZone.gameObject.SetActive(true);
+            }
+        }
 
         // send synd data to ui
         syncDataUI.AddText("Maze controler:");

@@ -1,10 +1,7 @@
 ﻿using UdonSharp;
 using UnityEngine;
-using UnityEngine.UIElements;
-using VRC;
 using VRC.SDK3.Components;
 using VRC.SDKBase;
-using VRC.Udon;
 
 [UdonBehaviourSyncMode(BehaviourSyncMode.Manual)]
 public class PoolObjects : UdonSharpBehaviour {
@@ -12,8 +9,6 @@ public class PoolObjects : UdonSharpBehaviour {
     private Transform poolContainer;
     private MazeObject[] poolItems;
     [UdonSynced] bool[] states;
-
-    public bool ManageOwners;
 
     public int MaxCount => poolItems.Length;
 
@@ -35,7 +30,23 @@ public class PoolObjects : UdonSharpBehaviour {
         MazeController.MazeUI.UILog($"PoolObjects OnDeserialization:");
         string log = "Active ids: ";
         for (int i = 0; i < poolContainer.childCount; i++) {
-            //poolItems[i].gameObject.SetActive(states[i]); // temp test
+
+            var obj = poolItems[i];
+            if (obj.gameObject.activeSelf != states[i]) {
+                if (states[i]) {
+                    // предположение: телепортация в -10 перед активацией уберет случайные коллайды
+                    // obj.transform.SetPositionAndRotation(new Vector3(0, -10, 0), Quaternion.Euler(0, 0, 0));
+                    // не сработало
+                }
+                MazeController.MazeUI.UILog($"- {i} - " + (states[i] ? "activate" : "deactivate"));
+                var vrc_sync = obj.gameObject.GetComponent<VRCObjectSync>();
+                if (vrc_sync != null) {
+                    vrc_sync.FlagDiscontinuity();
+                }
+                obj.gameObject.SetActive(states[i]);
+                // предположение: после активации (глобальная позиция пикапа) засинхронится через VRC_Sync
+            }
+
             if (states[i]) {
                 log += $"{i}, ";
             }
@@ -43,21 +54,21 @@ public class PoolObjects : UdonSharpBehaviour {
         MazeController.MazeUI.UILog(log);
     }
 
+
     public bool TryTake(out MazeObject obj, Vector3 position, Quaternion rotation) {
         obj = null;
         for (int i = 0; i < poolItems.Length; i++) {
             MazeObject item = poolItems[i];
             if (!item.gameObject.activeSelf) {
-                //if (!Networking.IsOwner(item.gameObject)) {
-                //    Networking.SetOwner(Networking.LocalPlayer, item.gameObject);
-                //}
                 obj = item;
-                obj.transform.SetPositionAndRotation(position, rotation);
-                for (int j = 0; j < obj.transform.childCount; j++) {
-                    obj.transform.GetChild(j).SetLocalPositionAndRotation(Vector3.zero, Quaternion.Euler(0, 0, 0));
-                }
 
                 obj.gameObject.SetActive(true);
+                var vrc_sync = obj.gameObject.GetComponent<VRCObjectSync>();
+                if (vrc_sync != null) {
+                    vrc_sync.FlagDiscontinuity();
+                }
+                obj.transform.SetPositionAndRotation(position, rotation);
+
                 states[i] = true;
                 RequestSerialization();
                 break;
@@ -67,12 +78,19 @@ public class PoolObjects : UdonSharpBehaviour {
     }
 
 
+    // вызывать строго только мастером
     public void Return(MazeObject obj) {
+        if (!obj.gameObject.activeSelf) return;
+
+        // вернуть предмет во владение мастера
+        Networking.SetOwner(Networking.LocalPlayer, obj.gameObject);
+
         states[obj.pool_id] = false;
-        obj.transform.SetPositionAndRotation(new Vector3(0, -100, 0), Quaternion.Euler(0, 0, 0));
-        for (int j = 0; j < obj.transform.childCount; j++) {
-            obj.transform.GetChild(j).SetLocalPositionAndRotation(Vector3.zero, Quaternion.Euler(0, 0, 0));
+        var vrc_sync = obj.gameObject.GetComponent<VRCObjectSync>();
+        if (vrc_sync != null) {
+            vrc_sync.FlagDiscontinuity();
         }
+        obj.transform.SetPositionAndRotation(new Vector3(0, -10, 0), Quaternion.Euler(0, 0, 0));
         obj.gameObject.SetActive(false);
         RequestSerialization();
     }

@@ -33,8 +33,7 @@ public class TreasureFinderDebug : UdonSharpBehaviour {
     private void Update() {
         for (int i = 0; i < lightsArray.Length; i++) {
             GameObject light = lightsArray[i];
-            if (light.transform.parent.gameObject.activeSelf)
-                light.transform.position = poolsOfTreasures.GetChild(i).GetChild(0).position;
+            lightsArray[i].gameObject.transform.rotation = Quaternion.identity;
         }
     }
 }
