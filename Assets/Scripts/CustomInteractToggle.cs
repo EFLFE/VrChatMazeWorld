@@ -9,12 +9,18 @@ public class CustomInteractToggle : UdonSharpBehaviour {
 
     public UdonSharpBehaviour TargetNetworkObject;
     public string TargetMethodName;
+    public bool for_owner_only = true;
 
     private void Start() {
         InteractionText = interactionText;
     }
 
     public override void Interact() {
-        TargetNetworkObject.SendCustomNetworkEvent(VRC.Udon.Common.Interfaces.NetworkEventTarget.Owner, TargetMethodName);
+        TargetNetworkObject.SendCustomNetworkEvent(
+            for_owner_only
+            ? VRC.Udon.Common.Interfaces.NetworkEventTarget.Owner
+            : VRC.Udon.Common.Interfaces.NetworkEventTarget.All,
+            TargetMethodName
+        );
     }
 }
