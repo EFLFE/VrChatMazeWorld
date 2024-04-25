@@ -81,9 +81,9 @@ public class PoolObjects : UdonSharpBehaviour {
         return obj != null;
     }
 
-
-    // вызывать строго только мастером
+    // вызывается только у мастера
     public void Return(MazeObject obj) {
+        if (!Networking.IsMaster) return;
         if (!obj.gameObject.activeSelf) return;
 
         MazeController.MazeUI.UILog($"Return pool object, id: {obj.pool_id} ");
@@ -93,7 +93,7 @@ public class PoolObjects : UdonSharpBehaviour {
             + " " + Networking.GetOwner(obj.gameObject).displayName
         );
         // вернуть предмет во владение мастера
-        Networking.SetOwner(Networking.LocalPlayer, obj.gameObject);
+        Networking.SetOwner(Networking.GetOwner(MazeController.gameObject), obj.gameObject);
         MazeController.MazeUI.UILog($"- new owner: "
             + Networking.GetOwner(obj.gameObject).playerId.ToString()
             + " " + Networking.GetOwner(obj.gameObject).displayName
@@ -109,7 +109,9 @@ public class PoolObjects : UdonSharpBehaviour {
         RequestSerialization();
     }
 
+    // вызывается только у мастера
     public void ReturnAll() {
+        if (!Networking.IsMaster) return;
         for (int i = 0; i < poolItems.Length; i++) {
             Return(poolItems[i]);
         }
