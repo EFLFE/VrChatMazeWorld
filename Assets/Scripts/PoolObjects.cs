@@ -1,5 +1,6 @@
 ﻿using UdonSharp;
 using UnityEngine;
+using VRC.SDK3.ClientSim;
 using VRC.SDK3.Components;
 using VRC.SDKBase;
 
@@ -28,7 +29,6 @@ public class PoolObjects : UdonSharpBehaviour {
     public override void OnDeserialization() {
         base.OnDeserialization();
         MazeController.MazeUI.UILog($"PoolObjects OnDeserialization:");
-        string log = "Active ids: ";
         for (int i = 0; i < poolContainer.childCount; i++) {
 
             var obj = poolItems[i];
@@ -38,20 +38,24 @@ public class PoolObjects : UdonSharpBehaviour {
                     // obj.transform.SetPositionAndRotation(new Vector3(0, -10, 0), Quaternion.Euler(0, 0, 0));
                     // не сработало
                 }
-                MazeController.MazeUI.UILog($"- {i} - " + (states[i] ? "activate" : "deactivate"));
+                MazeController.MazeUI.UILog(
+                    $"- {i} - "
+                    + (states[i] ? "activate" : "deactivate")
+                    + ", owner player: "
+                    + Networking.GetOwner(obj.gameObject).playerId.ToString()
+                    + " " + Networking.GetOwner(obj.gameObject).displayName
+                );
+
                 var vrc_sync = obj.gameObject.GetComponent<VRCObjectSync>();
                 if (vrc_sync != null) {
                     vrc_sync.FlagDiscontinuity();
                 }
                 obj.gameObject.SetActive(states[i]);
-                // предположение: после активации (глобальная позиция пикапа) засинхронится через VRC_Sync
-            }
 
-            if (states[i]) {
-                log += $"{i}, ";
+                // предположение: после активации (глобальная позиция пикапа) засинхронится через VRC_Sync
+                // оно синхронится, но на лейт джойнерах с задержкой
             }
         }
-        MazeController.MazeUI.UILog(log);
     }
 
 
@@ -82,8 +86,18 @@ public class PoolObjects : UdonSharpBehaviour {
     public void Return(MazeObject obj) {
         if (!obj.gameObject.activeSelf) return;
 
+        MazeController.MazeUI.UILog($"Return pool object, id: {obj.pool_id} ");
+
+        MazeController.MazeUI.UILog($"- old owner: "
+            + Networking.GetOwner(obj.gameObject).playerId.ToString()
+            + " " + Networking.GetOwner(obj.gameObject).displayName
+        );
         // вернуть предмет во владение мастера
         Networking.SetOwner(Networking.LocalPlayer, obj.gameObject);
+        MazeController.MazeUI.UILog($"- new owner: "
+            + Networking.GetOwner(obj.gameObject).playerId.ToString()
+            + " " + Networking.GetOwner(obj.gameObject).displayName
+        );
 
         states[obj.pool_id] = false;
         var vrc_sync = obj.gameObject.GetComponent<VRCObjectSync>();
