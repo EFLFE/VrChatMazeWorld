@@ -27,6 +27,7 @@ public class MazeController : UdonSharpBehaviour {
     public MazeBuilder MazeBuilder;
     public MazeGenerator MazeGenerator;
     public MazeUI MazeUI;
+    public Utils Utils;
 
     public TMPro.TextMeshProUGUI debugText;
 

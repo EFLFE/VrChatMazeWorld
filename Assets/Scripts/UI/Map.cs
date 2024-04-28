@@ -7,7 +7,8 @@ using VRC.Udon;
 [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
 public class Map : UdonSharpBehaviour {
     [SerializeField] private RectTransform canvasRect;
-    [SerializeField] private Transform container;
+    [SerializeField] private Transform staticContainer;
+    [SerializeField] private Transform dynamicContainer;
     [SerializeField] private Transform bgImage;
     [SerializeField] private GameObject facadePrefab;
     [SerializeField] private GameObject imageCellPrefab;
@@ -78,7 +79,7 @@ public class Map : UdonSharpBehaviour {
     private void DrawCircle(Vector2 pos, Color clr) {
         circleIndex++;
         if (circleRects[circleIndex] == null) {
-            var obj = Instantiate(playerImagePrefab, container.transform);
+            var obj = Instantiate(playerImagePrefab, dynamicContainer.transform);
             circleRects[circleIndex] = obj.GetComponent<RectTransform>();
             var image = obj.GetComponent<Image>();
             image.color = clr;
@@ -126,7 +127,7 @@ public class Map : UdonSharpBehaviour {
         Clear();
 
         // build map
-        mapContainer = Instantiate(facadePrefab, container).transform;
+        mapContainer = Instantiate(facadePrefab, staticContainer).transform;
         mapContainer.SetSiblingIndex(bgImage.GetSiblingIndex() + 1);
 
         cellSize.x = canvasRect.sizeDelta.x / maze.Size;
@@ -144,7 +145,8 @@ public class Map : UdonSharpBehaviour {
                     case Cell.DoorDeadEnd:
                     case Cell.DoorEnterance:
                     case Cell.DoorExit:
-                        CreateImage(x, y, Color.gray, cellType);
+                        Color clr = controller.Utils.GetFloorColor(ids[x][y]);
+                        CreateImage(x, y, clr, cellType);
                         break;
 
                     case Cell.Hole:

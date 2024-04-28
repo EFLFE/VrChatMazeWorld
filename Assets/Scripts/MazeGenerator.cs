@@ -131,7 +131,7 @@ public class MazeGenerator : UdonSharpBehaviour {
         for (int i = 0; i < size; i++) cells_backup[i] = new Cell[size];
         */
 
-        this.chests_amount = chests;
+        chests_amount = chests;
         chests_x = new int[chests];
         chests_y = new int[chests];
 

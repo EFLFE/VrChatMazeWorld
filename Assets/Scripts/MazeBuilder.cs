@@ -2,6 +2,12 @@
 using UnityEngine;
 using VRC.SDKBase;
 
+internal enum BuildIterType {
+    BaseLevel,
+    Chest,
+    None,
+}
+
 [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
 public class MazeBuilder : UdonSharpBehaviour {
     public const float ROOMS_OFFSET = 4f;
@@ -25,25 +31,7 @@ public class MazeBuilder : UdonSharpBehaviour {
     private const int BUILD_COUNT = 4;
     private int buildLeft;
 
-    private void Spiral(int size, int step, out int x, out int y) {
-        x = 0;
-        y = 0;
-        int dx = 0, dy = -1;
-        int maxI = size * size;
-
-        for (int i = 0; i < maxI && i < step; i++) {
-            if ((x == y) || ((x < 0) && (x == -y)) || ((x > 0) && (x == 1 - y))) {
-                int t = dx;
-                dx = -dy;
-                dy = t;
-            }
-            x += dx;
-            y += dy;
-        }
-
-        x += size / 2;
-        y += size / 2;
-    }
+    private BuildIterType buildIterType;
 
     public void Init(MazeController controller) {
         this.controller = controller;
@@ -57,12 +45,16 @@ public class MazeBuilder : UdonSharpBehaviour {
         iter = 0;
         buildLeft = 0;
         controller.MazeUI.SetProgressValue(0f);
+        buildIterType = default(BuildIterType);
     }
 
     /// <summary>
     /// Run BuildRoomsBegin before. Iteration building. true = completed.
     /// </summary>
     public bool BuildRoomsIter() {
+        if (MazeReady)
+            return true;
+
         MazeGenerator maze = controller.MazeGenerator;
 
         // epic костыль
@@ -71,30 +63,37 @@ public class MazeBuilder : UdonSharpBehaviour {
             return MazeReady;
         }
 
+        if (iter == 0) {
+            controller.Utils.ResetSpiral(maze.Size);
+        }
+
         buildLeft = BUILD_COUNT;
-        while (buildLeft > 0 && !MazeReady) {
-            //controller.MazeUI.Log($"Iter: {iter}");
-            iter++;
-            Spiral(maze.Size, iter - 1, out int x, out int y);
-            SpawnCell(x, y);
+        while (buildLeft > 0 && buildIterType != BuildIterType.None) {
+            if (buildIterType == BuildIterType.BaseLevel) {
+                iter++;
 
-            for (int i = 0; i < maze.ChestsAmount; i++) {
-                if (x == maze.ChestsX[i] && y == maze.ChestsY[i]) {
-                    SpawnChest(x, y);
+                if (iter < maze.Size * maze.Size) {
+                    controller.Utils.NextSpiral(out int x, out int y);
+                    SpawnCell(x, y);
+                    controller.MazeUI.SetProgressValue((float) iter / (maze.Size * maze.Size));
+                } else {
+                    buildIterType = BuildIterType.Chest;
+                    iter = 0;
                 }
-            }
+            } else if (buildIterType == BuildIterType.Chest) {
+                if (iter < maze.ChestsAmount) {
+                    SpawnChest(maze.ChestsX[iter], maze.ChestsY[iter]);
+                    controller.MazeUI.SetProgressValue((float) iter / maze.ChestsAmount);
+                } else {
+                    buildIterType = BuildIterType.None;
+                    iter = 0;
+                }
 
-            buildLeft--;
-
-            //controller.MazeUI.Log($"MazeSize: {MazeSize}");
-            if (iter >= maze.Size * maze.Size) {
-                MazeReady = true;
-                break;
+                iter++;
             }
         }
 
-
-        controller.MazeUI.SetProgressValue((float) iter / (maze.Size * maze.Size));
+        MazeReady = buildIterType == BuildIterType.None;
         return MazeReady;
     }
 
@@ -259,27 +258,9 @@ public class MazeBuilder : UdonSharpBehaviour {
     }
 
     private void ColorizeFloor(GameObject floor, int id) {
-        MeshRenderer floorMesh = (MeshRenderer) floor.GetComponent(typeof(MeshRenderer));
-        MaterialPropertyBlock matProp = new MaterialPropertyBlock();
-
-        Color clr;
-
-        if (id == 1) {
-            clr = Color.black;
-        } else {
-            const float D = 255f;
-            switch (id % 7) {
-                case 0: clr = new Color(225 / D, 155 / D, 155 / D); break;
-                case 1: clr = new Color(225 / D, 205 / D, 158 / D); break;
-                case 2: clr = new Color(175 / D, 225 / D, 158 / D); break;
-                case 3: clr = new Color(158 / D, 223 / D, 225 / D); break;
-                case 4: clr = new Color(158 / D, 158 / D, 225 / D); break;
-                case 5: clr = new Color(225 / D, 158 / D, 225 / D); break;
-                case 6: clr = new Color(158 / D, 158 / D, 158 / D); break;
-                default: clr = Color.white; break;
-            }
-        }
-
+        var floorMesh = (MeshRenderer) floor.GetComponent(typeof(MeshRenderer));
+        var matProp = new MaterialPropertyBlock();
+        Color clr = controller.Utils.GetFloorColor(id);
         matProp.SetColor("_Color", clr);
         floorMesh.SetPropertyBlock(matProp);
     }
@@ -293,11 +274,11 @@ public class MazeBuilder : UdonSharpBehaviour {
         GO.transform.SetPositionAndRotation(position, Quaternion.Euler(-90, rotation, 0));
         GO.transform.localScale = new Vector3(ROOM_SCALE, ROOM_SCALE, ROOM_SCALE);
         GO.name = name;
+        buildLeft--;
         return GO;
     }
 
     private MazeObject SpawnChest(int x, int y) {
-
         // lets spawn treasures only on master
         if (!Networking.IsOwner(gameObject)) return null;
 
@@ -317,6 +298,7 @@ public class MazeBuilder : UdonSharpBehaviour {
             $"\n- x, y = {x}, {y} => {position.x}, {position.z}"
         );
 
+        buildLeft = 0;
         return GO;
     }
 }
