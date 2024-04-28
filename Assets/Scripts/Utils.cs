@@ -61,6 +61,7 @@ public class Utils : UdonSharpBehaviour {
     public Color GetFloorColor(int id) {
         Color clr;
         if (id == 1) {
+            // general room
             clr = Color.black;
         } else {
             const float D = 255f;

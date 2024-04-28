@@ -582,7 +582,7 @@ MonoBehaviour:
   maps:
   - {fileID: 1322962922}
   - {fileID: 2860119066175330707}
-  startedLevel: 6
+  startedLevel: 15
   startedSeed: 0
   MazeBuilder: {fileID: 1027156425}
   MazeGenerator: {fileID: 1990344165}
@@ -16793,7 +16793,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 12.7, y: -11.4}
+  m_AnchoredPosition: {x: -5.2, y: -5.3}
   m_SizeDelta: {x: 5, y: 5}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &9207358658401620335

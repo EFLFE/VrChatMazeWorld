@@ -152,9 +152,22 @@ public class MazeBuilder : UdonSharpBehaviour {
             ceiling_prefab_to_spawn = ceiling_general;
         }
         if (ceiling_prefab_to_spawn != null) {
-            int rotation = controller.MazeGenerator.RandomInclusive(0, 3) * 90;
-            // TODO make admin button to remove all ceilings
-            // Spawn(ceiling_prefab_to_spawn, x, y, rotation, "ceiling");
+            // дырки в цетре комнат (демо)
+            if (current_id != 1 && x > 0 && y > 0 && x < maze.Size - 1 && y < maze.Size - 1) {
+                if (ids[x - 1][y - 1] != current_id
+                 || ids[x + 0][y - 1] != current_id
+                 || ids[x + 1][y - 1] != current_id
+                 || ids[x - 1][y + 0] != current_id
+                 || ids[x + 1][y + 0] != current_id
+                 || ids[x - 1][y + 1] != current_id
+                 || ids[x + 0][y + 1] != current_id
+                 || ids[x + 1][y + 1] != current_id
+                    ) {
+                    // TODO make admin button to remove all ceilings
+                    int rotation = controller.MazeGenerator.RandomInclusive(0, 3) * 90;
+                    Spawn(ceiling_prefab_to_spawn, x, y, rotation, "ceiling");
+                }
+            }
         }
 
 
