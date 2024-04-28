@@ -7,6 +7,7 @@ using VRC.Udon;
 [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
 public class Map : UdonSharpBehaviour {
     [SerializeField] private RectTransform canvasRect;
+    [SerializeField] private Transform container;
     [SerializeField] private Transform bgImage;
     [SerializeField] private GameObject facadePrefab;
     [SerializeField] private GameObject imageCellPrefab;
@@ -16,35 +17,82 @@ public class Map : UdonSharpBehaviour {
     [SerializeField] private GameObject imageWallLeftPrefab;
     [Space]
     [SerializeField] private GameObject playerImagePrefab;
-    //[SerializeField] private GameObject testPlayer;
-    [SerializeField] private float floorScaleTest = 0.5f;
+    [SerializeField] private Transform poolsOfTreasures;
 
     private MazeController controller;
     private Vector2 cellSize;
     private Transform mapContainer;
-    private RectTransform[] playersImageRect;
     private VRCPlayerApi[] allPlayers;
+    private RectTransform[] circleRects;
+    private int circleIndex;
 
     public void Init(MazeController controller) {
         this.controller = controller;
-        playersImageRect = new RectTransform[64];
+        circleRects = new RectTransform[256];
         allPlayers = new VRCPlayerApi[64];
+        circleIndex = -1;
         enabled = true;
     }
 
     private void Update() {
+        // clear old circles
+        for (int i = 0; i <= circleIndex; i++) {
+            circleRects[i].anchoredPosition = new Vector2(-999, 999);
+        }
+
+        // draw new
+        circleIndex = -1;
+
         int playersCount = VRCPlayerApi.GetPlayerCount();
         VRCPlayerApi.GetPlayers(allPlayers);
         for (int i = 0; i < playersCount; i++) {
             var item = allPlayers[i];
-            UpdatePlayer(item.GetPosition(), i, item.isLocal);
+            Color clr;
+            const float D = 255f;
+            switch (i % 7) {
+                case 0: clr = new Color(225 / D, 155 / D, 155 / D); break;
+                case 1: clr = new Color(225 / D, 205 / D, 158 / D); break;
+                case 2: clr = new Color(175 / D, 225 / D, 158 / D); break;
+                case 3: clr = new Color(158 / D, 223 / D, 225 / D); break;
+                case 4: clr = new Color(158 / D, 158 / D, 225 / D); break;
+                case 5: clr = new Color(225 / D, 158 / D, 225 / D); break;
+                case 6: clr = new Color(158 / D, 158 / D, 158 / D); break;
+                default: clr = Color.white; break;
+            }
+            DrawCircle(item.GetPosition(), clr);
+        }
+
+        // treasures
+        int count = Mathf.Min(controller.GetChestsAmount, poolsOfTreasures.childCount);
+        for (int i = 0; i < count; i++) {
+            Transform treasureTran = poolsOfTreasures.GetChild(i);
+            if (treasureTran.gameObject.activeSelf)
+                DrawCircle(treasureTran.position, Color.red);
         }
     }
 
+    private void DrawCircle(Vector3 pos, Color clr) {
+        DrawCircle(new Vector2(pos.x, pos.z), clr);
+    }
+
+    private void DrawCircle(Vector2 pos, Color clr) {
+        circleIndex++;
+        if (circleRects[circleIndex] == null) {
+            var obj = Instantiate(playerImagePrefab, container.transform);
+            circleRects[circleIndex] = obj.GetComponent<RectTransform>();
+            var image = obj.GetComponent<Image>();
+            image.color = clr;
+        }
+
+        float mapX = canvasRect.sizeDelta.x / 2f + pos.x * (cellSize.x / MazeBuilder.ROOMS_OFFSET);
+        float mapY = canvasRect.sizeDelta.y / 2f + pos.y * (cellSize.y / MazeBuilder.ROOMS_OFFSET);
+        circleRects[circleIndex].anchoredPosition = new Vector2(mapX, -mapY);
+    }
+
     private void UpdatePlayer(Vector3 playerPos, int index, bool isLocal) {
-        if (playersImageRect[index] == null) {
+        if (circleRects[index] == null) {
             var obj = Instantiate(playerImagePrefab, canvasRect.transform);
-            playersImageRect[index] = obj.GetComponent<RectTransform>();
+            circleRects[index] = obj.GetComponent<RectTransform>();
 
             var image = obj.GetComponent<Image>();
             Color clr;
@@ -62,9 +110,9 @@ public class Map : UdonSharpBehaviour {
             image.color = clr;
         }
 
-        float mapX = (playerPos.x / floorScaleTest) + (canvasRect.sizeDelta.x / 2f);
-        float mapY = (playerPos.z / floorScaleTest) + (canvasRect.sizeDelta.y / 2f);
-        playersImageRect[index].anchoredPosition = new Vector2(mapX, -mapY);
+        float mapX = canvasRect.sizeDelta.x / 2f + playerPos.x * (cellSize.x / MazeBuilder.ROOMS_OFFSET);
+        float mapY = canvasRect.sizeDelta.y / 2f + playerPos.z * (cellSize.y / MazeBuilder.ROOMS_OFFSET);
+        circleRects[index].anchoredPosition = new Vector2(mapX, -mapY);
     }
 
     public void Clear() {
@@ -77,7 +125,8 @@ public class Map : UdonSharpBehaviour {
     public void Render(MazeGenerator maze) {
         Clear();
 
-        mapContainer = Instantiate(facadePrefab, canvasRect.transform).transform;
+        // build map
+        mapContainer = Instantiate(facadePrefab, container).transform;
         mapContainer.SetSiblingIndex(bgImage.GetSiblingIndex() + 1);
 
         cellSize.x = canvasRect.sizeDelta.x / maze.Size;
