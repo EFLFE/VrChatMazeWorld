@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c333ccfdd0cbdbc4ca30cef2dd6e6b9b, type: 3}
   m_Name: Slime
   m_EditorClassIdentifier: 
-  serializedUdonProgramAsset: {fileID: 11400000, guid: d304624427bf9e049a1fd36e1bb744f7,
+  serializedUdonProgramAsset: {fileID: 11400000, guid: a87a95eb25b1c3042ac14ab7d7d85753,
     type: 2}
   udonAssembly: 
   assemblyError: 

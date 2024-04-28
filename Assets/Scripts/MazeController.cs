@@ -150,7 +150,7 @@ public class MazeController : UdonSharpBehaviour {
     }
 
     public void ClearQVPens() {
-        if (level <= 1) return;
+        if (level <= startedLevel) return;
         foreach (QvPen_PenManager penManager in QV_PEN_Settings.penManagers)
             if (penManager)
                 penManager.Clear();
