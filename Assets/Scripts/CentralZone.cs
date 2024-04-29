@@ -5,8 +5,9 @@ using VRC.SDKBase;
 using static VRC.Udon.Common.Interfaces.NetworkEventTarget;
 
 public class CentralZone : UdonSharpBehaviour {
-    [SerializeField] private PoolObjects chestPool;
     [SerializeField] public MazeController MazeController;
+    [SerializeField] private PoolObjects chestPool;
+    [SerializeField] private AudioSource noice;
 
     private void OnTriggerEnter(Collider collider) {
         /*        var type1 = other.GetType(); // MeshCollider
@@ -27,7 +28,8 @@ public class CentralZone : UdonSharpBehaviour {
             MazeController.MazeUI.UILog($"Treasure found in CentralZone: {collider.gameObject.name}, id = {treasure.pool_id}");
 
             // дропнуть предмет из руки текущего владельца
-            treasure.pickup.Drop();
+            treasure.Drop();
+            noice.Play();
 
             if (Networking.IsMaster) {
                 MazeController.MazeUI.UILog($"We are Master: return treasure, call OnTreasureGathered()");
