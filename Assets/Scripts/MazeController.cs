@@ -101,6 +101,7 @@ public class MazeController : UdonSharpBehaviour {
             player.TeleportTo(Vector3.zero, player.GetRotation());
         }
 
+        MazeUI.UILog($"CentralZone - deactivating");
         CentralZone.gameObject.SetActive(false);
 
         mazeChestsAmountGathered = 0;
@@ -191,6 +192,7 @@ public class MazeController : UdonSharpBehaviour {
             if (MazeBuilder.BuildRoomsIter()) {
                 // completed
                 MazeUI.HideProgress();
+                MazeUI.UILog($"CentralZone - activating");
                 CentralZone.gameObject.SetActive(true);
                 for (int i = 0; i < maps.Length; i++)
                     maps[i].Render(MazeGenerator);

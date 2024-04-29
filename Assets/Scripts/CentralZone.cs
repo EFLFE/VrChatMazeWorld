@@ -24,17 +24,19 @@ public class CentralZone : UdonSharpBehaviour {
 
         var treasure = collider.gameObject.GetComponent<Treasure>();
         if (treasure != null) {
-            if (Networking.IsOwner(treasure.gameObject)) {
-                // дропнуть предмет из руки текущего владельца
-                treasure.pickup.Drop();
+            MazeController.MazeUI.UILog($"Treasure found in CentralZone: {collider.gameObject.name}, id = {treasure.pool_id}");
 
-                MazeController.MazeUI.UILog($"Treasure found in CentralZone: {collider.gameObject.name}, id = {treasure.pool_id}");
+            // дропнуть предмет из руки текущего владельца
+            treasure.pickup.Drop();
 
-                treasure.SendCustomNetworkEvent(All, nameof(Treasure.Despawn));                   
-                //MazeController.GetChestPool.Return(treasure);
-                MazeController.SendCustomNetworkEvent(Owner, nameof(MazeController.OnTreasureGathered));
-                //MazeController.OnTreasureGathered();
+            if (Networking.IsMaster) {
+                MazeController.MazeUI.UILog($"We are Master: return treasure, call OnTreasureGathered()");
 
+                //treasure.SendCustomNetworkEvent(All, nameof(Treasure.Despawn));
+                MazeController.GetChestPool.Return(treasure);
+
+                //MazeController.SendCustomNetworkEvent(Owner, nameof(MazeController.OnTreasureGathered));
+                MazeController.OnTreasureGathered();
             }
         }
     }
