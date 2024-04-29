@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using UdonSharp;
 using UnityEngine;
+using VRC.Economy;
 using VRC.SDKBase;
 using VRC.Udon.Common.Interfaces;
 
@@ -28,8 +29,6 @@ public class MazeController : UdonSharpBehaviour {
     public MazeGenerator MazeGenerator;
     public MazeUI MazeUI;
     public Utils Utils;
-
-    public TMPro.TextMeshProUGUI debugText;
 
     public CentralZone CentralZone;
 
@@ -127,6 +126,10 @@ public class MazeController : UdonSharpBehaviour {
         MazeGenerator.Init(seed, mazeSize, mazeRoomsAmount, mazeChestsAmount);
         MazeBuilder.Init(this);
         generator_is_ready = false;
+
+        for (int i = 0; i < maps.Length; i++) {
+            maps[i].Clear();
+        }
     }
 
     // network event for master only
@@ -204,32 +207,6 @@ public class MazeController : UdonSharpBehaviour {
         syncDataUI.AddText($"- {nameof(mazeChestsAmountGathered)} = {mazeChestsAmountGathered}");
         syncDataUI.AddText($"- {nameof(seed)} = {seed}");
         syncDataUI.AddText($"- {nameof(network_event)} = {network_event}");
-    }
-
-    public void PrintRooms() {
-        debugText.text = "";
-        Cell[][] maze = MazeGenerator.Cells;
-        for (int x = 0; x < maze.Length; x++) {
-            for (int y = 0; y < maze[x].Length; y++) {
-                if (maze[x][y] == Cell.DoorEnterance)
-                    debugText.text += "D";
-
-                else if (maze[x][y] == Cell.DoorExit)
-                    debugText.text += "d";
-
-                else if (maze[x][y] == Cell.Passage)
-                    debugText.text += ".";
-
-                else if (maze[x][y] == Cell.Wall)
-                    debugText.text += "#";
-
-                else
-                    debugText.text += ".";
-            }
-            debugText.text += "\n";
-        }
-        bool isOwner = Networking.LocalPlayer.IsOwner(gameObject);
-        debugText.text += $"\nBuild seed: {seed}\n{(isOwner ? "Owner" : "")}";
     }
 
     // event (test)
