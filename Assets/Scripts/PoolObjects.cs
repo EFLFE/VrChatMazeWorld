@@ -1,5 +1,6 @@
 ﻿using UdonSharp;
 using UnityEngine;
+using UnityEngine.UIElements;
 using VRC.SDK3.ClientSim;
 using VRC.SDK3.Components;
 using VRC.SDKBase;
@@ -33,11 +34,6 @@ public class PoolObjects : UdonSharpBehaviour {
 
             var obj = poolItems[i];
             if (obj.gameObject.activeSelf != states[i]) {
-                if (states[i]) {
-                    // предположение: телепортация в -10 перед активацией уберет случайные коллайды
-                    // obj.transform.SetPositionAndRotation(new Vector3(0, -10, 0), Quaternion.Euler(0, 0, 0));
-                    // не сработало
-                }
                 MazeController.MazeUI.UILog(
                     $"- {i} - "
                     + (states[i] ? "activate" : "deactivate")
@@ -47,9 +43,8 @@ public class PoolObjects : UdonSharpBehaviour {
                 );
 
                 var vrc_sync = obj.gameObject.GetComponent<VRCObjectSync>();
-                if (vrc_sync != null) {
-                    vrc_sync.FlagDiscontinuity();
-                }
+                if (vrc_sync != null) vrc_sync.FlagDiscontinuity();
+
                 obj.gameObject.SetActive(states[i]);
 
                 // предположение: после активации (глобальная позиция пикапа) засинхронится через VRC_Sync
@@ -58,6 +53,14 @@ public class PoolObjects : UdonSharpBehaviour {
         }
     }
 
+    private void TeleportObject(MazeObject obj, Vector3 position, Quaternion rotation) {
+        obj.transform.SetPositionAndRotation(position, rotation);
+        VRCObjectSync vrc_sync = obj.gameObject.GetComponent<VRCObjectSync>();
+        if (vrc_sync != null) {
+            vrc_sync.FlagDiscontinuity();
+            vrc_sync.TeleportTo(obj.transform);
+        }
+    }
 
     public bool TryTake(out MazeObject obj, Vector3 position, Quaternion rotation) {
         obj = null;
@@ -67,11 +70,7 @@ public class PoolObjects : UdonSharpBehaviour {
                 obj = item;
 
                 obj.gameObject.SetActive(true);
-                var vrc_sync = obj.gameObject.GetComponent<VRCObjectSync>();
-                if (vrc_sync != null) {
-                    vrc_sync.FlagDiscontinuity();
-                }
-                obj.transform.SetPositionAndRotation(position, rotation);
+                TeleportObject(obj, position, rotation);
 
                 states[i] = true;
                 RequestSerialization();
@@ -86,26 +85,19 @@ public class PoolObjects : UdonSharpBehaviour {
         if (!Networking.IsMaster) return;
         if (!obj.gameObject.activeSelf) return;
 
-        MazeController.MazeUI.UILog($"Return pool object, id: {obj.pool_id} ");
-
-        MazeController.MazeUI.UILog($"- old owner: "
-            + Networking.GetOwner(obj.gameObject).playerId.ToString()
-            + " " + Networking.GetOwner(obj.gameObject).displayName
-        );
+        string log = $"Return pool object, id: {obj.pool_id}, owner: ";
+        log += Networking.GetOwner(obj.gameObject).playerId.ToString() + " " + Networking.GetOwner(obj.gameObject).displayName;
         // вернуть предмет во владение мастера
         Networking.SetOwner(Networking.GetOwner(MazeController.gameObject), obj.gameObject);
-        MazeController.MazeUI.UILog($"- new owner: "
-            + Networking.GetOwner(obj.gameObject).playerId.ToString()
-            + " " + Networking.GetOwner(obj.gameObject).displayName
-        );
+        log += " -> ";
+        log += Networking.GetOwner(obj.gameObject).playerId.ToString() + " " + Networking.GetOwner(obj.gameObject).displayName;
+        MazeController.MazeUI.UILog(log);
 
         states[obj.pool_id] = false;
-        var vrc_sync = obj.gameObject.GetComponent<VRCObjectSync>();
-        if (vrc_sync != null) {
-            vrc_sync.FlagDiscontinuity();
-        }
-        obj.transform.SetPositionAndRotation(new Vector3(0, -10, 0), Quaternion.Euler(0, 0, 0));
+
+        TeleportObject(obj, new Vector3(0, -10, 0), Quaternion.Euler(0, 0, 0));
         obj.gameObject.SetActive(false);
+
         RequestSerialization();
     }
 
