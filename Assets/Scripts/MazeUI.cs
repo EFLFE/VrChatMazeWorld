@@ -16,8 +16,6 @@ public class MazeUI : UdonSharpBehaviour {
 
     private int logLines;
     private string logText;
-    private int curProg;
-    private float maxProg;
 
     public void Init(MazeController controller) {
         loadProgressBarContent.SetActive(false);
