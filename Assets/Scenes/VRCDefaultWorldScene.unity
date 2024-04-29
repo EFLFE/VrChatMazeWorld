@@ -591,7 +591,6 @@ MonoBehaviour:
   CentralZone: {fileID: 1995901748}
   QV_PEN_Settings: {fileID: 1312368321}
   progressText: {fileID: 8768401141443737082}
-  network_event: 
 --- !u!4 &112654836
 Transform:
   m_ObjectHideFlags: 0
