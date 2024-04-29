@@ -209,6 +209,8 @@ public class MazeController : UdonSharpBehaviour {
         syncDataUI.AddText($"- {nameof(mazeChestsAmountGathered)} = {mazeChestsAmountGathered}");
         syncDataUI.AddText($"- {nameof(seed)} = {seed}");
         syncDataUI.AddText($"- {nameof(network_event)} = {network_event}");
+        syncDataUI.AddText("Other:");
+        syncDataUI.AddText($"- lang = {VRCPlayerApi.GetCurrentLanguage()}");
     }
 
     // event (test)
@@ -222,8 +224,14 @@ public class MazeController : UdonSharpBehaviour {
     }
 
     public void UpdateProgressText() {
-        progressText.text = "Bring treasures!" +
-            $"\r\nLevel: {level}" +
-            $"\r\nTreasures: {mazeChestsAmountGathered} / {mazeChestsAmount}";
+        progressText.text = $"Bring treasures!" +
+            $"\r\n Level: {level}" +
+            $"\r\n Treasures: {mazeChestsAmountGathered} / {mazeChestsAmount}";
+
+        if (VRCPlayerApi.GetCurrentLanguage() == "ru") {
+            progressText.text = "Принеси сокровища!" +
+                $"\r\n Уровень: {level}" +
+                $"\r\n Сокровища: {mazeChestsAmountGathered} / {mazeChestsAmount}";
+        }
     }
 }
