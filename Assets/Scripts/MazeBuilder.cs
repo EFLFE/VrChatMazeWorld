@@ -11,7 +11,7 @@ internal enum BuildIterType {
 [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
 public class MazeBuilder : UdonSharpBehaviour {
     public const float ROOMS_OFFSET = 4f;
-    public const float ROOM_SCALE = 1; // 0,1875
+    public const float ROOM_SCALE = 1;
 
     [Header("Rooms")]
     [SerializeField] private Transform mazeContainer;
