@@ -6789,34 +6789,35 @@ MonoBehaviour:
     PrefabModifications: []
     SerializationNodes: []
   _udonSharpBackingUdonBehaviour: {fileID: 1027156426}
+  chestPool: {fileID: 296725506}
+  universalPrefab: {fileID: 163171878969795899, guid: 1f22ec2fba5552849ab4464bd9b5f043,
+    type: 3}
   mazeContainer: {fileID: 578185170}
-  wallPrefabs:
-  - {fileID: 919132149155446097, guid: 6ca3352aa408cf3449ffa88680ae2f56, type: 3}
-  - {fileID: 919132149155446097, guid: 52947f0bf2110c34fbb8c05ddc096cad, type: 3}
-  - {fileID: 919132149155446097, guid: 6824ddae2e72b2e43896b1bea0b9dc5c, type: 3}
-  - {fileID: 919132149155446097, guid: 3f47c27729e2cab45be139d050109e49, type: 3}
-  - {fileID: 919132149155446097, guid: 0abb16e6bbf578c4db3f8fd70ff80359, type: 3}
-  - {fileID: 919132149155446097, guid: f2576c390e85d474fab75b71c5d46ea4, type: 3}
-  - {fileID: 919132149155446097, guid: 16a93d815dc197341b0f607b903b8557, type: 3}
-  - {fileID: 919132149155446097, guid: e00f64957fc52834d896ad69a98408df, type: 3}
-  - {fileID: 919132149155446097, guid: 424ddc94f1822aa4dab7c129cb7e2ef2, type: 3}
-  - {fileID: 919132149155446097, guid: 3d4f471e02fb28941aea878ff14babbe, type: 3}
-  doorPrefab: {fileID: 163171878969795899, guid: 2fd984ee99686ee40bb15a26fe8f4d5f,
-    type: 3}
-  floorPrefab: {fileID: 919132149155446097, guid: 11bc400a854f78846a5c8fc397340f38,
-    type: 3}
-  cornerPrefabs:
-  - {fileID: 2241460406191565827, guid: bb24006ff97c09f4da69aa3cc3c24f38, type: 3}
-  - {fileID: 4976898629553075264, guid: b65fd0052d6850b4797969987866036f, type: 3}
-  - {fileID: 7145658197873208521, guid: 63353cd1bfa705e418e6ba10ec51350c, type: 3}
-  deadendPrefabs:
-  - {fileID: 919132149155446097, guid: 9a4258fa83e24b0439ad98f00246f24b, type: 3}
+  walls:
+  - {fileID: -6281424698479989189, guid: 6ca3352aa408cf3449ffa88680ae2f56, type: 3}
+  - {fileID: 7600354733793498603, guid: 52947f0bf2110c34fbb8c05ddc096cad, type: 3}
+  - {fileID: 7125925254588785975, guid: 6824ddae2e72b2e43896b1bea0b9dc5c, type: 3}
+  - {fileID: -550989797650051609, guid: 3f47c27729e2cab45be139d050109e49, type: 3}
+  - {fileID: 7305389320063831837, guid: 0abb16e6bbf578c4db3f8fd70ff80359, type: 3}
+  - {fileID: -8766839468989445839, guid: 16a93d815dc197341b0f607b903b8557, type: 3}
+  - {fileID: 8138370486785168944, guid: e00f64957fc52834d896ad69a98408df, type: 3}
+  - {fileID: 1239033086771716094, guid: 0c7b87ab2ffb0464a939de3928f02497, type: 3}
+  - {fileID: 5172457886836709913, guid: 424ddc94f1822aa4dab7c129cb7e2ef2, type: 3}
+  - {fileID: 6018880220201159761, guid: 3d4f471e02fb28941aea878ff14babbe, type: 3}
+  - {fileID: 9200090720505334235, guid: 69297af4066c02f42ba7a793abd4ed24, type: 3}
+  - {fileID: -3234992457524538686, guid: 86f2195c9cfe5a64e8e6a08866246178, type: 3}
+  doors:
+  - {fileID: 4196161430825003242, guid: b0bf5fe5311e624429ed163ceb51fbe4, type: 3}
+  - {fileID: -2154953612500603615, guid: 9a4258fa83e24b0439ad98f00246f24b, type: 3}
+  floors:
+  - {fileID: -2634147639830484596, guid: 11bc400a854f78846a5c8fc397340f38, type: 3}
+  - {fileID: -6587542100840358391, guid: 63eac16f6812b3c45a787c30ceeae4d6, type: 3}
+  - {fileID: 1910194057624958710, guid: 836bee9bd9e46c544abf622d8d5dd92e, type: 3}
+  deadends:
+  - {fileID: 6068885569156669, guid: f2576c390e85d474fab75b71c5d46ea4, type: 3}
   ceiling_general: {fileID: 3038483739167293764, guid: 91b46de5846617f46bf07c46b0e39784,
     type: 3}
   ceiling_cave: {fileID: 5439447328683318313, guid: 8242c27f73c0ab24ea8c9ac7b8334714,
-    type: 3}
-  chestPool: {fileID: 296725506}
-  universalPrefab: {fileID: 163171878969795899, guid: 1f22ec2fba5552849ab4464bd9b5f043,
     type: 3}
 --- !u!114 &1027156426
 MonoBehaviour:
@@ -15891,74 +15892,6 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
---- !u!1001 &7065354571485613047
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    serializedVersion: 3
-    m_TransformParent: {fileID: 0}
-    m_Modifications:
-    - target: {fileID: 163171878969795899, guid: 2fd984ee99686ee40bb15a26fe8f4d5f,
-        type: 3}
-      propertyPath: m_Name
-      value: wall_doorway
-      objectReference: {fileID: 0}
-    - target: {fileID: 650879380089978753, guid: 2fd984ee99686ee40bb15a26fe8f4d5f,
-        type: 3}
-      propertyPath: m_LocalPosition.x
-      value: -27.972383
-      objectReference: {fileID: 0}
-    - target: {fileID: 650879380089978753, guid: 2fd984ee99686ee40bb15a26fe8f4d5f,
-        type: 3}
-      propertyPath: m_LocalPosition.y
-      value: -20
-      objectReference: {fileID: 0}
-    - target: {fileID: 650879380089978753, guid: 2fd984ee99686ee40bb15a26fe8f4d5f,
-        type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 6.6983585
-      objectReference: {fileID: 0}
-    - target: {fileID: 650879380089978753, guid: 2fd984ee99686ee40bb15a26fe8f4d5f,
-        type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 650879380089978753, guid: 2fd984ee99686ee40bb15a26fe8f4d5f,
-        type: 3}
-      propertyPath: m_LocalRotation.x
-      value: 0.00000008146034
-      objectReference: {fileID: 0}
-    - target: {fileID: 650879380089978753, guid: 2fd984ee99686ee40bb15a26fe8f4d5f,
-        type: 3}
-      propertyPath: m_LocalRotation.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 650879380089978753, guid: 2fd984ee99686ee40bb15a26fe8f4d5f,
-        type: 3}
-      propertyPath: m_LocalRotation.z
-      value: -0
-      objectReference: {fileID: 0}
-    - target: {fileID: 650879380089978753, guid: 2fd984ee99686ee40bb15a26fe8f4d5f,
-        type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 650879380089978753, guid: 2fd984ee99686ee40bb15a26fe8f4d5f,
-        type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 650879380089978753, guid: 2fd984ee99686ee40bb15a26fe8f4d5f,
-        type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-    m_RemovedGameObjects: []
-    m_AddedGameObjects: []
-    m_AddedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: 2fd984ee99686ee40bb15a26fe8f4d5f, type: 3}
 --- !u!114 &7111575897785925491
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -17020,4 +16953,3 @@ SceneRoots:
   - {fileID: 1385585398}
   - {fileID: 440053771}
   - {fileID: 1653870264}
-  - {fileID: 7065354571485613047}
