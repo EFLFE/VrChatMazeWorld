@@ -1,4 +1,5 @@
-﻿using UdonSharp;
+﻿using System.Collections.Generic;
+using UdonSharp;
 using UnityEngine;
 using VRC.SDKBase;
 
@@ -207,7 +208,8 @@ public class MazeBuilder : UdonSharpBehaviour {
                     ||
                     (cells[x][y] == Cell.DoorExit && neighbor == Cell.DoorEnterance)
                     ) {
-                    obj = Spawn(doors[controller.MazeGenerator.RandomInclusive(0, doors.Length - 1)], x, y, rotation);
+                    obj = Spawn(doors[controller.MazeGenerator.RandomInclusive(0, doors.Length - 1)], x, y, rotation,
+                        "door", false, null, false);
                     obj.name = $"id={ids[x][y]}, type 2A, {debug}";
                 } else {
                     obj = Spawn(walls[GetRandomIndex(walls.Length, 0.5f)], x, y, rotation);
@@ -227,10 +229,6 @@ public class MazeBuilder : UdonSharpBehaviour {
         return controller.MazeGenerator.RandomInclusive(1, length - 1);
     }
 
-    private int GetClockwiseDirection(int dir) {
-        return (dir - 1 + 1) % 4 + 1;
-    }
-
     private void ColorizeFloor(GameObject floor, int id) {
         var floorMesh = (MeshRenderer) floor.GetComponent(typeof(MeshRenderer));
         var matProp = new MaterialPropertyBlock();
@@ -239,10 +237,24 @@ public class MazeBuilder : UdonSharpBehaviour {
         floorMesh.SetPropertyBlock(matProp);
     }
 
-    private GameObject Spawn(Mesh mesh, int x, int y, int rotation, string name = "", bool do_not_offset = false, Transform cutstomContainer = null) {
+    private GameObject Spawn(
+            Mesh mesh, int x, int y, int rotation, string name = "", bool do_not_offset = false, Transform cutstomContainer = null,
+            bool useBoxCollider = true) {
+
         GameObject GO = Instantiate(universalPrefab, cutstomContainer != null ? cutstomContainer : mazeContainer);
         GO.GetComponent<MeshFilter>().sharedMesh = mesh;
-        GO.GetComponent<MeshCollider>().sharedMesh = mesh;
+
+        var boxCollider = GO.GetComponent<BoxCollider>();
+        var meshCollider = GO.GetComponent<MeshCollider>();
+        boxCollider.enabled = useBoxCollider;
+        meshCollider.enabled = !useBoxCollider;
+
+        if (useBoxCollider) {
+            boxCollider.center = mesh.bounds.center;
+            boxCollider.size = mesh.bounds.size;
+        } else {
+            meshCollider.sharedMesh = mesh;
+        }
 
         Vector3 position = GO.transform.position;
         position.x = (x - controller.MazeGenerator.Size / 2) * ROOMS_OFFSET;
