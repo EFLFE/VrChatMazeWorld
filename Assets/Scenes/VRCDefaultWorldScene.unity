@@ -6815,10 +6815,10 @@ MonoBehaviour:
   - {fileID: 1910194057624958710, guid: 836bee9bd9e46c544abf622d8d5dd92e, type: 3}
   deadends:
   - {fileID: 6068885569156669, guid: f2576c390e85d474fab75b71c5d46ea4, type: 3}
-  ceiling_general: {fileID: 3038483739167293764, guid: 91b46de5846617f46bf07c46b0e39784,
-    type: 3}
-  ceiling_cave: {fileID: 5439447328683318313, guid: 8242c27f73c0ab24ea8c9ac7b8334714,
-    type: 3}
+  ceilings:
+  - {fileID: -2634147639830484596, guid: 11bc400a854f78846a5c8fc397340f38, type: 3}
+  - {fileID: 8444914509475954959, guid: c630eb69abf1dcb418a36f41a9661e92, type: 3}
+  - {fileID: 8444914509475954959, guid: 953265eda71f2e144bdb5a41964617ed, type: 3}
 --- !u!114 &1027156426
 MonoBehaviour:
   m_ObjectHideFlags: 2

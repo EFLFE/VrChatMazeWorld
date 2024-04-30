@@ -22,8 +22,9 @@ public class MazeBuilder : UdonSharpBehaviour {
     [SerializeField] private Mesh[] doors;
     [SerializeField] private Mesh[] floors;
     [SerializeField] private Mesh[] deadends;
-    [SerializeField] private GameObject ceiling_general;
-    [SerializeField] private GameObject ceiling_cave;
+    [SerializeField] private Mesh[] ceilings;
+    //[SerializeField] private GameObject ceiling_general;
+    //[SerializeField] private GameObject ceiling_cave;
 
     public bool MazeReady { get; private set; }
 
@@ -134,7 +135,7 @@ public class MazeBuilder : UdonSharpBehaviour {
 
             if (need_to_spawn_floor) {
                 GameObject obj_floor = Spawn(
-                    floors[GetRandomIndex(floors.Length, 0.9f)],
+                    floors[current_id == 1 ? 0 : GetRandomIndex(floors.Length, 0.9f)],
                     x, y, 0,
                     $"floor {current_id}, cell type: {current_cell}",
                     true
@@ -149,37 +150,17 @@ public class MazeBuilder : UdonSharpBehaviour {
         }
         // ------------- next, spawn walls and corners
 
-        /*
+
         // spawn ceiling
-        GameObject ceiling_prefab_to_spawn = null;
-        if (current_room == Room.Cave) {
-            ceiling_prefab_to_spawn = ceiling_cave;
+        if (current_id != 1) {
+            // TODO make admin button to remove all ceilings
+            int rotation = controller.MazeGenerator.RandomInclusive(0, 3) * 90;
+            GameObject GO = Spawn(ceilings[GetRandomIndex(ceilings.Length, 0.75f)], x, y, rotation, "ceiling", true);
+            // поворот для потолочков <(^_^)> =(^_^)=
+            GO.transform.SetPositionAndRotation(GO.transform.position + new Vector3(0, 4, 0), Quaternion.Euler(180, 0, 0));
         }
-        if (current_room == Room.Square || current_room == Room.Turn) {
-            ceiling_prefab_to_spawn = ceiling_general;
-        }
-        if (ceiling_prefab_to_spawn != null) {
-            // дырки в цетре комнат (демо)
-            if (current_id != 1 && x > 0 && y > 0 && x < maze.Size - 1 && y < maze.Size - 1) {
-                if (ids[x - 1][y - 1] != current_id
-                 || ids[x + 0][y - 1] != current_id
-                 || ids[x + 1][y - 1] != current_id
-                 || ids[x - 1][y + 0] != current_id
-                 || ids[x + 1][y + 0] != current_id
-                 || ids[x - 1][y + 1] != current_id
-                 || ids[x + 0][y + 1] != current_id
-                 || ids[x + 1][y + 1] != current_id
-                    ) {
-                    // TODO make admin button to remove all ceilings
-                    int rotation = controller.MazeGenerator.RandomInclusive(0, 3) * 90;
-                    Spawn(ceiling_prefab_to_spawn, x, y, rotation, "ceiling");
-                }
-            }
-        }
-        */
 
-
-        // spawn 2 walls
+        // spawn 2, 3 or 4 walls
         for (int direction = 1; direction <= 4; direction++) {
 
             if (direction == 3 && x > 0) continue;
