@@ -23,6 +23,7 @@ public class MazeBuilder : UdonSharpBehaviour {
     [SerializeField] private GameObject ceiling_general;
     [SerializeField] private GameObject ceiling_cave;
     [SerializeField] private PoolObjects chestPool;
+    [SerializeField] private GameObject universalPrefab;
 
     public bool MazeReady { get; private set; }
 
@@ -132,17 +133,18 @@ public class MazeBuilder : UdonSharpBehaviour {
             }
 
             if (need_to_spawn_floor) {
-                GameObject obj_floor = Spawn(floorPrefab, x, y, 0, $"floor {current_id}, cell type: {current_cell}");
+                GameObject obj_floor = Spawn(floorPrefab, x, y, 0, $"floor {current_id}, cell type: {current_cell}", true);
                 ColorizeFloor(obj_floor, current_id);
             }
         }
 
         // ------------- next, spawn walls and corners
         if (current_id == 0) {
-            return false; // spawn floor only
+            //return false; // spawn floor only
         }
         // ------------- next, spawn walls and corners
 
+        /*
         // spawn ceiling
         GameObject ceiling_prefab_to_spawn = null;
         if (current_room == Room.Cave) {
@@ -169,10 +171,15 @@ public class MazeBuilder : UdonSharpBehaviour {
                 }
             }
         }
+        */
 
 
-        // spawn 4 walls
+        // spawn 2 walls
         for (int direction = 1; direction <= 4; direction++) {
+
+            if (direction == 3 && x > 0) continue;
+            if (direction == 4 && y > 0) continue;
+
             int dx = (direction == 1) ? 1 : (direction == 3) ? -1 : 0;
             int dy = (direction == 2) ? 1 : (direction == 4) ? -1 : 0;
 
@@ -192,6 +199,8 @@ public class MazeBuilder : UdonSharpBehaviour {
                 debug = "in bounds";
             }
 
+            if (current_id == 0 && nearId == 0) continue;
+
             GameObject obj;
             if (current_cell == Cell.DoorDeadEnd && neighbor == Cell.Wall) {
                 int deadend_variant = ids[x][y] % deadendPrefabs.Length;
@@ -199,8 +208,7 @@ public class MazeBuilder : UdonSharpBehaviour {
                 obj.name = $"id={ids[x][y]}, type deadend, variant {deadend_variant}, {debug}";
             } else if (neighbor == Cell.Wall || nearId == 0) {
                 // spawn wall
-                int wall_variant = ids[x][y] % wallPrefabs.Length;
-                obj = Spawn(wallPrefabs[wall_variant], x, y, rotation);
+                obj = Spawn(wallPrefabs[GetWallVariant()], x, y, rotation);
                 obj.name = $"id={ids[x][y]}, type 1, {debug}";
             } else if (nearId > 0 && nearId != ids[x][y]) {
                 // wall or door?
@@ -212,8 +220,7 @@ public class MazeBuilder : UdonSharpBehaviour {
                     obj = Spawn(doorPrefab, x, y, rotation);
                     obj.name = $"id={ids[x][y]}, type 2A, {debug}";
                 } else {
-                    int wall_variant = ids[x][y] % wallPrefabs.Length;
-                    obj = Spawn(wallPrefabs[wall_variant], x, y, rotation);
+                    obj = Spawn(wallPrefabs[GetWallVariant()], x, y, rotation);
                     obj.name = $"id={ids[x][y]}, type 2B, {debug}";
                 }
             } else {
@@ -222,48 +229,12 @@ public class MazeBuilder : UdonSharpBehaviour {
             }
         }
 
-        // спавн уголков только поверх чистых проходов без дверей и только для пещер
-        if (current_cell == Cell.Passage && current_room == Room.Cave) {
-            for (int direction1 = 1; direction1 <= 4; direction1++) {
-                int dx1 = (direction1 == 1) ? 1 : (direction1 == 3) ? -1 : 0;
-                int dy1 = (direction1 == 2) ? 1 : (direction1 == 4) ? -1 : 0;
-
-                int rotation = 0;
-                // не ругайте меня пж
-                if (direction1 == 1) rotation = 90;
-                if (direction1 == 2) rotation = 0;
-                if (direction1 == 3) rotation = 270;
-                if (direction1 == 4) rotation = 180;
-
-                Cell near1_cell = Cell.Wall;
-                int near1_id = 0;
-                if (y + dy1 >= 0 && y + dy1 < maze.Size && x + dx1 >= 0 && x + dx1 < maze.Size) {
-                    near1_cell = cells[x + dx1][y + dy1];
-                    near1_id = ids[x + dx1][y + dy1];
-                }
-
-                int direction2 = GetClockwiseDirection(direction1);
-                int dx2 = (direction2 == 1) ? 1 : (direction2 == 3) ? -1 : 0;
-                int dy2 = (direction2 == 2) ? 1 : (direction2 == 4) ? -1 : 0;
-
-                //UnityEngine.Debug.Log($"dir: {direction1} -> {direction2}");
-
-                Cell near2_cell = Cell.Wall;
-                int near2_id = 0;
-                if (y + dy2 >= 0 && y + dy2 < maze.Size && x + dx2 >= 0 && x + dx2 < maze.Size) {
-                    near2_cell = cells[x + dx2][y + dy2];
-                    near2_id = ids[x + dx2][y + dy2];
-                }
-
-                if (current_id != near1_id && current_id != near2_id) {
-                    int corner_variant = ids[x][y] % cornerPrefabs.Length;
-                    GameObject obj333 = Spawn(cornerPrefabs[corner_variant], x, y, rotation);
-                    obj333.name = $"corner={ids[x][y]}";
-                }
-            }
-        }
-
         return true;
+    }
+
+    private int GetWallVariant() {
+        if (controller.MazeGenerator.RandomInclusive(0, 1) == 0) return 0;
+        return controller.MazeGenerator.RandomInclusive(1, wallPrefabs.Length - 1);
     }
 
     private int GetClockwiseDirection(int dir) {
@@ -278,13 +249,27 @@ public class MazeBuilder : UdonSharpBehaviour {
         floorMesh.SetPropertyBlock(matProp);
     }
 
-    private GameObject Spawn(GameObject prefab, int x, int y, int rotation, string name = "") {
-        GameObject GO = Instantiate(prefab, mazeContainer);
+    private GameObject Spawn(GameObject prefab, int x, int y, int rotation, string name = "", bool do_not_offset = false) {
+        //GameObject GO = Instantiate(prefab, mazeContainer);
+        // GO.AddComponent(typeof(MeshCollider)); // no way
+
+        GameObject GO = Instantiate(universalPrefab, mazeContainer);
+        GO.GetComponent<MeshFilter>().sharedMesh = prefab.GetComponent<MeshFilter>().sharedMesh;
+        GO.GetComponent<MeshCollider>().sharedMesh = prefab.GetComponent<MeshFilter>().sharedMesh;
+
         Vector3 position = GO.transform.position;
         position.x = (x - controller.MazeGenerator.Size / 2) * ROOMS_OFFSET;
         position.z = (y - controller.MazeGenerator.Size / 2) * ROOMS_OFFSET;
         position.y = 0;
-        GO.transform.SetPositionAndRotation(position, Quaternion.Euler(-90, rotation, 0));
+
+        if (!do_not_offset) {
+            if (rotation == 0) position.z += 2;
+            if (rotation == 90) position.x += 2;
+            if (rotation == 180) position.z -= 2;
+            if (rotation == 270) position.x -= 2;
+        }
+
+        GO.transform.SetPositionAndRotation(position, Quaternion.Euler(0, rotation, 0));
         GO.transform.localScale = new Vector3(ROOM_SCALE, ROOM_SCALE, ROOM_SCALE);
         GO.name = name;
         buildLeft--;
