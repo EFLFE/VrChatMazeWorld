@@ -17,14 +17,13 @@ public class MazeBuilder : UdonSharpBehaviour {
     [SerializeField] private PoolObjects chestPool;
     [SerializeField] private GameObject universalPrefab;
     [SerializeField] private Transform mazeContainer;
+    [SerializeField] private Transform mazeCeilingContainer;
     [Header("Rooms")]
     [SerializeField] private Mesh[] walls;
     [SerializeField] private Mesh[] doors;
     [SerializeField] private Mesh[] floors;
     [SerializeField] private Mesh[] deadends;
     [SerializeField] private Mesh[] ceilings;
-    //[SerializeField] private GameObject ceiling_general;
-    //[SerializeField] private GameObject ceiling_cave;
 
     public bool MazeReady { get; private set; }
 
@@ -155,7 +154,12 @@ public class MazeBuilder : UdonSharpBehaviour {
         if (current_id != 1) {
             // TODO make admin button to remove all ceilings
             int rotation = controller.MazeGenerator.RandomInclusive(0, 3) * 90;
-            GameObject GO = Spawn(ceilings[GetRandomIndex(ceilings.Length, 0.75f)], x, y, rotation, "ceiling", true);
+            GameObject GO = Spawn(
+                ceilings[GetRandomIndex(ceilings.Length, 0.75f)],
+                x, y, rotation,
+                "ceiling",
+                true,
+                mazeCeilingContainer);
             // поворот для потолочков <(^_^)> =(^_^)=
             GO.transform.SetPositionAndRotation(GO.transform.position + new Vector3(0, 4, 0), Quaternion.Euler(180, 0, 0));
         }
@@ -235,14 +239,10 @@ public class MazeBuilder : UdonSharpBehaviour {
         floorMesh.SetPropertyBlock(matProp);
     }
 
-    private GameObject Spawn(Mesh mesh, int x, int y, int rotation, string name = "", bool do_not_offset = false) {
-        //GameObject GO = Instantiate(prefab, mazeContainer);
-        // GO.AddComponent(typeof(MeshCollider)); // no way
-
-        GameObject GO = Instantiate(universalPrefab, mazeContainer);
+    private GameObject Spawn(Mesh mesh, int x, int y, int rotation, string name = "", bool do_not_offset = false, Transform cutstomContainer = null) {
+        GameObject GO = Instantiate(universalPrefab, cutstomContainer != null ? cutstomContainer : mazeContainer);
         GO.GetComponent<MeshFilter>().sharedMesh = mesh;
         GO.GetComponent<MeshCollider>().sharedMesh = mesh;
-
 
         Vector3 position = GO.transform.position;
         position.x = (x - controller.MazeGenerator.Size / 2) * ROOMS_OFFSET;

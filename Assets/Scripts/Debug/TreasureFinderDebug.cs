@@ -3,6 +3,7 @@ using UnityEngine;
 using VRC.SDKBase;
 using VRC.Udon;
 
+[UdonBehaviourSyncMode(BehaviourSyncMode.Manual)]
 public class TreasureFinderDebug : UdonSharpBehaviour {
     [SerializeField] private Transform poolsOfTreasures;
     [SerializeField] private GameObject lightPrefab;
