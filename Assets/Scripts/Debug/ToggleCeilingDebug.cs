@@ -4,8 +4,12 @@ using UnityEngine;
 [UdonBehaviourSyncMode(BehaviourSyncMode.Manual)]
 public class ToggleCeilingDebug : UdonSharpBehaviour {
     [SerializeField] private Transform mazeCeilingContainer;
+    private bool isVisibleState;
 
-    [UdonSynced] private bool isVisibleState;
+    public override void Interact() {
+        base.Interact();
+        SwitchCeilingVisible();
+    }
 
     public void SetCeilingsVisible(bool isVisible) {
         isVisibleState = isVisible;
@@ -16,10 +20,5 @@ public class ToggleCeilingDebug : UdonSharpBehaviour {
         isVisibleState = !mazeCeilingContainer.gameObject.activeSelf;
         SetCeilingsVisible(isVisibleState);
         RequestSerialization();
-    }
-
-    public override void OnDeserialization() {
-        base.OnDeserialization();
-        SetCeilingsVisible(isVisibleState);
     }
 }
