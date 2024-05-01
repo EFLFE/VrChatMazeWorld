@@ -43,6 +43,10 @@ public class MazeBuilder : UdonSharpBehaviour {
             GameObject child = mazeContainer.GetChild(i).gameObject;
             GameObject.Destroy(child, 0.1f);
         }
+        for (int i = mazeCeilingContainer.childCount - 1; i >= 0; --i) {
+            GameObject child = mazeCeilingContainer.GetChild(i).gameObject;
+            GameObject.Destroy(child, 0.1f);
+        }
         chestPool.ReturnAll();
         iter = 0;
         buildLeft = 0;
