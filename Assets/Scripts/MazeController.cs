@@ -45,6 +45,8 @@ public class MazeController : UdonSharpBehaviour {
     public PoolObjects GetChestPool { get => chestPool; }
     public int GetChestsAmount => mazeChestsAmount;
 
+    [SerializeField] private AudioSource[] next_level_variants;
+
     // called only on late-joiners (not master of this object)
     public override void OnDeserialization() {
         MazeUI.UILog(
@@ -112,6 +114,11 @@ public class MazeController : UdonSharpBehaviour {
         );
 
         Build();
+
+        if (level > 1) {
+            int next_level_variant_index = level % next_level_variants.Length;
+            next_level_variants[next_level_variant_index].Play();
+        }
     }
 
     public void Build() {
