@@ -8843,6 +8843,11 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 196403039553977187, guid: 1411ad6638aa9d948b1a4b70d0684bb5,
+        type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: a67ab7cf373f7614eae44e19709ea514, type: 2}
     - target: {fileID: 1139310583267873086, guid: 1411ad6638aa9d948b1a4b70d0684bb5,
         type: 3}
       propertyPath: serializedProgramAsset
@@ -16036,7 +16041,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 03e13d7bbd6ab4e4dbe1d5f5aa7f75a6, type: 2}
+  - {fileID: 2100000, guid: a67ab7cf373f7614eae44e19709ea514, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -16223,9 +16228,9 @@ MonoBehaviour:
   - {fileID: 2100000, guid: e01134920adbcf549ac7f52ceeb583a2, type: 2}
   - {fileID: 2100000, guid: 56778de2f4060f14fb06bc8cba7e30b7, type: 2}
   - {fileID: 2100000, guid: 5b91c5c74862dba4d9fc2e8ae3e07b70, type: 2}
-  - {fileID: 2100000, guid: 03e13d7bbd6ab4e4dbe1d5f5aa7f75a6, type: 2}
   - {fileID: 10303, guid: 0000000000000000f000000000000000, type: 0}
   - {fileID: 2100000, guid: c815f7613a04b724089c206857e57c6a, type: 2}
+  - {fileID: 2100000, guid: a67ab7cf373f7614eae44e19709ea514, type: 2}
   - {fileID: 2100000, guid: 4d67ee93926c00243bd0446f92f73578, type: 2}
   LightMapsNear: []
   LightMapsFar: []
