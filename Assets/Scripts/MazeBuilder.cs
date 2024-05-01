@@ -148,15 +148,8 @@ public class MazeBuilder : UdonSharpBehaviour {
             }
         }
 
-        // ------------- next, spawn walls and corners
-        if (current_id == 0) {
-            //return false; // spawn floor only
-        }
-        // ------------- next, spawn walls and corners
-
-
-        // spawn ceiling
-        if (current_id != 1) {
+        // spawn ceiling everywhere except start room and walls
+        if (current_id > 1) {
             // TODO make admin button to remove all ceilings
             int rotation = controller.MazeGenerator.RandomInclusive(0, 3) * 90;
             GameObject GO = Spawn(
