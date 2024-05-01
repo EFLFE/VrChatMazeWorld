@@ -165,9 +165,6 @@ public class MazeBuilder : UdonSharpBehaviour {
         // spawn 2, 3 or 4 walls
         for (int direction = 1; direction <= 4; direction++) {
 
-            if (direction == 3 && x > 0) continue;
-            if (direction == 4 && y > 0) continue;
-
             int dx = (direction == 1) ? 1 : (direction == 3) ? -1 : 0;
             int dy = (direction == 2) ? 1 : (direction == 4) ? -1 : 0;
 
@@ -186,6 +183,22 @@ public class MazeBuilder : UdonSharpBehaviour {
                 nearId = ids[x + dx][y + dy];
                 debug = "in bounds";
             }
+
+            // спавн стен для первой комнаты на втором этаже
+            if ((current_id == 1 && nearId != 1)) {
+                // spawn wall in air
+                GameObject wall2;
+                wall2 = Spawn(walls[0], x, y, rotation);
+                wall2.name = $"id={ids[x][y]}, type 2NDFLOOR, {debug}";
+                wall2.transform.SetPositionAndRotation(
+                    wall2.transform.position + new Vector3(0, 4, 0),
+                    wall2.transform.rotation
+                );
+            }
+
+
+            if (direction == 3 && x > 0) continue;
+            if (direction == 4 && y > 0) continue;
 
             if (current_id == 0 && nearId == 0) continue;
 
