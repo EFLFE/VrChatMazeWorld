@@ -7,9 +7,14 @@ using VRC.Udon;
 public class TreasureFinderDebug : UdonSharpBehaviour {
     [SerializeField] private Transform poolsOfTreasures;
     [SerializeField] private GameObject lightPrefab;
-    [SerializeField] private GameObject toggleObj;
 
     private GameObject[] lightsArray;
+    private bool state = false;
+
+    public override void Interact() {
+        if (state) Hide(); else Show();
+        state = !state;
+    }
 
     private void Start() {
         lightsArray = new GameObject[0];
@@ -21,7 +26,6 @@ public class TreasureFinderDebug : UdonSharpBehaviour {
 
         int count = poolsOfTreasures.childCount;
         lightsArray = new GameObject[count];
-        toggleObj.SetActive(false);
 
         for (int i = 0; i < count; i++) {
             Transform treasureTran = poolsOfTreasures.GetChild(i);
@@ -29,6 +33,13 @@ public class TreasureFinderDebug : UdonSharpBehaviour {
             lightsArray[i] = light;
             light.SetActive(true);
         }
+    }
+
+    public void Hide() {
+        for (int i = 0; i < lightsArray.Length; i++) {
+            GameObject.Destroy(lightsArray[i]);
+        }
+        lightsArray = new GameObject[0];
     }
 
     private void Update() {
