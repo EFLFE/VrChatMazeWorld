@@ -78,7 +78,7 @@ public class MazeBuilder : UdonSharpBehaviour {
             if (buildIterType == BuildIterType.BaseLevel) {
                 iter++;
 
-                if (iter < maze.Size * maze.Size) {
+                if (iter <= maze.Size * maze.Size) {
                     controller.Utils.NextSpiral(out int x, out int y);
                     SpawnCell(x, y);
                     controller.MazeUI.SetProgressValue((float) iter / (maze.Size * maze.Size));
@@ -141,7 +141,7 @@ public class MazeBuilder : UdonSharpBehaviour {
                 GameObject obj_floor = Spawn(
                     floors[current_id == 1 ? 0 : GetRandomIndex(floors.Length, 0.9f)],
                     x, y, 0,
-                    $"floor {current_id}, cell type: {current_cell}",
+                    $"floor {current_id}, cell type: {current_cell}, xy: {x} {y}",
                     true
                 );
                 ColorizeFloor(obj_floor, current_id);
