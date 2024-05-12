@@ -102,9 +102,9 @@ public class MazeController : UdonSharpBehaviour {
 
     private void NextLevel() {
 
-        mazeSize = 19 + level * 2;
-        mazeRoomsAmount = 15 + 5 * level;
-        mazeChestsAmount = 1 + level;
+        mazeSize = 39 + level * 2;
+        mazeRoomsAmount = 30 + 5 * level;
+        mazeChestsAmount = 4;
 
         MazeUI.UILog(
             $"NextLevel, new level = {level} "
@@ -130,7 +130,7 @@ public class MazeController : UdonSharpBehaviour {
         ClearQVPens();
         genStopwatch.Restart();
         MazeUI.UILog($"MazeGenerator Init, mazeSize: {mazeSize}, mazeRoomsAmount: {mazeRoomsAmount}, mazeChestsAmount: {mazeChestsAmount}");
-        MazeGenerator.Init(seed, mazeSize, mazeRoomsAmount, mazeChestsAmount);
+        MazeGenerator.Init(seed, mazeSize, mazeRoomsAmount, mazeChestsAmount, MazeType.Tree);
         MazeBuilder.Init(this);
         generator_is_ready = false;
 
@@ -138,6 +138,7 @@ public class MazeController : UdonSharpBehaviour {
             maps[i].Clear();
         }
     }
+
 
     // local (not-network) event for master only
     public void OnTreasureGathered() {

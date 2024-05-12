@@ -1,4 +1,5 @@
-﻿using System;
+﻿using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.X500;
+using System;
 using System.Runtime.CompilerServices;
 using UdonSharp;
 using UnityEngine;
@@ -17,6 +18,11 @@ public enum Room {
     Square,
     Cave,
     Turn
+}
+
+public enum MazeType {
+    Snail,
+    Tree
 }
 
 [RequireComponent(typeof(UdonRandom))]
@@ -38,6 +44,7 @@ public class MazeGenerator : UdonSharpBehaviour {
 
     private int size;
     private int max_rooms;
+    private MazeType maze_type;
 
     private int[][] ids;
     private Cell[][] cells;
@@ -100,12 +107,13 @@ public class MazeGenerator : UdonSharpBehaviour {
     }
 
 
-    public void Init(int seed, int size, int rooms, int chests) {
+    public void Init(int seed, int size, int rooms, int chests, MazeType maze_type) {
         this.seed = seed;
         udonRandom.SetSeed(seed);
         //rnd = new Random(seed);
         this.size = size;
         this.max_rooms = rooms;
+        this.maze_type = maze_type;
 
         cache_cells_x = new int[rooms + 1][];
         cache_cells_y = new int[rooms + 1][];
@@ -117,7 +125,7 @@ public class MazeGenerator : UdonSharpBehaviour {
         possible_doors2_head = 0;
         possible_doors2_tail = 0;
 
-        this.rooms = new Room[rooms];
+        this.rooms = new Room[rooms + chests];
 
         ids = new int[size][];
         for (int i = 0; i < size; i++) ids[i] = new int[size];
@@ -136,6 +144,19 @@ public class MazeGenerator : UdonSharpBehaviour {
         chests_y = new int[chests];
 
         GenerateFirstRoom();
+
+        int halfSize = size / 2;
+
+        if (maze_type == MazeType.Snail) {
+            TryToSpawnPossibleDoor(halfSize + 0, halfSize - 2, 0);
+            TryToSpawnPossibleDoor(halfSize + 2, halfSize + 0, 1);
+            TryToSpawnPossibleDoor(halfSize + 0, halfSize + 2, 2);
+            TryToSpawnPossibleDoor(halfSize - 2, halfSize + 0, 3);
+        } else if (maze_type == MazeType.Tree) {
+            TryToSpawnPossibleDoor(halfSize + 0, halfSize - 2, 0);
+            tree_branch_iterator1 = 0;
+            tree_branch_iterator2 = 0;
+        }
     }
 
 
@@ -157,92 +178,167 @@ public class MazeGenerator : UdonSharpBehaviour {
         }
     }
 
+    /** make central room 5 by 5 with no doors yet */
     public void GenerateFirstRoom() {
-        // make central room 5 by 5 with 4 doors
         current_id = 1;
         int halfSize = size / 2;
-
         for (int x = halfSize - 2; x <= halfSize + 2; x++) {
             for (int y = halfSize - 2; y <= halfSize + 2; y++) {
                 ids[x][y] = 1;
                 cells[x][y] = Cell.Passage;
             }
         }
-        cells[halfSize - 2][halfSize] = Cell.DoorEnterance;
-        cells[halfSize + 2][halfSize] = Cell.DoorEnterance;
-        cells[halfSize][halfSize - 2] = Cell.DoorEnterance;
-        cells[halfSize][halfSize + 2] = Cell.DoorEnterance;
-
-        cells[halfSize - 3][halfSize] = Cell.DoorExit;
-        cells[halfSize + 3][halfSize] = Cell.DoorExit;
-        cells[halfSize][halfSize - 3] = Cell.DoorExit;
-        cells[halfSize][halfSize + 3] = Cell.DoorExit;
-
-        PossibleDoorsPushToTail(halfSize + 0, halfSize - 3, 0);
-        PossibleDoorsPushToTail(halfSize + 3, halfSize + 0, 1);
-        PossibleDoorsPushToTail(halfSize + 0, halfSize + 3, 2);
-        PossibleDoorsPushToTail(halfSize - 3, halfSize + 0, 3);
-
         current_id++;
     }
 
     public bool Generate() {
+        if (maze_type == MazeType.Snail) {
+            return GenerateSnail();
+        } else if (maze_type == MazeType.Tree) {
+            return GenerateTree();
+        }
+        return true;
+    }
+
+    public bool GenerateSnail() {
         ReSeed();
-        int steps = 1;
-        while (PossibleDoorsAmont() > 0 && steps > 0 && current_id < max_rooms) {
-            steps--;
+        if (PossibleDoorsAmont() > 0 && current_id < max_rooms) {
             PossibleDoorsPopFromHead(out int x, out int y, out int d);
             if (TryToGenerateRoom(x, y, d)) {
                 current_id++;
             }
+            return false;
+        }
 
-            //ShowInConsole();
-            //Console.ReadLine();
+        GenerateSnailFinish();
+        return true;
+    }
 
-            // finishing
-            if (current_id >= max_rooms) {
-                // remove all possible doors
-                while (PossibleDoorsAmont() > 0) {
-                    PossibleDoorsPopFromHead(out x, out y, out d);
-                    GetDirectionsVector(d, out int dx, out int dy);
-                    if (ids[x][y] == 0) {
-                        cells[x][y] = Cell.Wall;
-                        cells[x - dx][y - dy] = Cell.DoorDeadEnd;
-                    } else {
-                        cells[x][y] = Cell.Passage;
-                        cells[x - dx][y - dy] = Cell.Passage;
-                    }
-                }
+    public void GenerateSnailFinish() {
+        // remove all possible doors
+        RemoveAllUnusedDoors();
 
-                // spawn final chests
-                for (int i = 0; i < chests_amount; i++) {
-                    int room_id = max_rooms - 1 - i * 4;
-                    GetRandomCellFromRoomByID(room_id, out int room_x, out int room_y);
-                    chests_x[i] = room_x;
-                    chests_y[i] = room_y;
-                    if (cells[room_x][room_y] == Cell.Hole) {
-                        cells[room_x][room_y] = Cell.Passage;
+        // spawn final chests
+        for (int i = 0; i < chests_amount; i++) {
+            int room_id = current_id - 1 - i * 4;
+            GetRandomCellFromRoomByID(room_id, out int room_x, out int room_y);
+            chests_x[i] = room_x;
+            chests_y[i] = room_y;
+            if (cells[room_x][room_y] == Cell.Hole) {
+                cells[room_x][room_y] = Cell.Passage;
+            }
+        }
+    }
+
+    public void RemoveAllUnusedDoors() {
+        while (PossibleDoorsAmont() > 0) {
+            PossibleDoorsPopFromHead(out int x, out int y, out int d);
+            GetDirectionsVector(d, out int dx, out int dy);
+            if (ids[x][y] == 0) {
+                cells[x][y] = Cell.Wall;
+                cells[x - dx][y - dy] = Cell.DoorDeadEnd;
+            } else {
+                cells[x][y] = Cell.Passage;
+                cells[x - dx][y - dy] = Cell.Passage;
+            }
+        }
+    }
+
+    private int tree_branch_length1 = 10; // длинна ветки
+    private int tree_branch_iterator1 = 0; // текущий итератор вдоль ветки (не может превышать длинну ветки)
+
+    private int tree_branch_length2 = 4; // длинна микро-ветки
+    private int tree_branch_iterator2 = 0; // текущий итератор вдоль микро-ветки (не может превышать длинну ветки)
+
+    public bool GenerateTree() {
+        ReSeed();
+
+        if (current_id < max_rooms) {
+
+            if (PossibleDoorsAmont() == 0) {
+                // в прошлых циклах дверь не заспавнилась, ищем новую
+                int possible_room_id = current_id - 1;
+                while (TryToSpawnRandomDoorsInRoomByID(possible_room_id, 1) == 0) {
+                    possible_room_id--;
+                    // подушка безопасности
+                    if (possible_room_id <= 1) {
+                        GenerateTreeFinish();
+                        return true;
                     }
                 }
             }
+
+            PossibleDoorsPopFromHead(out int x, out int y, out int d);
+
+            if (TryToGenerateRoomForTree(x, y, d)) {
+                tree_branch_iterator1++;
+                tree_branch_iterator2++;
+                if (tree_branch_iterator1 >= tree_branch_length1) {
+                    TryToSpawnRandomDoorsInRoomByID(current_id - 1 - (tree_branch_length1 / 2), 1);
+                    tree_branch_iterator1 = 0;
+                } else if (tree_branch_iterator2 >= tree_branch_length2) {
+                    TryToSpawnRandomDoorsInRoomByID(current_id - 1 - (tree_branch_length2 / 2), 1);
+                    tree_branch_iterator2 = 0;
+                } else {
+                    TryToSpawnRandomDoorsInRoomByID(current_id - 1, 1);
+                }
+                return false;
+            }
+            // ничего не удалось сгенерировать? ничего страшного, в следующем цикле извлечется следующая дверь (наверное)
+            return false;
         }
 
-        bool genIsReady = current_id >= max_rooms || PossibleDoorsAmont() <= 0;
-        return genIsReady;
+        GenerateTreeFinish();
+        return true;
     }
 
-    private void TryToSpawnRandomDoorsInRoomByID(int room_id) {
-        int min_amount_of_doors = current_id <= 5 ? 3 : 2;
-        int amount_of_doors = RandomInclusive(min_amount_of_doors, 4);
+    bool TryToGenerateRoomForTree(int x, int y, int d) {
+        if (TryToGenerateRoomSquare(x, y, d)) {
+            rooms[current_id] = Room.Square;
+            current_id++;
+            return true;
+        }
+
+        if (TryToGenerateRoomCave(x, y, d)) {
+            rooms[current_id] = Room.Cave;
+            current_id++;
+            return true;
+        }
+        return false;
+    }
+
+    public void GenerateTreeFinish() {
+        RemoveAllUnusedDoors();
+
+        // spawn final chests
+        for (int i = 0; i < chests_amount; i++) {
+            int room_id = current_id - 1 - i;
+            GetRandomCellFromRoomByID(room_id, out int room_x, out int room_y);
+            chests_x[i] = room_x;
+            chests_y[i] = room_y;
+            if (cells[room_x][room_y] == Cell.Hole) {
+                cells[room_x][room_y] = Cell.Passage;
+            }
+        }
+    }
+
+
+
+    private int TryToSpawnRandomDoorsInRoomByID(int room_id, int amount = 0) {
+        int amount_of_doors = amount;
+        if (amount_of_doors == 0) {
+            int min_amount_of_doors = current_id <= 5 ? 3 : 2;
+            amount_of_doors = RandomInclusive(min_amount_of_doors, 4);
+        }
+        int amount_of_doors_spawned = 0;
         for (int i = 0; i < amount_of_doors; i++) {
             bool result = TryToGetRandomCellFromRoomByIDOnTheEdge(room_id, out int door_x, out int door_y, out int door_d);
             if (!result) break;
-            GetDirectionsVector(door_d, out int dx, out int dy);
-
-            cells[door_x][door_y] = Cell.DoorEnterance;
-            cells[door_x + dx][door_y + dy] = Cell.DoorExit;
-            PossibleDoorsPushToTail(door_x + dx, door_y + dy, (door_d));
+            if (TryToSpawnPossibleDoor(door_x, door_y, door_d)) {
+                amount_of_doors_spawned++;
+            }
         }
+        return amount_of_doors_spawned;
     }
 
     private bool TryToGenerateRoom(int start_x, int start_y, int forward_direction) {
@@ -255,18 +351,21 @@ public class MazeGenerator : UdonSharpBehaviour {
             // 20% chance
             if (TryToGenerateRoomTurn(start_x, start_y, forward_direction)) {
                 rooms[current_id] = Room.Turn;
+                TryToSpawnRandomDoorsInRoomByID(current_id);
                 return true;
             }
         } else {
             // 80% chance
             if (TryToGenerateRoomSquare(start_x, start_y, forward_direction)) {
                 rooms[current_id] = Room.Square;
+                TryToSpawnRandomDoorsInRoomByID(current_id);
                 return true;
             }
         }
 
         if (TryToGenerateRoomCave(start_x, start_y, forward_direction)) {
             rooms[current_id] = Room.Cave;
+            TryToSpawnRandomDoorsInRoomByID(current_id);
             return true;
         }
         return false;
@@ -372,6 +471,7 @@ public class MazeGenerator : UdonSharpBehaviour {
                 }
             }
 
+            /*
             TryToSpawnPossibleDoor(
                 dx2 + end_x,
                 dy2 + end_y,
@@ -379,6 +479,7 @@ public class MazeGenerator : UdonSharpBehaviour {
                 dy2 + end_y + dy2,
                 dir2
             );
+            */
 
             return true;
 
@@ -386,6 +487,11 @@ public class MazeGenerator : UdonSharpBehaviour {
         return false;
     }
 
+    /**
+     * Пытается заспавнить дверь:
+     * в x1 y1 = вход
+     * в x2 y2 = выход + запись в стак будущих дверей
+     */
     bool TryToSpawnPossibleDoor(int x1, int y1, int x2, int y2, int dir) {
         if (
             x1 < 0 || x1 >= size
@@ -400,6 +506,16 @@ public class MazeGenerator : UdonSharpBehaviour {
         cells[x2][y2] = Cell.DoorExit;
         PossibleDoorsPushToTail(x2, y2, (dir));
         return true;
+    }
+
+    /**
+     * Пытается заспавнить дверь:
+     * в указанных координатах = вход
+     * в указанных координатах + смещение вдоль направления = выход + запись в стак будущих дверей
+     */
+    bool TryToSpawnPossibleDoor(int x, int y, int dir) {
+        GetDirectionsVector(dir, out int dx, out int dy);
+        return TryToSpawnPossibleDoor(x, y, x + dx, y + dy, dir);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -473,7 +589,7 @@ public class MazeGenerator : UdonSharpBehaviour {
                 }
             }
 
-            TryToSpawnRandomDoorsInRoomByID(current_id);
+
 
             return true;
         }
@@ -518,7 +634,7 @@ public class MazeGenerator : UdonSharpBehaviour {
                 amount_of_cells_generated++;
             }
         }
-        TryToSpawnRandomDoorsInRoomByID(current_id);
+
         return true;
     }
 

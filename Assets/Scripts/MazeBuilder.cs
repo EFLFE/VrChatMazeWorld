@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using UdonSharp;
 using UnityEngine;
+using UnityEngine.InputSystem.XR;
 using VRC.SDKBase;
 
 internal enum BuildIterType {
@@ -112,6 +113,8 @@ public class MazeBuilder : UdonSharpBehaviour {
     }
 
     private bool SpawnCell(int x, int y) {
+        //controller.MazeUI.UILog($"SpawnCell XY = {x}, {y}");
+
         MazeGenerator maze = controller.MazeGenerator;
         Cell[][] cells = maze.Cells;
         int[][] ids = maze.Ids;
