@@ -27,6 +27,10 @@ public class MazeBuilder : UdonSharpBehaviour {
     [SerializeField] private Mesh[] floors;
     [SerializeField] private Mesh[] deadends;
     [SerializeField] private Mesh[] ceilings;
+    [Header("Decor")]
+    [SerializeField] private Mesh[] deco1;
+    [SerializeField] private Mesh[] deco2;
+    [SerializeField] private Mesh[] deco3;
 
     public bool MazeReady { get; private set; }
 
@@ -235,6 +239,32 @@ public class MazeBuilder : UdonSharpBehaviour {
             }
         }
 
+        if (x > 0 && x < controller.MazeGenerator.Size - 1 && y > 0 && y < controller.MazeGenerator.Size - 1) {
+            if (current_id > 1 && current_room == Room.Square) {
+                bool in_middle = true;
+                for (int d = 0; d <= 3; d++) {
+                    controller.MazeGenerator.GetDirectionsVector(d, out int dx, out int dy);
+                    if (ids[x + dx][y + dy] != current_id) {
+                        in_middle = false;
+                        break;
+                    }
+                }
+                if (in_middle) {
+                    // мы находимся в центре квадратной комнаты: можно спавнить декорации
+                    int deco_type = RandomInclusive(1, 3);
+                    if (deco_type == 1) {
+                        Spawn(deco1[RandomInclusive(0, deco1.Length - 1)], x, y, RandomInclusive(0, 360 - 1), "deco1", true);
+                    }
+                    if (deco_type == 2) {
+                        Spawn(deco2[RandomInclusive(0, deco2.Length - 1)], x, y, RandomInclusive(0, 3) * 90, "deco2", true);
+                    }
+                    if (deco_type == 3) {
+                        Spawn(deco3[RandomInclusive(0, deco3.Length - 1)], x, y, RandomInclusive(0, 7) * 45, "deco3", true);
+                    }
+                }
+            }
+        }
+
         return true;
     }
 
@@ -272,6 +302,7 @@ public class MazeBuilder : UdonSharpBehaviour {
 
         var boxCollider = GO.GetComponent<BoxCollider>();
         var meshCollider = GO.GetComponent<MeshCollider>();
+        //useBoxCollider = false; // test
         boxCollider.enabled = useBoxCollider;
         meshCollider.enabled = !useBoxCollider;
 

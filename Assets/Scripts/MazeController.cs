@@ -249,12 +249,12 @@ public class MazeController : UdonSharpBehaviour {
 
     public void UpdateProgressText() {
         progressText.text = $"Bring treasures!" +
-            $"\r\n Level: {level} ({mazeRoomsAmount} ▧)" +
+            $"\r\n Level: {level} ({mazeRoomsAmount})" +
             $"\r\n Treasures: {mazeChestsAmountGathered} / {mazeChestsAmount}";
 
         if (VRCPlayerApi.GetCurrentLanguage() == "ru") {
             progressText.text = "Принеси сокровища!" +
-                $"\r\n Уровень: {level} ({mazeRoomsAmount} ▧)" +
+                $"\r\n Уровень: {level} ({mazeRoomsAmount})" +
                 $"\r\n Сокровища: {mazeChestsAmountGathered} / {mazeChestsAmount}";
         }
     }
