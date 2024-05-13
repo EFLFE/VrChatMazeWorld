@@ -598,6 +598,7 @@ MonoBehaviour:
   - {fileID: 1767624570}
   - {fileID: 1220117763}
   - {fileID: 894091551}
+  personal_map: {fileID: 1322962922}
 --- !u!4 &112654836
 Transform:
   m_ObjectHideFlags: 0
