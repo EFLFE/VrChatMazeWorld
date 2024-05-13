@@ -21,6 +21,7 @@ public class MazeBuilder : UdonSharpBehaviour {
     [SerializeField] private Transform mazeContainer;
     [SerializeField] private Transform mazeCeilingContainer;
     [Header("Rooms")]
+    private const int walls_simple_count = 3;
     [SerializeField] private Mesh[] walls;
     [SerializeField] private Mesh[] doors;
     [SerializeField] private Mesh[] floors;
@@ -191,7 +192,7 @@ public class MazeBuilder : UdonSharpBehaviour {
             if ((current_id == 1 && nearId != 1)) {
                 // spawn wall in air
                 GameObject wall2;
-                wall2 = Spawn(walls[0], x, y, rotation);
+                wall2 = Spawn(walls[GetRandomIndexOfWall()], x, y, rotation);
                 wall2.name = $"id={ids[x][y]}, type 2NDFLOOR, {debug}";
                 wall2.transform.SetPositionAndRotation(
                     wall2.transform.position + new Vector3(0, 4, 0),
@@ -212,7 +213,7 @@ public class MazeBuilder : UdonSharpBehaviour {
                 obj.name = $"id={ids[x][y]}, type deadend, variant {deadend_variant}, {debug}";
             } else if (neighbor == Cell.Wall || nearId == 0) {
                 // spawn wall
-                obj = Spawn(walls[GetRandomIndex(walls.Length, 0.5f)], x, y, rotation);
+                obj = Spawn(walls[GetRandomIndexOfWall()], x, y, rotation);
                 obj.name = $"id={ids[x][y]}, type 1, {debug}";
             } else if (nearId > 0 && nearId != ids[x][y]) {
                 // wall or door?
@@ -225,7 +226,7 @@ public class MazeBuilder : UdonSharpBehaviour {
                         "door", false, null, false);
                     obj.name = $"id={ids[x][y]}, type 2A, {debug}";
                 } else {
-                    obj = Spawn(walls[GetRandomIndex(walls.Length, 0.5f)], x, y, rotation);
+                    obj = Spawn(walls[GetRandomIndexOfWall()], x, y, rotation);
                     obj.name = $"id={ids[x][y]}, type 2B, {debug}";
                 }
             } else {
@@ -237,9 +238,21 @@ public class MazeBuilder : UdonSharpBehaviour {
         return true;
     }
 
+    private int RandomInclusive(int min, int max) {
+        return controller.MazeGenerator.RandomInclusive(min, max);
+    }
+
     private int GetRandomIndex(int length, float probability_of_zero_index = 0.5f) {
-        if (controller.MazeGenerator.RandomInclusive(0, 100) / 100.0f < probability_of_zero_index) return 0;
-        return controller.MazeGenerator.RandomInclusive(1, length - 1);
+        if (RandomInclusive(0, 100) / 100.0f < probability_of_zero_index) return 0;
+        return RandomInclusive(1, length - 1);
+    }
+
+    private int GetRandomIndexOfWall() {
+        if (RandomInclusive(0, 100) / 100.0f < 0.5f) {
+            return RandomInclusive(0, walls_simple_count - 1);
+        } else {
+            return RandomInclusive(walls_simple_count, walls.Length - 1);
+        }
     }
 
     private void ColorizeFloor(GameObject floor, int id) {

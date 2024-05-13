@@ -7092,12 +7092,13 @@ MonoBehaviour:
   mazeContainer: {fileID: 578185170}
   mazeCeilingContainer: {fileID: 1702653217}
   walls:
-  - {fileID: -6281424698479989189, guid: 6ca3352aa408cf3449ffa88680ae2f56, type: 3}
+  - {fileID: -4147342352816037521, guid: 8bfe9cff2cd36504eb50b3d439ddc934, type: 3}
+  - {fileID: 4377865600221286077, guid: 8ae8d6a6c1b73b942b365628e1b60816, type: 3}
+  - {fileID: 5703254614228647771, guid: 6b238a1656f54ad4b9a2f7a7d73c6013, type: 3}
   - {fileID: 7600354733793498603, guid: 52947f0bf2110c34fbb8c05ddc096cad, type: 3}
   - {fileID: 7125925254588785975, guid: 6824ddae2e72b2e43896b1bea0b9dc5c, type: 3}
   - {fileID: -550989797650051609, guid: 3f47c27729e2cab45be139d050109e49, type: 3}
-  - {fileID: 7305389320063831837, guid: 0abb16e6bbf578c4db3f8fd70ff80359, type: 3}
-  - {fileID: -8766839468989445839, guid: 16a93d815dc197341b0f607b903b8557, type: 3}
+  - {fileID: 6068885569156669, guid: f2576c390e85d474fab75b71c5d46ea4, type: 3}
   - {fileID: 8138370486785168944, guid: e00f64957fc52834d896ad69a98408df, type: 3}
   - {fileID: 1239033086771716094, guid: 0c7b87ab2ffb0464a939de3928f02497, type: 3}
   - {fileID: 5172457886836709913, guid: 424ddc94f1822aa4dab7c129cb7e2ef2, type: 3}
@@ -7111,7 +7112,7 @@ MonoBehaviour:
   - {fileID: -6587542100840358391, guid: 63eac16f6812b3c45a787c30ceeae4d6, type: 3}
   - {fileID: 1910194057624958710, guid: 836bee9bd9e46c544abf622d8d5dd92e, type: 3}
   deadends:
-  - {fileID: 6068885569156669, guid: f2576c390e85d474fab75b71c5d46ea4, type: 3}
+  - {fileID: -8766839468989445839, guid: 16a93d815dc197341b0f607b903b8557, type: 3}
   ceilings:
   - {fileID: -2634147639830484596, guid: 11bc400a854f78846a5c8fc397340f38, type: 3}
   - {fileID: 8444914509475954959, guid: c630eb69abf1dcb418a36f41a9661e92, type: 3}
