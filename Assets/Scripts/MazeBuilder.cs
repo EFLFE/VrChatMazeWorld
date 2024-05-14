@@ -150,8 +150,7 @@ public class MazeBuilder : UdonSharpBehaviour {
                 GameObject obj_floor = Spawn(
                     floors[current_id == 1 ? 0 : GetRandomIndex(floors.Length, 0.9f)],
                     x, y, 0,
-                    $"floor {current_id}, cell type: {current_cell}, xy: {x} {y}",
-                    true
+                    $"floor {current_id}, cell type: {current_cell}, xy: {x} {y}"
                 );
                 ColorizeFloor(obj_floor, current_id);
             }
@@ -165,7 +164,6 @@ public class MazeBuilder : UdonSharpBehaviour {
                 ceilings[GetRandomIndex(ceilings.Length, 0.75f)],
                 x, y, rotation,
                 "ceiling",
-                true,
                 mazeCeilingContainer);
             // поворот для потолочков <(^_^)> =(^_^)=
             GO.transform.SetPositionAndRotation(GO.transform.position + new Vector3(0, 4, 0), Quaternion.Euler(180, 0, 0));
@@ -197,7 +195,7 @@ public class MazeBuilder : UdonSharpBehaviour {
             if ((current_id == 1 && nearId != 1)) {
                 // spawn wall in air
                 GameObject wall2;
-                wall2 = Spawn(walls[GetRandomIndexOfWall()], x, y, rotation);
+                wall2 = SpawnWithOffsetAndRecolor(walls[GetRandomIndexOfWall()], x, y, rotation);
                 wall2.name = $"id={ids[x][y]}, type 2NDFLOOR, {debug}";
                 wall2.transform.SetPositionAndRotation(
                     wall2.transform.position + new Vector3(0, 4, 0),
@@ -214,11 +212,11 @@ public class MazeBuilder : UdonSharpBehaviour {
             GameObject obj;
             if (current_cell == Cell.DoorDeadEnd && neighbor == Cell.Wall) {
                 int deadend_variant = ids[x][y] % deadends.Length;
-                obj = Spawn(deadends[deadend_variant], x, y, rotation);
+                obj = SpawnWithOffsetAndRecolor(deadends[deadend_variant], x, y, rotation);
                 obj.name = $"id={ids[x][y]}, type deadend, variant {deadend_variant}, {debug}";
             } else if (neighbor == Cell.Wall || nearId == 0) {
                 // spawn wall
-                obj = Spawn(walls[GetRandomIndexOfWall()], x, y, rotation);
+                obj = SpawnWithOffsetAndRecolor(walls[GetRandomIndexOfWall()], x, y, rotation);
                 obj.name = $"id={ids[x][y]}, type 1, {debug}";
             } else if (nearId > 0 && nearId != ids[x][y]) {
                 // wall or door?
@@ -227,11 +225,10 @@ public class MazeBuilder : UdonSharpBehaviour {
                     ||
                     (cells[x][y] == Cell.DoorExit && neighbor == Cell.DoorEnterance)
                     ) {
-                    obj = Spawn(doors[controller.MazeGenerator.RandomInclusive(0, doors.Length - 1)], x, y, rotation,
-                        "door", false, null);
+                    obj = SpawnWithOffsetAndRecolor(doors[controller.MazeGenerator.RandomInclusive(0, doors.Length - 1)], x, y, rotation, "door");
                     obj.name = $"id={ids[x][y]}, type 2A, {debug}";
                 } else {
-                    obj = Spawn(walls[GetRandomIndexOfWall()], x, y, rotation);
+                    obj = SpawnWithOffsetAndRecolor(walls[GetRandomIndexOfWall()], x, y, rotation);
                     obj.name = $"id={ids[x][y]}, type 2B, {debug}";
                 }
             } else {
@@ -254,13 +251,13 @@ public class MazeBuilder : UdonSharpBehaviour {
                     // мы находимся на краю квадратной комнаты + текущая ячейка не проход: можно спавнить декорации
                     int deco_type = RandomInclusive(1, 3);
                     if (deco_type == 1) {
-                        Spawn(deco1[RandomInclusive(0, deco1.Length - 1)], x, y, RandomInclusive(0, 360 - 1), "deco1", true);
+                        Spawn(deco1[RandomInclusive(0, deco1.Length - 1)], x, y, RandomInclusive(0, 360 - 1), "deco1");
                     }
                     if (deco_type == 2) {
-                        Spawn(deco2[RandomInclusive(0, deco2.Length - 1)], x, y, RandomInclusive(0, 3) * 90, "deco2", true);
+                        Spawn(deco2[RandomInclusive(0, deco2.Length - 1)], x, y, RandomInclusive(0, 3) * 90, "deco2");
                     }
                     if (deco_type == 3) {
-                        Spawn(deco3[RandomInclusive(0, deco3.Length - 1)], x, y, RandomInclusive(0, 7) * 45, "deco3", true);
+                        Spawn(deco3[RandomInclusive(0, deco3.Length - 1)], x, y, RandomInclusive(0, 7) * 45, "deco3");
                     }
                 }
             }
@@ -313,18 +310,36 @@ public class MazeBuilder : UdonSharpBehaviour {
         position.x = (x - controller.MazeGenerator.Size / 2) * ROOMS_OFFSET;
         position.z = (y - controller.MazeGenerator.Size / 2) * ROOMS_OFFSET;
         position.y = 0;
-
-        if (!do_not_offset) {
-            if (rotation == 0) position.z += 2;
-            if (rotation == 90) position.x += 2;
-            if (rotation == 180) position.z -= 2;
-            if (rotation == 270) position.x -= 2;
-        }
-
         GO.transform.SetPositionAndRotation(position, Quaternion.Euler(0, rotation, 0));
         GO.transform.localScale = new Vector3(ROOM_SCALE, ROOM_SCALE, ROOM_SCALE);
+
         GO.name = name;
         buildLeft--;
+
+        return GO;
+    }
+
+    private GameObject SpawnWithOffsetAndRecolor(
+        Mesh mesh,
+        int x,
+        int y,
+        int rotation,
+        string name = ""
+    ) {
+        GameObject GO = Spawn(mesh, x, y, rotation, name);
+
+        // смещение для стеночек вдоль поворота
+        Vector3 position = GO.transform.position;
+        if (rotation == 0) position.z += 2;
+        if (rotation == 90) position.x += 2;
+        if (rotation == 180) position.z -= 2;
+        if (rotation == 270) position.x -= 2;
+        GO.transform.SetPositionAndRotation(position, Quaternion.Euler(0, rotation, 0));
+
+        // покраска для стеночек для каждого нового уровня
+        Material material = GO.GetComponent<MeshRenderer>().materials[0];
+        material.SetFloat("_MainHueShift", (controller.level * 0.31473248f) % 1f);
+
         return GO;
     }
 

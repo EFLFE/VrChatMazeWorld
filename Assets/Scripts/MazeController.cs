@@ -22,7 +22,7 @@ public class MazeController : UdonSharpBehaviour {
     [UdonSynced] private int mazeSize;
     [UdonSynced] private int mazeRoomsAmount;
     [UdonSynced] private int mazeChestsAmount;
-    [UdonSynced] private int level = 1;
+    [UdonSynced] public int level = 1;
     private int last_level = 0; // используется для контроля запуска NextLevel() на лейт-джойнерах
     [UdonSynced] private int mazeChestsAmountGathered = 0;
 
