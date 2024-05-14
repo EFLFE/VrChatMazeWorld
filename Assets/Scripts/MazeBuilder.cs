@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using UdonSharp;
 using UnityEngine;
+using UnityEngine.AI;
 using UnityEngine.InputSystem.XR;
 using VRC.SDKBase;
 
@@ -227,7 +228,7 @@ public class MazeBuilder : UdonSharpBehaviour {
                     (cells[x][y] == Cell.DoorExit && neighbor == Cell.DoorEnterance)
                     ) {
                     obj = Spawn(doors[controller.MazeGenerator.RandomInclusive(0, doors.Length - 1)], x, y, rotation,
-                        "door", false, null, false);
+                        "door", false, null);
                     obj.name = $"id={ids[x][y]}, type 2A, {debug}";
                 } else {
                     obj = Spawn(walls[GetRandomIndexOfWall()], x, y, rotation);
@@ -294,24 +295,19 @@ public class MazeBuilder : UdonSharpBehaviour {
     }
 
     private GameObject Spawn(
-            Mesh mesh, int x, int y, int rotation, string name = "", bool do_not_offset = false, Transform cutstomContainer = null,
-            bool useBoxCollider = true) {
+            Mesh mesh,
+            int x,
+            int y,
+            int rotation,
+            string name = "",
+            bool do_not_offset = false,
+            Transform cutstomContainer = null
+        ) {
 
         GameObject GO = Instantiate(universalPrefab, cutstomContainer != null ? cutstomContainer : mazeContainer);
+
         GO.GetComponent<MeshFilter>().sharedMesh = mesh;
-
-        var boxCollider = GO.GetComponent<BoxCollider>();
-        var meshCollider = GO.GetComponent<MeshCollider>();
-        //useBoxCollider = false; // test
-        boxCollider.enabled = useBoxCollider;
-        meshCollider.enabled = !useBoxCollider;
-
-        if (useBoxCollider) {
-            boxCollider.center = mesh.bounds.center;
-            boxCollider.size = mesh.bounds.size;
-        } else {
-            meshCollider.sharedMesh = mesh;
-        }
+        GO.GetComponent<MeshCollider>().sharedMesh = mesh;
 
         Vector3 position = GO.transform.position;
         position.x = (x - controller.MazeGenerator.Size / 2) * ROOMS_OFFSET;
