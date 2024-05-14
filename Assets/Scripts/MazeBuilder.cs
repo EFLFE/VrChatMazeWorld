@@ -249,8 +249,8 @@ public class MazeBuilder : UdonSharpBehaviour {
                         break;
                     }
                 }
-                if (in_middle) {
-                    // мы находимся в центре квадратной комнаты: можно спавнить декорации
+                if (!in_middle && current_cell == Cell.Passage) {
+                    // мы находимся на краю квадратной комнаты + текущая ячейка не проход: можно спавнить декорации
                     int deco_type = RandomInclusive(1, 3);
                     if (deco_type == 1) {
                         Spawn(deco1[RandomInclusive(0, deco1.Length - 1)], x, y, RandomInclusive(0, 360 - 1), "deco1", true);
