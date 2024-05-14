@@ -139,7 +139,7 @@ public class Map : UdonSharpBehaviour {
 
                 if (!rooms_explored[maze.Ids[x][y]]) continue;
 
-                bool safeZone = x != 0 && y != 0 && x < maze.Size - 1 && y < maze.Size - 1;
+                //bool safeZone = x != 0 && y != 0 && x < maze.Size - 1 && y < maze.Size - 1;
                 Cell cellType = cells[x][y];
                 int posX = maze.Size - x - 1;
                 int posY = y;
@@ -160,13 +160,13 @@ public class Map : UdonSharpBehaviour {
 
                 int curID = ids[x][y];
                 Cell curCell = cells[x][y];
-                if (safeZone && curID != 0) {
+                if (curID != 0) {
                     for (int direction = 1; direction <= 4; direction++) {
                         // 1 up, 2 right, 3 down, 4 left
                         int dx = (direction == 2) ? 1 : (direction == 4) ? -1 : 0;
                         int dy = (direction == 1) ? 1 : (direction == 3) ? -1 : 0;
-                        int neirID = ids[x + dx][y + dy];
-                        Cell neirCell = cells[x + dx][y + dy];
+                        int neirID = maze.GetId(x + dx, y + dy);
+                        Cell neirCell = maze.GetCell(x + dx, y + dy);
 
                         if (neirID == 0
                             || neirCell == Cell.Wall

@@ -68,6 +68,22 @@ public class MazeGenerator : UdonSharpBehaviour {
     private int[][] cache_cells_y;
     private int[] cache_cells_ammounts;
 
+    public int GetId(int x, int y) {
+        if (x >= 0 && y >= 0 && x < size && y < size) {
+            return ids[x][y];
+        } else {
+            return 0;
+        }
+    }
+
+    public Cell GetCell(int x, int y) {
+        if (x >= 0 && y >= 0 && x < size && y < size) {
+            return cells[x][y];
+        } else {
+            return Cell.Wall;
+        }
+    }
+
     public void PossibleDoorsPushToTail(int x, int y, int forward_direction) {
         possible_doors2_x[possible_doors2_tail] = x;
         possible_doors2_y[possible_doors2_tail] = y;
