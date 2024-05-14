@@ -27,6 +27,8 @@ public class Map : UdonSharpBehaviour {
     private RectTransform[] circleRects;
     private int circleIndex;
 
+    private bool[] rooms_explored;
+
     public void Init(MazeController controller) {
         this.controller = controller;
         circleRects = new RectTransform[256];
@@ -47,7 +49,7 @@ public class Map : UdonSharpBehaviour {
         int playersCount = VRCPlayerApi.GetPlayerCount();
         VRCPlayerApi.GetPlayers(allPlayers);
         for (int i = 0; i < playersCount; i++) {
-            VRCPlayerApi item = allPlayers[i];
+            VRCPlayerApi player = allPlayers[i];
             Color clr;
             const float D = 255f;
             switch (i % 7) {
@@ -60,16 +62,25 @@ public class Map : UdonSharpBehaviour {
                 case 6: clr = new Color(158 / D, 158 / D, 158 / D); break;
                 default: clr = Color.white; break;
             }
-            DrawCircle(item.GetPosition(), clr);
+            DrawCircle(player.GetPosition(), clr);
+
+            int size = controller.MazeGenerator.Size;
+            int x = (int) (size / 2f + player.GetPosition().x / MazeBuilder.ROOMS_OFFSET);
+            int y = (int) (size / 2f + player.GetPosition().z / MazeBuilder.ROOMS_OFFSET);
+            if (x >= 0 && x < size && y >= 0 && y < size) {
+                PlayerInTheRoom(controller.MazeGenerator.Ids[x][y]);
+            }
         }
 
         // treasures
+        /*
         int count = Mathf.Min(controller.GetChestsAmount, poolsOfTreasures.childCount);
         for (int i = 0; i < count; i++) {
             Transform treasureTran = poolsOfTreasures.GetChild(i);
             if (treasureTran.gameObject.activeSelf)
                 DrawCircle(treasureTran.position, Color.red);
         }
+        */
     }
 
     private void DrawCircle(Vector3 pos, Color clr) {
@@ -98,6 +109,19 @@ public class Map : UdonSharpBehaviour {
         }
     }
 
+    public void NewLevel(int rooms_amount) {
+        rooms_explored = new bool[rooms_amount];
+        rooms_explored[1] = true;
+    }
+
+    public void PlayerInTheRoom(int room_id) {
+        if (rooms_explored == null) return;
+        if (!rooms_explored[room_id]) {
+            rooms_explored[room_id] = true;
+            Render(controller.MazeGenerator);
+        }
+    }
+
     public void Render(MazeGenerator maze) {
         Clear();
 
@@ -112,6 +136,9 @@ public class Map : UdonSharpBehaviour {
 
         for (int y = 0; y < maze.Size; y++) {
             for (int x = 0; x < maze.Size; x++) {
+
+                if (!rooms_explored[maze.Ids[x][y]]) continue;
+
                 bool safeZone = x != 0 && y != 0 && x < maze.Size - 1 && y < maze.Size - 1;
                 Cell cellType = cells[x][y];
                 int posX = maze.Size - x - 1;
