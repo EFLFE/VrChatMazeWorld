@@ -1,4 +1,5 @@
-﻿using UdonSharp;
+﻿using System;
+using UdonSharp;
 using UnityEngine;
 using UnityEngine.UI;
 using VRC.SDKBase;
@@ -21,6 +22,7 @@ public class Map : UdonSharpBehaviour {
     [SerializeField] private Transform poolsOfTreasures;
 
     private MazeController controller;
+    private MazeGenerator maze;
     private Vector2 cellSize;
     private Transform mapContainer;
     private VRCPlayerApi[] allPlayers;
@@ -28,9 +30,11 @@ public class Map : UdonSharpBehaviour {
     private int circleIndex;
 
     private bool[] rooms_explored;
+    private bool[][] coords_explored;
 
     public void Init(MazeController controller) {
         this.controller = controller;
+        maze = controller.MazeGenerator;
         circleRects = new RectTransform[256];
         allPlayers = new VRCPlayerApi[64];
         circleIndex = -1;
@@ -68,7 +72,7 @@ public class Map : UdonSharpBehaviour {
             int x = (int) (size / 2f + player.GetPosition().x / MazeBuilder.ROOMS_OFFSET);
             int y = (int) (size / 2f + player.GetPosition().z / MazeBuilder.ROOMS_OFFSET);
             if (x >= 0 && x < size && y >= 0 && y < size) {
-                PlayerInTheRoom(controller.MazeGenerator.Ids[x][y]);
+                PlayerIsMoving(x, y, controller.MazeGenerator.GetId(x, y));
             }
         }
 
@@ -81,6 +85,22 @@ public class Map : UdonSharpBehaviour {
                 DrawCircle(treasureTran.position, Color.red);
         }
         */
+    }
+
+    private void PlayerIsMoving(int x, int y, int room_id) {
+        if (rooms_explored == null) return;
+        if (coords_explored == null) return;
+
+        int radius = 2;
+
+        for (int dx = -radius; dx <= radius; dx++) {
+            for (int dy = -radius; dy <= radius; dy++) {
+                if (!coords_explored[x + dx][y + dy] && maze.GetId(x + dx, y + dy) == room_id) {
+                    coords_explored[x + dx][y + dy] = true;
+                    DrawBlock(x + dx, y + dy);
+                }
+            }
+        }
     }
 
     private void DrawCircle(Vector3 pos, Color clr) {
@@ -112,17 +132,14 @@ public class Map : UdonSharpBehaviour {
     public void NewLevel(int rooms_amount) {
         rooms_explored = new bool[rooms_amount];
         rooms_explored[1] = true;
-    }
 
-    public void PlayerInTheRoom(int room_id) {
-        if (rooms_explored == null) return;
-        if (!rooms_explored[room_id]) {
-            rooms_explored[room_id] = true;
-            Render(controller.MazeGenerator);
+        coords_explored = new bool[maze.Size][];
+        for (int i = 0; i < maze.Size; i++) {
+            coords_explored[i] = new bool[maze.Size];
         }
     }
 
-    public void Render(MazeGenerator maze) {
+    public void Render() {
         Clear();
 
         // build map
@@ -131,61 +148,53 @@ public class Map : UdonSharpBehaviour {
 
         cellSize.x = canvasRect.sizeDelta.x / maze.Size;
         cellSize.y = canvasRect.sizeDelta.y / maze.Size;
-        Cell[][] cells = maze.Cells;
-        int[][] ids = maze.Ids;
+    }
 
-        for (int y = 0; y < maze.Size; y++) {
-            for (int x = 0; x < maze.Size; x++) {
+    private void DrawBlock(int x, int y) {
 
-                if (!rooms_explored[maze.Ids[x][y]]) continue;
+        Cell cellType = maze.GetCell(x, y);
+        int posX = maze.Size - x - 1;
+        int posY = y;
 
-                //bool safeZone = x != 0 && y != 0 && x < maze.Size - 1 && y < maze.Size - 1;
-                Cell cellType = cells[x][y];
-                int posX = maze.Size - x - 1;
-                int posY = y;
+        switch (cellType) {
+            case Cell.Passage:
+            case Cell.DoorDeadEnd:
+            case Cell.DoorEnterance:
+            case Cell.DoorExit:
+                Color clr = controller.Utils.GetFloorColor(maze.Ids[x][y]);
+                CreateCell(posX, posY, clr, cellType);
+                break;
 
-                switch (cellType) {
-                    case Cell.Passage:
-                    case Cell.DoorDeadEnd:
-                    case Cell.DoorEnterance:
-                    case Cell.DoorExit:
-                        Color clr = controller.Utils.GetFloorColor(ids[x][y]);
-                        CreateCell(posX, posY, clr, cellType);
-                        break;
+            case Cell.Hole:
+                CreateCell(posX, posY, Color.black, cellType);
+                break;
+        }
 
-                    case Cell.Hole:
-                        CreateCell(posX, posY, Color.black, cellType);
-                        break;
-                }
+        int curID = maze.GetId(x, y);
+        if (curID != 0) {
+            for (int direction = 1; direction <= 4; direction++) {
+                // 1 up, 2 right, 3 down, 4 left
+                int dx = (direction == 2) ? 1 : (direction == 4) ? -1 : 0;
+                int dy = (direction == 1) ? 1 : (direction == 3) ? -1 : 0;
+                int neirID = maze.GetId(x + dx, y + dy);
+                Cell neirCell = maze.GetCell(x + dx, y + dy);
 
-                int curID = ids[x][y];
-                Cell curCell = cells[x][y];
-                if (curID != 0) {
-                    for (int direction = 1; direction <= 4; direction++) {
-                        // 1 up, 2 right, 3 down, 4 left
-                        int dx = (direction == 2) ? 1 : (direction == 4) ? -1 : 0;
-                        int dy = (direction == 1) ? 1 : (direction == 3) ? -1 : 0;
-                        int neirID = maze.GetId(x + dx, y + dy);
-                        Cell neirCell = maze.GetCell(x + dx, y + dy);
-
-                        if (neirID == 0
-                            || neirCell == Cell.Wall
-                            || (neirID > 0 && neirID != curID
-                                && !(
-                                    (curCell == Cell.DoorEnterance && neirCell == Cell.DoorExit)
-                                    ||
-                                    (curCell == Cell.DoorExit && neirCell == Cell.DoorEnterance)
-                                    )
-                                )
-                            ) {
-                            GameObject wallObj = null;
-                            if (direction == 1) wallObj = imageWallBottomPrefab;
-                            else if (direction == 2) wallObj = imageWallLeftPrefab;
-                            else if (direction == 3) wallObj = imageWallUpPrefab;
-                            else if (direction == 4) wallObj = imageWallRightPrefab;
-                            CreateWall(posX, posY, wallObj);
-                        }
-                    }
+                if (neirID == 0
+                    || neirCell == Cell.Wall
+                    || (neirID > 0 && neirID != curID
+                        && !(
+                            (cellType == Cell.DoorEnterance && neirCell == Cell.DoorExit)
+                            ||
+                            (cellType == Cell.DoorExit && neirCell == Cell.DoorEnterance)
+                            )
+                        )
+                    ) {
+                    GameObject wallObj = null;
+                    if (direction == 1) wallObj = imageWallBottomPrefab;
+                    else if (direction == 2) wallObj = imageWallLeftPrefab;
+                    else if (direction == 3) wallObj = imageWallUpPrefab;
+                    else if (direction == 4) wallObj = imageWallRightPrefab;
+                    CreateWall(posX, posY, wallObj);
                 }
             }
         }

@@ -221,7 +221,7 @@ public class MazeController : UdonSharpBehaviour {
                 CentralZone.gameObject.SetActive(true);
                 foreach (var map in maps) {
                     map.NewLevel(mazeRoomsAmount);
-                    map.Render(MazeGenerator);
+                    map.Render();
                 }
             }
         }
