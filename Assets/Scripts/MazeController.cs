@@ -136,9 +136,8 @@ public class MazeController : UdonSharpBehaviour {
         MazeBuilder.Init(this);
         generator_is_ready = false;
 
-        //for (int i = 0; i < maps.Length; i++) {
         foreach(var map in maps) { 
-            map.Clear();
+            map.NewLevel();
         }
     }
 
@@ -219,10 +218,6 @@ public class MazeController : UdonSharpBehaviour {
                 MazeUI.HideProgress();
                 MazeUI.UILog($"CentralZone - activating");
                 CentralZone.gameObject.SetActive(true);
-                foreach (var map in maps) {
-                    map.NewLevel(mazeRoomsAmount);
-                    map.Render();
-                }
             }
         }
 

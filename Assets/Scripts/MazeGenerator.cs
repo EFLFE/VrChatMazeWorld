@@ -30,6 +30,7 @@ public class MazeGenerator : UdonSharpBehaviour {
     [SerializeField] UdonRandom udonRandom;
 
     public int Size => size;
+    public int RoomsAmount => max_rooms;
     public int[][] Ids => ids;
     public Cell[][] Cells => cells;
     public Room[] Rooms => rooms;

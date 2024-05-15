@@ -122,27 +122,23 @@ public class Map : UdonSharpBehaviour {
         circleRects[circleIndex].anchoredPosition = new Vector2(mapX, -mapY);
     }
 
-    public void Clear() {
+    public void NewLevel() {
+        // former Clear()
         if (mapContainer != null) {
             Destroy(mapContainer.gameObject);
             mapContainer = null;
         }
-    }
 
-    public void NewLevel(int rooms_amount) {
-        rooms_explored = new bool[rooms_amount];
+        // former NewLevel()
+        rooms_explored = new bool[maze.RoomsAmount];
         rooms_explored[1] = true;
 
         coords_explored = new bool[maze.Size][];
         for (int i = 0; i < maze.Size; i++) {
             coords_explored[i] = new bool[maze.Size];
         }
-    }
 
-    public void Render() {
-        Clear();
-
-        // build map
+        // former Render()
         mapContainer = Instantiate(facadePrefab, staticContainer).transform;
         mapContainer.SetSiblingIndex(bgImage.GetSiblingIndex() + 1);
 
