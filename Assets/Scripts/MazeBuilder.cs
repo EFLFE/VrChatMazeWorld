@@ -338,7 +338,8 @@ public class MazeBuilder : UdonSharpBehaviour {
 
         // покраска для стеночек для каждого нового уровня
         Material material = GO.GetComponent<MeshRenderer>().materials[0];
-        material.SetFloat("_MainHueShift", (controller.level * 0.31473248f) % 1f);
+        material.SetFloat("_Hue", (controller.level * 0.31473248f) % 1f);
+        material.SetFloat("_Contrast", (controller.level * 374262944 % 5 + 8) / 10f);
 
         return GO;
     }
