@@ -87,7 +87,7 @@ public class Map : UdonSharpBehaviour {
         */
     }
 
-    private void PlayerIsMoving(int x, int y, int room_id) {
+    private void PlayerIsMoving(int player_x, int player_y, int room_id) {
         if (rooms_explored == null) return;
         if (coords_explored == null) return;
 
@@ -95,9 +95,14 @@ public class Map : UdonSharpBehaviour {
 
         for (int dx = -radius; dx <= radius; dx++) {
             for (int dy = -radius; dy <= radius; dy++) {
-                if (!coords_explored[x + dx][y + dy] && maze.GetId(x + dx, y + dy) == room_id) {
-                    coords_explored[x + dx][y + dy] = true;
-                    DrawBlock(x + dx, y + dy);
+                int x = player_x + dx;
+                int y = player_y + dy;
+
+                if (x >= 0 && x < maze.Size && y >= 0 && y < maze.Size) {
+                    if (!coords_explored[x][y] && maze.GetId(x, y) == room_id) {
+                        coords_explored[x][y] = true;
+                        DrawBlock(x, y);
+                    }
                 }
             }
         }

@@ -1883,7 +1883,7 @@ Material:
     - _HoloRimSharpness: 0.5
     - _HoloRimWidth: 0.5
     - _HoloScrollSpeed: 1
-    - _Hue: 0
+    - _Hue: 1
     - _IgnoreCastedShadows: 0
     - _IgnoreFog: 0
     - _Inverse_Clipping: 0
