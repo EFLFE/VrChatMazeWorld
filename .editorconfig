@@ -65,7 +65,7 @@ dotnet_code_quality_unused_parameters = non_public:warning
 #### Рекомендации по написанию кода C# ####
 
 # Предпочтения var
-csharp_style_var_elsewhere = false:warning
+csharp_style_var_elsewhere = false:silent
 csharp_style_var_for_built_in_types = false:silent
 csharp_style_var_when_type_is_apparent = false:silent
 
