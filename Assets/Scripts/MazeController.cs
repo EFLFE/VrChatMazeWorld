@@ -142,13 +142,9 @@ public class MazeController : UdonSharpBehaviour {
     }
 
     private void RespawnPersonalMap() {
-        personal_map.transform.SetPositionAndRotation(
-            new Vector3(0.395f, 2, -9.57f),
-            Quaternion.Euler(0, 180, 0)
-        );
-        personal_map.transform.GetChild(0).transform.SetLocalPositionAndRotation(
-            new Vector3(-0.442f, -0.402f, 0.011f),
-            Quaternion.Euler(0, 0, 0)
+        personal_map.transform.GetChild(0).SetLocalPositionAndRotation(
+            Vector3.zero,
+            Quaternion.identity
         );
     }
 
