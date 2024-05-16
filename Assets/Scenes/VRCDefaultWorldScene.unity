@@ -7119,6 +7119,8 @@ MonoBehaviour:
   - {fileID: -2634147639830484596, guid: 11bc400a854f78846a5c8fc397340f38, type: 3}
   - {fileID: 8444914509475954959, guid: c630eb69abf1dcb418a36f41a9661e92, type: 3}
   - {fileID: 8444914509475954959, guid: 953265eda71f2e144bdb5a41964617ed, type: 3}
+  corners:
+  - {fileID: 9173248160468994099, guid: e2b6f60927ef12741b4601f5602ec5f6, type: 3}
   deco1:
   - {fileID: -4131521360128221038, guid: 15bbd7184f6557541b38b38b5a25e357, type: 3}
   - {fileID: 3764769452664136512, guid: 3629513df2ea8e042a8955d8974efcdb, type: 3}
@@ -7482,7 +7484,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: -876546973899608171, guid: 3db07ffe835b15743a95508dd8099659, type: 3}
+  - {fileID: 2100000, guid: 0793ec6746b48fd4fb571fad77c2541f, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0

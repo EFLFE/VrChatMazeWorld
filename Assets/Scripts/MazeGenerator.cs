@@ -8,7 +8,7 @@ public enum Cell {
     Wall,
     Passage,
     Hole,
-    Something,
+    Treasure,
     DoorEnterance,
     DoorExit,
     DoorDeadEnd,
@@ -333,13 +333,9 @@ public class MazeGenerator : UdonSharpBehaviour {
             GetRandomCellFromRoomByID(room_id, out int room_x, out int room_y);
             chests_x[i] = room_x;
             chests_y[i] = room_y;
-            if (cells[room_x][room_y] == Cell.Hole) {
-                cells[room_x][room_y] = Cell.Passage;
-            }
+            cells[room_x][room_y] = Cell.Treasure;
         }
     }
-
-
 
     private int TryToSpawnRandomDoorsInRoomByID(int room_id, int amount = 0) {
         int amount_of_doors = amount;

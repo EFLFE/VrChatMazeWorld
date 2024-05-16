@@ -28,6 +28,7 @@ public class MazeBuilder : UdonSharpBehaviour {
     [SerializeField] private Mesh[] floors;
     [SerializeField] private Mesh[] deadends;
     [SerializeField] private Mesh[] ceilings;
+    [SerializeField] private Mesh[] corners;
     [Header("Decor")]
     [SerializeField] private Mesh[] deco1;
     [SerializeField] private Mesh[] deco2;
@@ -237,6 +238,7 @@ public class MazeBuilder : UdonSharpBehaviour {
             }
         }
 
+        // спавн декораций
         if (x > 0 && x < controller.MazeGenerator.Size - 1 && y > 0 && y < controller.MazeGenerator.Size - 1) {
             if (current_id > 1 && current_room == Room.Square) {
                 bool in_middle = true;
@@ -263,7 +265,52 @@ public class MazeBuilder : UdonSharpBehaviour {
             }
         }
 
+        // спавн уголков только поверх чистых проходов без дверей и только для пещер
+        if (current_cell == Cell.Passage && current_room == Room.Cave) {
+            for (int direction1 = 1; direction1 <= 4; direction1++) {
+                int dx1 = (direction1 == 1) ? 1 : (direction1 == 3) ? -1 : 0;
+                int dy1 = (direction1 == 2) ? 1 : (direction1 == 4) ? -1 : 0;
+
+                int rotation = 0;
+                // не ругайте меня пж
+                if (direction1 == 1) rotation = 90;
+                if (direction1 == 2) rotation = 0;
+                if (direction1 == 3) rotation = 270;
+                if (direction1 == 4) rotation = 180;
+
+                Cell near1_cell = Cell.Wall;
+                int near1_id = 0;
+                if (y + dy1 >= 0 && y + dy1 < maze.Size && x + dx1 >= 0 && x + dx1 < maze.Size) {
+                    near1_cell = cells[x + dx1][y + dy1];
+                    near1_id = ids[x + dx1][y + dy1];
+                }
+
+                int direction2 = GetClockwiseDirection(direction1);
+                int dx2 = (direction2 == 1) ? 1 : (direction2 == 3) ? -1 : 0;
+                int dy2 = (direction2 == 2) ? 1 : (direction2 == 4) ? -1 : 0;
+
+                //UnityEngine.Debug.Log($"dir: {direction1} -> {direction2}");
+
+                Cell near2_cell = Cell.Wall;
+                int near2_id = 0;
+                if (y + dy2 >= 0 && y + dy2 < maze.Size && x + dx2 >= 0 && x + dx2 < maze.Size) {
+                    near2_cell = cells[x + dx2][y + dy2];
+                    near2_id = ids[x + dx2][y + dy2];
+                }
+
+                if (current_id != near1_id && current_id != near2_id) {
+                    int corner_variant = ids[x][y] % corners.Length;
+                    GameObject corner = SpawnWithRecolor(corners[corner_variant], x, y, rotation);
+                    corner.name = $"corner={ids[x][y]}";
+                }
+            }
+        }
+
         return true;
+    }
+
+    private int GetClockwiseDirection(int dir) {
+        return (dir - 1 + 1) % 4 + 1;
     }
 
     private int RandomInclusive(int min, int max) {
@@ -297,7 +344,6 @@ public class MazeBuilder : UdonSharpBehaviour {
             int y,
             int rotation,
             string name = "",
-            bool do_not_offset = false,
             Transform cutstomContainer = null
         ) {
 
@@ -319,6 +365,23 @@ public class MazeBuilder : UdonSharpBehaviour {
         return GO;
     }
 
+    private GameObject SpawnWithRecolor(
+    Mesh mesh,
+    int x,
+    int y,
+    int rotation,
+    string name = ""
+) {
+        GameObject GO = Spawn(mesh, x, y, rotation, name);
+
+        // покраска для стеночек для каждого нового уровня
+        Material material = GO.GetComponent<MeshRenderer>().materials[0];
+        material.SetFloat("_Hue", (controller.level * 0.31473248f) % 1f);
+        material.SetFloat("_Contrast", (controller.level * 374262944 % 5 + 8) / 10f);
+
+        return GO;
+    }
+
     private GameObject SpawnWithOffsetAndRecolor(
         Mesh mesh,
         int x,
@@ -326,7 +389,7 @@ public class MazeBuilder : UdonSharpBehaviour {
         int rotation,
         string name = ""
     ) {
-        GameObject GO = Spawn(mesh, x, y, rotation, name);
+        GameObject GO = SpawnWithRecolor(mesh, x, y, rotation, name);
 
         // смещение для стеночек вдоль поворота
         Vector3 position = GO.transform.position;
@@ -335,11 +398,6 @@ public class MazeBuilder : UdonSharpBehaviour {
         if (rotation == 180) position.z -= 2;
         if (rotation == 270) position.x -= 2;
         GO.transform.SetPositionAndRotation(position, Quaternion.Euler(0, rotation, 0));
-
-        // покраска для стеночек для каждого нового уровня
-        Material material = GO.GetComponent<MeshRenderer>().materials[0];
-        material.SetFloat("_Hue", (controller.level * 0.31473248f) % 1f);
-        material.SetFloat("_Contrast", (controller.level * 374262944 % 5 + 8) / 10f);
 
         return GO;
     }
