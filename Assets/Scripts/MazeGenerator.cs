@@ -333,7 +333,9 @@ public class MazeGenerator : UdonSharpBehaviour {
             GetRandomCellFromRoomByID(room_id, out int room_x, out int room_y);
             chests_x[i] = room_x;
             chests_y[i] = room_y;
-            cells[room_x][room_y] = Cell.Treasure;
+            if (cells[room_x][room_y] != Cell.DoorEnterance && cells[room_x][room_y] != Cell.DoorExit) {
+                cells[room_x][room_y] = Cell.Treasure;
+            }
         }
     }
 
