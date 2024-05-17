@@ -1,6 +1,4 @@
-﻿using BestHTTP.SecureProtocol.Org.BouncyCastle.Asn1.X500;
-using System;
-using System.Runtime.CompilerServices;
+﻿using System.Runtime.CompilerServices;
 using UdonSharp;
 using UnityEngine;
 
@@ -17,12 +15,7 @@ public enum Cell {
 public enum Room {
     Square,
     Cave,
-    Turn
-}
-
-public enum MazeType {
-    Snail,
-    Tree
+    Stairs,
 }
 
 [RequireComponent(typeof(UdonRandom))]
@@ -50,7 +43,6 @@ public class MazeGenerator : UdonSharpBehaviour {
     public int middle_floor_index = 2; // 01234
 
     private int max_rooms;
-    private MazeType maze_type;
 
     private int[][][] ids;
     private Cell[][][] cells;
@@ -131,13 +123,12 @@ public class MazeGenerator : UdonSharpBehaviour {
     }
 
 
-    public void Init(int seed, int size, int rooms, int chests, MazeType maze_type) {
+    public void Init(int seed, int size, int rooms, int chests) {
         this.seed = seed;
         udonRandom.SetSeed(seed);
         //rnd = new Random(seed);
         this.size = size;
         this.max_rooms = rooms;
-        this.maze_type = maze_type;
 
         cache_cells_x = new int[rooms + 1][];
         cache_cells_y = new int[rooms + 1][];

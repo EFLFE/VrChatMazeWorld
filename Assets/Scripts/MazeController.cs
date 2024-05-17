@@ -2,7 +2,6 @@
 using System.Diagnostics;
 using UdonSharp;
 using UnityEngine;
-using VRC.Economy;
 using VRC.SDKBase;
 using VRC.Udon.Common.Interfaces;
 using static VRC.Udon.Common.Interfaces.NetworkEventTarget;
@@ -132,7 +131,7 @@ public class MazeController : UdonSharpBehaviour {
         RespawnPersonalMap();
         genStopwatch.Restart();
         MazeUI.UILog($"MazeGenerator Init, mazeSize: {mazeSize}, mazeRoomsAmount: {mazeRoomsAmount}, mazeChestsAmount: {mazeChestsAmount}");
-        MazeGenerator.Init(seed, mazeSize, mazeRoomsAmount, mazeChestsAmount, MazeType.Tree);
+        MazeGenerator.Init(seed, mazeSize, mazeRoomsAmount, mazeChestsAmount);
         MazeBuilder.Init(this);
         generator_is_ready = false;
 
