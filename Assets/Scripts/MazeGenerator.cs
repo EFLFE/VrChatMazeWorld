@@ -255,6 +255,18 @@ public class MazeGenerator : UdonSharpBehaviour {
     }
 
     bool TryToGenerateRoomForTree(int x, int y, int z, int d) {
+
+        int random_index = RandomInclusive(0, 3);
+
+        if (random_index == 0) {
+            if (TryToGenerateRoomStairs(x, y, z, d)) {
+                rooms[current_id] = Room.Stairs;
+                current_id++;
+                // return true; // lets just spawn next room immideatly
+                PossibleDoorsPopFromHead(out x, out y, out z, out d);
+            }
+        }
+
         if (TryToGenerateRoomSquare(x, y, z, d)) {
             rooms[current_id] = Room.Square;
             current_id++;
@@ -450,6 +462,27 @@ public class MazeGenerator : UdonSharpBehaviour {
                 amount_of_cells_generated++;
             }
         }
+
+        return true;
+    }
+
+    private bool TryToGenerateRoomStairs(int start_x, int start_y, int start_z, int forward_dir) {
+        if (ids[start_x][start_y][start_z] != 0) return false;
+        int dz = RandomInclusive(0, 1) * 2 - 1;
+        if (start_z == 0) dz = 1;
+        if (start_z == height - 1) dz = -1;
+
+        if (ids[start_x][start_y][start_z + dz] != 0) return false;
+        GetDirectionsVector(forward_dir, out int dx, out int dy);
+        if (ids[start_x + dx][start_y + dy][start_z + dz] != 0) return false;
+
+        // it is possible to spawn room with 2 vertical cells
+        ids[start_x][start_y][start_z] = current_id;
+        // cells[start_x][start_y][start_z] = Cell.DoorExit; // already there
+        ids[start_x][start_y][start_z + dz] = current_id;
+        // cells[start_x][start_y][start_z + dz] = Cell.DoorEnterance; // will be there after next line
+
+        TryToSpawnPossibleDoor(start_x, start_y, start_z + dz, forward_dir);
 
         return true;
     }

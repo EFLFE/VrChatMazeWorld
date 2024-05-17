@@ -29,6 +29,7 @@ public class MazeBuilder : UdonSharpBehaviour {
     [SerializeField] private Mesh[] deadends;
     [SerializeField] private Mesh[] ceilings;
     [SerializeField] private Mesh[] corners;
+    [SerializeField] private Mesh[] stairs;
     [Header("Decor")]
     [SerializeField] private Mesh[] deco1;
     [SerializeField] private Mesh[] deco2;
@@ -125,30 +126,48 @@ public class MazeBuilder : UdonSharpBehaviour {
         int current_id = ids[x][y][z];
         Room current_room = rooms[current_id];
 
-        if (current_cell != Cell.Hole) {
-            bool need_to_spawn_floor = false;
-            if (current_id != 0) {
-                need_to_spawn_floor = true;
-            }
+        bool must_spawn_floor = (current_id > 0);
+        bool must_spawn_stair = false;
+        if (current_room == Room.Stairs && z > 0 && ids[x][y][z - 1] == ids[x][y][z]) {
+            must_spawn_floor = false;
+            must_spawn_stair = true;
+        }
 
-            if (!need_to_spawn_floor) {
-                for (int dir = 0; dir < 4; dir++) {
-                    maze.GetDirectionsVector(dir, out int dx, out int dy);
-                    if (maze.GetCell(x + dx, y + dy, z) == Cell.Hole) {
-                        need_to_spawn_floor = true;
-                        break;
-                    }
+        if (must_spawn_floor) {
+            GameObject obj_floor = Spawn(
+                floors[current_id == 1 ? 0 : GetRandomIndex(floors.Length, 0.9f)],
+                x, y, z, 0,
+                $"floor {current_id}, cell type: {current_cell}, xyz: {x} {y} {z}"
+            );
+            ColorizeFloor(obj_floor, current_id);
+        }
+
+        if (must_spawn_stair) {
+
+            int rotation = -1;
+            for (int dir = 0; dir <= 3; dir++) {
+                maze.GetDirectionsVector(dir, out int dx, out int dy);
+                var diff_cell1 = maze.GetCell(x + dx, y + dy, z);
+                var diff_cell2 = maze.GetCell(x - dx, y - dy, z - 1);
+                if (
+                    (diff_cell1 == Cell.DoorEnterance && diff_cell2 == Cell.DoorExit)
+                    ||
+                    (diff_cell1 == Cell.DoorExit && diff_cell2 == Cell.DoorEnterance)
+                ) {
+                    rotation = dir;
+                    break;
                 }
             }
 
-            if (need_to_spawn_floor) {
-                GameObject obj_floor = Spawn(
-                    floors[current_id == 1 ? 0 : GetRandomIndex(floors.Length, 0.9f)],
-                    x, y, z, 0,
-                    $"floor {current_id}, cell type: {current_cell}, xy: {x} {y}"
-                );
-                ColorizeFloor(obj_floor, current_id);
-            }
+            // не ругайте меня пж
+            if (rotation == 3) rotation = 1;
+            else if (rotation == 1) rotation = 3;
+
+            GameObject obj_stair = Spawn(
+                stairs[0],
+                x, y, z - 1, rotation * 90,
+                $"stair {current_id}, cell type: {current_cell}, xyz: {x} {y} {z}, rotation: {rotation}"
+            );
         }
 
         /*

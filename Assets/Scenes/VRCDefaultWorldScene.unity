@@ -582,8 +582,8 @@ MonoBehaviour:
   maps:
   - {fileID: 1322962922}
   - {fileID: 2860119066175330707}
-  startedLevel: 1
-  startedSeed: 0
+  startedLevel: 7
+  startedSeed: 815695
   level: 1
   MazeBuilder: {fileID: 1027156425}
   MazeGenerator: {fileID: 1990344165}
@@ -7328,6 +7328,8 @@ MonoBehaviour:
   - {fileID: 8444914509475954959, guid: 953265eda71f2e144bdb5a41964617ed, type: 3}
   corners:
   - {fileID: 9173248160468994099, guid: e2b6f60927ef12741b4601f5602ec5f6, type: 3}
+  stairs:
+  - {fileID: 5543852910939878438, guid: 0bd8bdfda1a2d6b40a9aef1cd95a822c, type: 3}
   deco1:
   - {fileID: -4131521360128221038, guid: 15bbd7184f6557541b38b38b5a25e357, type: 3}
   - {fileID: 3764769452664136512, guid: 3629513df2ea8e042a8955d8974efcdb, type: 3}
@@ -14510,6 +14512,7 @@ MonoBehaviour:
     SerializationNodes: []
   _udonSharpBackingUdonBehaviour: {fileID: 1990344164}
   udonRandom: {fileID: 1990344167}
+  middle_floor_index: 2
 --- !u!114 &1990344166
 MonoBehaviour:
   m_ObjectHideFlags: 2
