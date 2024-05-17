@@ -128,17 +128,30 @@ public class MazeBuilder : UdonSharpBehaviour {
 
         bool must_spawn_floor = (current_id > 0);
         bool must_spawn_stair = false;
-        if (current_room == Room.Stairs && z > 0 && ids[x][y][z - 1] == ids[x][y][z]) {
+        if (z > 0 && ids[x][y][z - 1] == ids[x][y][z]) {
             must_spawn_floor = false;
-            must_spawn_stair = true;
+            if (current_room == Room.Stairs) {
+                must_spawn_stair = true;
+            }
         }
 
         if (must_spawn_floor) {
+
+            bool can_spawn_decorative_floor = false;
+            if (z <= 0 || ids[x][y][z - 1] == 0) {
+                can_spawn_decorative_floor = true;
+            }
+            if (current_id == 1) {
+                can_spawn_decorative_floor = false;
+            }
+            int floor_variant = can_spawn_decorative_floor ? GetRandomIndex(floors.Length, 0.75f) : 0;
+
             GameObject obj_floor = Spawn(
-                floors[current_id == 1 ? 0 : GetRandomIndex(floors.Length, 0.9f)],
+                floors[floor_variant],
                 x, y, z, 0,
                 $"floor {current_id}, cell type: {current_cell}, xyz: {x} {y} {z}"
             );
+
             ColorizeFloor(obj_floor, current_id);
         }
 
@@ -170,20 +183,37 @@ public class MazeBuilder : UdonSharpBehaviour {
             );
         }
 
-        /*
-        // spawn ceiling everywhere except start room and walls
-        if (current_id > 1) {
-            int rotation = maze.RandomInclusive(0, 3) * 90;
+
+        // spawn ceiling everywhere where id > 0 and no same id at the level higher
+        bool must_spawn_ceiling = (current_id > 0);
+        if (z < maze.Height - 1) {
+            if (current_id == ids[x][y][z + 1]) {
+                must_spawn_ceiling = false;
+            }
+        }
+
+        if (must_spawn_ceiling) {
+
+            bool can_spawn_decorative_ceiling = false;
+            if (z >= maze.Height - 1 || ids[x][y][z + 1] == 0) {
+                can_spawn_decorative_ceiling = true;
+            }
+            int ceiling_variant = can_spawn_decorative_ceiling ? GetRandomIndex(ceilings.Length, 0.75f) : 0;
+
             GameObject GO = Spawn(
-                ceilings[GetRandomIndex(ceilings.Length, 0.75f)],
-                x, y, rotation,
+                ceilings[ceiling_variant],
+                x, y, z, maze.RandomInclusive(0, 3) * 90,
                 "ceiling",
                 mazeCeilingContainer
             );
+
             // поворот для потолочков <(^_^)> =(^_^)=
-            GO.transform.SetPositionAndRotation(GO.transform.position + new Vector3(0, 4, 0), Quaternion.Euler(180, 0, 0));
+            GO.transform.SetPositionAndRotation(
+                GO.transform.position + new Vector3(0, 4.0f - 0.2f, 0),
+                Quaternion.Euler(180, 0, 0)
+            );
         }
-        */
+
 
         // spawn 2, 3 or 4 walls
         for (int direction = 1; direction <= 4; direction++) {

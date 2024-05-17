@@ -582,8 +582,8 @@ MonoBehaviour:
   maps:
   - {fileID: 1322962922}
   - {fileID: 2860119066175330707}
-  startedLevel: 7
-  startedSeed: 815695
+  startedLevel: 1
+  startedSeed: 0
   level: 1
   MazeBuilder: {fileID: 1027156425}
   MazeGenerator: {fileID: 1990344165}

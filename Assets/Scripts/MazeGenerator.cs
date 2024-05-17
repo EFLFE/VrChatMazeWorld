@@ -183,6 +183,10 @@ public class MazeGenerator : UdonSharpBehaviour {
             for (int y = halfSize - 2; y <= halfSize + 2; y++) {
                 ids[x][y][middle_floor_index] = 1;
                 cells[x][y][middle_floor_index] = Cell.Passage;
+                ids[x][y][middle_floor_index + 1] = 1;
+                cells[x][y][middle_floor_index + 1] = Cell.Passage;
+                ids[x][y][middle_floor_index + 2] = 1;
+                cells[x][y][middle_floor_index + 2] = Cell.Passage;
             }
         }
         current_id++;
@@ -474,7 +478,7 @@ public class MazeGenerator : UdonSharpBehaviour {
 
         if (ids[start_x][start_y][start_z + dz] != 0) return false;
         GetDirectionsVector(forward_dir, out int dx, out int dy);
-        if (ids[start_x + dx][start_y + dy][start_z + dz] != 0) return false;
+        if (GetId(start_x + dx, start_y + dy, start_z + dz) != 0) return false;
 
         // it is possible to spawn room with 2 vertical cells
         ids[start_x][start_y][start_z] = current_id;
