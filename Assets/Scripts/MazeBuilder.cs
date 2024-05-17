@@ -88,7 +88,9 @@ public class MazeBuilder : UdonSharpBehaviour {
 
                 if (iter <= maze.Size * maze.Size) {
                     controller.Utils.NextSpiral(out int x, out int y);
-                    SpawnCell(x, y);
+                    for (int z = 0; z < maze.Height; z++) {
+                        SpawnCell(x, y, z);
+                    }
                     controller.MazeUI.SetProgressValue((float) iter / (maze.Size * maze.Size));
                 } else {
                     buildIterType = BuildIterType.Chest;
@@ -96,7 +98,7 @@ public class MazeBuilder : UdonSharpBehaviour {
                 }
             } else if (buildIterType == BuildIterType.Chest) {
                 if (iter < maze.ChestsAmount) {
-                    SpawnChest(maze.ChestsX[iter], maze.ChestsY[iter]);
+                    SpawnChest(maze.ChestsX[iter], maze.ChestsY[iter], maze.ChestsZ[iter]);
                     controller.MazeUI.SetProgressValue((float) iter / maze.ChestsAmount);
                 } else {
                     buildIterType = BuildIterType.None;
@@ -111,24 +113,16 @@ public class MazeBuilder : UdonSharpBehaviour {
         return MazeReady;
     }
 
-    private Cell GetCell(int x, int y) {
-        if (x < 0 || y < 0 || x >= controller.MazeGenerator.Size || y >= controller.MazeGenerator.Size) {
-            return Cell.Wall;
-        } else {
-            return controller.MazeGenerator.Cells[x][y];
-        }
-    }
-
-    private bool SpawnCell(int x, int y) {
+    private bool SpawnCell(int x, int y, int z) {
         //controller.MazeUI.UILog($"SpawnCell XY = {x}, {y}");
 
         MazeGenerator maze = controller.MazeGenerator;
-        Cell[][] cells = maze.Cells;
-        int[][] ids = maze.Ids;
+        Cell[][][] cells = maze.Cells;
+        int[][][] ids = maze.Ids;
         Room[] rooms = maze.Rooms;
 
-        Cell current_cell = cells[x][y];
-        int current_id = ids[x][y];
+        Cell current_cell = cells[x][y][z];
+        int current_id = ids[x][y][z];
         Room current_room = rooms[current_id];
 
         if (current_cell != Cell.Hole) {
@@ -139,8 +133,8 @@ public class MazeBuilder : UdonSharpBehaviour {
 
             if (!need_to_spawn_floor) {
                 for (int dir = 0; dir < 4; dir++) {
-                    controller.MazeGenerator.GetDirectionsVector(dir, out int dx, out int dy);
-                    if (GetCell(x + dx, y + dy) == Cell.Hole) {
+                    maze.GetDirectionsVector(dir, out int dx, out int dy);
+                    if (maze.GetCell(x + dx, y + dy, z) == Cell.Hole) {
                         need_to_spawn_floor = true;
                         break;
                     }
@@ -150,25 +144,27 @@ public class MazeBuilder : UdonSharpBehaviour {
             if (need_to_spawn_floor) {
                 GameObject obj_floor = Spawn(
                     floors[current_id == 1 ? 0 : GetRandomIndex(floors.Length, 0.9f)],
-                    x, y, 0,
+                    x, y, z, 0,
                     $"floor {current_id}, cell type: {current_cell}, xy: {x} {y}"
                 );
                 ColorizeFloor(obj_floor, current_id);
             }
         }
 
+        /*
         // spawn ceiling everywhere except start room and walls
         if (current_id > 1) {
-            // TODO make admin button to remove all ceilings
-            int rotation = controller.MazeGenerator.RandomInclusive(0, 3) * 90;
+            int rotation = maze.RandomInclusive(0, 3) * 90;
             GameObject GO = Spawn(
                 ceilings[GetRandomIndex(ceilings.Length, 0.75f)],
                 x, y, rotation,
                 "ceiling",
-                mazeCeilingContainer);
+                mazeCeilingContainer
+            );
             // поворот для потолочков <(^_^)> =(^_^)=
             GO.transform.SetPositionAndRotation(GO.transform.position + new Vector3(0, 4, 0), Quaternion.Euler(180, 0, 0));
         }
+        */
 
         // spawn 2, 3 or 4 walls
         for (int direction = 1; direction <= 4; direction++) {
@@ -187,11 +183,12 @@ public class MazeBuilder : UdonSharpBehaviour {
             int nearId = 0;
             string debug = $"out of bounds: x + dx, y + dy, dx, dy: {x + dx}, {y + dy}, {dx}, {dy}";
             if (y + dy >= 0 && y + dy < maze.Size && x + dx >= 0 && x + dx < maze.Size) {
-                neighbor = cells[x + dx][y + dy];
-                nearId = ids[x + dx][y + dy];
+                neighbor = cells[x + dx][y + dy][z];
+                nearId = ids[x + dx][y + dy][z];
                 debug = "in bounds";
             }
 
+            /*
             // спавн стен для первой комнаты на втором этаже
             if ((current_id == 1 && nearId != 1)) {
                 // spawn wall in air
@@ -203,6 +200,7 @@ public class MazeBuilder : UdonSharpBehaviour {
                     wall2.transform.rotation
                 );
             }
+            */
 
 
             if (direction == 3 && x > 0) continue;
@@ -212,25 +210,25 @@ public class MazeBuilder : UdonSharpBehaviour {
 
             GameObject obj;
             if (current_cell == Cell.DoorDeadEnd && neighbor == Cell.Wall) {
-                int deadend_variant = ids[x][y] % deadends.Length;
-                obj = SpawnWithOffsetAndRecolor(deadends[deadend_variant], x, y, rotation);
-                obj.name = $"id={ids[x][y]}, type deadend, variant {deadend_variant}, {debug}";
+                int deadend_variant = ids[x][y][z] % deadends.Length;
+                obj = SpawnWithOffsetAndRecolor(deadends[deadend_variant], x, y, z, rotation);
+                obj.name = $"id={ids[x][y][z]}, type deadend, variant {deadend_variant}, {debug}";
             } else if (neighbor == Cell.Wall || nearId == 0) {
                 // spawn wall
-                obj = SpawnWithOffsetAndRecolor(walls[GetRandomIndexOfWall()], x, y, rotation);
-                obj.name = $"id={ids[x][y]}, type 1, {debug}";
-            } else if (nearId > 0 && nearId != ids[x][y]) {
+                obj = SpawnWithOffsetAndRecolor(walls[GetRandomIndexOfWall()], x, y, z, rotation);
+                obj.name = $"id={ids[x][y][z]}, type 1, {debug}";
+            } else if (nearId > 0 && nearId != ids[x][y][z]) {
                 // wall or door?
                 if (
-                    (cells[x][y] == Cell.DoorEnterance && neighbor == Cell.DoorExit)
+                    (cells[x][y][z] == Cell.DoorEnterance && neighbor == Cell.DoorExit)
                     ||
-                    (cells[x][y] == Cell.DoorExit && neighbor == Cell.DoorEnterance)
+                    (cells[x][y][z] == Cell.DoorExit && neighbor == Cell.DoorEnterance)
                     ) {
-                    obj = SpawnWithOffsetAndRecolor(doors[controller.MazeGenerator.RandomInclusive(0, doors.Length - 1)], x, y, rotation, "door");
-                    obj.name = $"id={ids[x][y]}, type 2A, {debug}";
+                    obj = SpawnWithOffsetAndRecolor(doors[controller.MazeGenerator.RandomInclusive(0, doors.Length - 1)], x, y, z, rotation, "door");
+                    obj.name = $"id={ids[x][y][z]}, type 2A, {debug}";
                 } else {
-                    obj = SpawnWithOffsetAndRecolor(walls[GetRandomIndexOfWall()], x, y, rotation);
-                    obj.name = $"id={ids[x][y]}, type 2B, {debug}";
+                    obj = SpawnWithOffsetAndRecolor(walls[GetRandomIndexOfWall()], x, y, z, rotation);
+                    obj.name = $"id={ids[x][y][z]}, type 2B, {debug}";
                 }
             } else {
                 // nothing to spawn - clear passage
@@ -244,7 +242,7 @@ public class MazeBuilder : UdonSharpBehaviour {
                 bool in_middle = true;
                 for (int d = 0; d <= 3; d++) {
                     controller.MazeGenerator.GetDirectionsVector(d, out int dx, out int dy);
-                    if (ids[x + dx][y + dy] != current_id) {
+                    if (ids[x + dx][y + dy][z] != current_id) {
                         in_middle = false;
                         break;
                     }
@@ -253,13 +251,13 @@ public class MazeBuilder : UdonSharpBehaviour {
                     // мы находимся на краю квадратной комнаты + текущая ячейка не проход: можно спавнить декорации
                     int deco_type = RandomInclusive(1, 3);
                     if (deco_type == 1) {
-                        Spawn(deco1[RandomInclusive(0, deco1.Length - 1)], x, y, RandomInclusive(0, 360 - 1), "deco1");
+                        Spawn(deco1[RandomInclusive(0, deco1.Length - 1)], x, y, z, RandomInclusive(0, 360 - 1), "deco1");
                     }
                     if (deco_type == 2) {
-                        Spawn(deco2[RandomInclusive(0, deco2.Length - 1)], x, y, RandomInclusive(0, 3) * 90, "deco2");
+                        Spawn(deco2[RandomInclusive(0, deco2.Length - 1)], x, y, z, RandomInclusive(0, 3) * 90, "deco2");
                     }
                     if (deco_type == 3) {
-                        Spawn(deco3[RandomInclusive(0, deco3.Length - 1)], x, y, RandomInclusive(0, 7) * 45, "deco3");
+                        Spawn(deco3[RandomInclusive(0, deco3.Length - 1)], x, y, z, RandomInclusive(0, 7) * 45, "deco3");
                     }
                 }
             }
@@ -281,8 +279,8 @@ public class MazeBuilder : UdonSharpBehaviour {
                 Cell near1_cell = Cell.Wall;
                 int near1_id = 0;
                 if (y + dy1 >= 0 && y + dy1 < maze.Size && x + dx1 >= 0 && x + dx1 < maze.Size) {
-                    near1_cell = cells[x + dx1][y + dy1];
-                    near1_id = ids[x + dx1][y + dy1];
+                    near1_cell = cells[x + dx1][y + dy1][z];
+                    near1_id = ids[x + dx1][y + dy1][z];
                 }
 
                 int direction2 = GetClockwiseDirection(direction1);
@@ -294,14 +292,14 @@ public class MazeBuilder : UdonSharpBehaviour {
                 Cell near2_cell = Cell.Wall;
                 int near2_id = 0;
                 if (y + dy2 >= 0 && y + dy2 < maze.Size && x + dx2 >= 0 && x + dx2 < maze.Size) {
-                    near2_cell = cells[x + dx2][y + dy2];
-                    near2_id = ids[x + dx2][y + dy2];
+                    near2_cell = cells[x + dx2][y + dy2][z];
+                    near2_id = ids[x + dx2][y + dy2][z];
                 }
 
                 if (current_id != near1_id && current_id != near2_id) {
-                    int corner_variant = ids[x][y] % corners.Length;
-                    GameObject corner = SpawnWithRecolor(corners[corner_variant], x, y, rotation);
-                    corner.name = $"corner={ids[x][y]}";
+                    int corner_variant = ids[x][y][z] % corners.Length;
+                    GameObject corner = SpawnWithRecolor(corners[corner_variant], x, y, z, rotation);
+                    corner.name = $"corner={ids[x][y][z]}";
                 }
             }
         }
@@ -342,6 +340,7 @@ public class MazeBuilder : UdonSharpBehaviour {
             Mesh mesh,
             int x,
             int y,
+            int z,
             int rotation,
             string name = "",
             Transform cutstomContainer = null
@@ -355,7 +354,7 @@ public class MazeBuilder : UdonSharpBehaviour {
         Vector3 position = GO.transform.position;
         position.x = (x - controller.MazeGenerator.Size / 2) * ROOMS_OFFSET;
         position.z = (y - controller.MazeGenerator.Size / 2) * ROOMS_OFFSET;
-        position.y = 0;
+        position.y = (z - controller.MazeGenerator.Height / 2) * ROOMS_OFFSET;
         GO.transform.SetPositionAndRotation(position, Quaternion.Euler(0, rotation, 0));
         GO.transform.localScale = new Vector3(ROOM_SCALE, ROOM_SCALE, ROOM_SCALE);
 
@@ -366,13 +365,14 @@ public class MazeBuilder : UdonSharpBehaviour {
     }
 
     private GameObject SpawnWithRecolor(
-    Mesh mesh,
-    int x,
-    int y,
-    int rotation,
-    string name = ""
-) {
-        GameObject GO = Spawn(mesh, x, y, rotation, name);
+        Mesh mesh,
+        int x,
+        int y,
+        int z,
+        int rotation,
+        string name = ""
+    ) {
+        GameObject GO = Spawn(mesh, x, y, z, rotation, name);
 
         // покраска для стеночек для каждого нового уровня
         Material material = GO.GetComponent<MeshRenderer>().materials[0];
@@ -386,10 +386,11 @@ public class MazeBuilder : UdonSharpBehaviour {
         Mesh mesh,
         int x,
         int y,
+        int z,
         int rotation,
         string name = ""
     ) {
-        GameObject GO = SpawnWithRecolor(mesh, x, y, rotation, name);
+        GameObject GO = SpawnWithRecolor(mesh, x, y, z, rotation, name);
 
         // смещение для стеночек вдоль поворота
         Vector3 position = GO.transform.position;
@@ -402,14 +403,14 @@ public class MazeBuilder : UdonSharpBehaviour {
         return GO;
     }
 
-    private MazeObject SpawnChest(int x, int y) {
+    private MazeObject SpawnChest(int x, int y, int z) {
         // lets spawn treasures only on master
         if (!Networking.IsOwner(gameObject)) return null;
 
         Vector3 position;
         position.x = (x - controller.MazeGenerator.Size / 2) * ROOMS_OFFSET;
         position.z = (y - controller.MazeGenerator.Size / 2) * ROOMS_OFFSET;
-        position.y = 1;
+        position.y = (z - controller.MazeGenerator.Height / 2) * ROOMS_OFFSET + 1;
 
         if (!chestPool.TryTake(out MazeObject GO, position, Quaternion.Euler(0, 0, 0))) {
             controller.MazeUI.UILog("No more chest in pool!");
@@ -419,7 +420,7 @@ public class MazeBuilder : UdonSharpBehaviour {
         var treasure = GO.GetComponent<Treasure>();
         controller.MazeUI.UILog(
             $"Spawn {GO.name}, id = {treasure.pool_id} " +
-            $"\n- x, y = {x}, {y} => {position.x}, {position.z}"
+            $"\n- x, y = {x}, {y}, {z} => {position.x}, {position.z}, {position.y}"
         );
 
         buildLeft = 0;
