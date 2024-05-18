@@ -252,8 +252,8 @@ public class MazeBuilder : UdonSharpBehaviour {
             */
 
 
-            if (direction == 3 && x > 0) continue;
             if (direction == 4 && y > 0) continue;
+            if (direction == 3 && x > 0) continue;
 
             if (current_id == 0 && nearId == 0) continue;
 
