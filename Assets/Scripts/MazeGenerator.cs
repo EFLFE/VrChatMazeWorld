@@ -291,14 +291,22 @@ public class MazeGenerator : UdonSharpBehaviour {
         RemoveAllUnusedDoors();
         
         // spawn final chests
-        for (int i = 0; i < chests_amount; i++) {
-            int room_id = current_id - 1 - i;
-            GetRandomCellFromRoomByID(room_id, out int x, out int y, out int z);
-            chests_x[i] = x;
-            chests_y[i] = y;
-            chests_z[i] = z;
-            if (cells[x][y][z] != Cell.DoorEnterance && cells[x][y][z] != Cell.DoorExit) {
-                cells[x][y][z] = Cell.Treasure;
+        int treasures_left = chests_amount;
+        int room_id = current_id;
+        int i = 0;
+        while (treasures_left > 0) {
+            room_id--;
+            if (room_id <= 1) break;
+            if (rooms[room_id] == Room.Cave || rooms[room_id] == Room.Square) {
+                GetRandomCellFromRoomByID(room_id, out int x, out int y, out int z);
+                chests_x[i] = x;
+                chests_y[i] = y;
+                chests_z[i] = z;
+                if (cells[x][y][z] != Cell.DoorEnterance && cells[x][y][z] != Cell.DoorExit) {
+                    cells[x][y][z] = Cell.Treasure;
+                }
+                i++;
+                treasures_left--;
             }
         }
     }
@@ -508,6 +516,12 @@ public class MazeGenerator : UdonSharpBehaviour {
             // down: stairs are on different level (+dz) with no offset (no +dx +dy)
             cells[start_x][start_y][start_z + dz] = stairs_cell;
         }
+        
+        // TODO fill with proper data
+        cache_cells_ammounts[current_id] = 0;
+        cache_cells_x[current_id] = new int[0];
+        cache_cells_y[current_id] = new int[0];
+        cache_cells_z[current_id] = new int[0];
         
         TryToSpawnPossibleDoor(start_x + dx, start_y + dy, start_z + dz, forward_dir);
         return true;

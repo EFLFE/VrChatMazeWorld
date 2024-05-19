@@ -52,6 +52,7 @@ resharper_csharp_allow_comment_after_lbrace = true
 resharper_csharp_blank_lines_around_field = 0
 resharper_csharp_empty_block_style = do_not_change
 resharper_csharp_max_line_length = 180
+resharper_csharp_remove_blank_lines_near_braces_in_code = false
 resharper_csharp_wrap_parameters_style = chop_if_long
 resharper_export_declaration_braces = end_of_line
 resharper_formatter_off_tag = @formatter:off
