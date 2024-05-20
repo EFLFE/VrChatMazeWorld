@@ -481,6 +481,10 @@ public class MazeGenerator : UdonSharpBehaviour {
     
     // генерирует комнату 2*1*2 с лестницей в случайную сторону: вверх или вниз
     private bool TryToGenerateRoomStairs(int start_x, int start_y, int start_z, int forward_dir) {
+        if (start_x < 3 || start_x > size - 4 || start_y < 3 || start_y > size - 4) {
+            return false;
+        }
+        
         if (ids[start_x][start_y][start_z] != 0) return false;
         int dz;
         if (start_z == 0) dz = 1;
