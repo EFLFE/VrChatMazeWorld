@@ -34,6 +34,7 @@ public class MazeBuilder : UdonSharpBehaviour {
     [SerializeField] private Mesh[] deco1;
     [SerializeField] private Mesh[] deco2;
     [SerializeField] private Mesh[] deco3;
+    [SerializeField] private Mesh[] deco4;
     
     public bool MazeReady { get; private set; }
     
@@ -227,21 +228,6 @@ public class MazeBuilder : UdonSharpBehaviour {
                 debug = "in bounds";
             }
             
-            /*
-            // спавн стен для первой комнаты на втором этаже
-            if ((current_id == 1 && nearId != 1)) {
-                // spawn wall in air
-                GameObject wall2;
-                wall2 = SpawnWithOffsetAndRecolor(walls[GetRandomIndexOfWall()], x, y, rotation);
-                wall2.name = $"id={ids[x][y]}, type 2NDFLOOR, {debug}";
-                wall2.transform.SetPositionAndRotation(
-                    wall2.transform.position + new Vector3(0, 4, 0),
-                    wall2.transform.rotation
-                );
-            }
-            */
-            
-            
             if (direction == 3 && x > 0) continue;
             if (direction == 4 && y > 0) continue;
             
@@ -276,27 +262,33 @@ public class MazeBuilder : UdonSharpBehaviour {
         }
         
         // спавн декораций
-        if (x > 0 && x < controller.MazeGenerator.Size - 1 && y > 0 && y < controller.MazeGenerator.Size - 1) {
-            if (current_id > 1 && current_room == Room.Square) {
-                bool in_middle = true;
-                for (int d = 0; d <= 3; d++) {
-                    controller.MazeGenerator.GetDirectionsVector(d, out int dx, out int dy);
-                    if (ids[x + dx][y + dy][z] != current_id) {
-                        in_middle = false;
-                        break;
+        int spawn_deco_probability = RandomInclusive(0, 2);
+        if (spawn_deco_probability >= 1) {
+            if (x > 0 && x < controller.MazeGenerator.Size - 1 && y > 0 && y < controller.MazeGenerator.Size - 1) {
+                if (current_id > 1 && current_room == Room.Square) {
+                    bool in_middle = true;
+                    for (int d = 0; d <= 3; d++) {
+                        controller.MazeGenerator.GetDirectionsVector(d, out int dx, out int dy);
+                        if (ids[x + dx][y + dy][z] != current_id) {
+                            in_middle = false;
+                            break;
+                        }
                     }
-                }
-                if (!in_middle && current_cell == Cell.Passage) {
-                    // мы находимся на краю квадратной комнаты + текущая ячейка не проход: можно спавнить декорации
-                    int deco_type = RandomInclusive(1, 3);
-                    if (deco_type == 1) {
-                        Spawn(deco1[RandomInclusive(0, deco1.Length - 1)], x, y, z, RandomInclusive(0, 360 - 1), "deco1");
-                    }
-                    if (deco_type == 2) {
-                        Spawn(deco2[RandomInclusive(0, deco2.Length - 1)], x, y, z, RandomInclusive(0, 3) * 90, "deco2");
-                    }
-                    if (deco_type == 3) {
-                        Spawn(deco3[RandomInclusive(0, deco3.Length - 1)], x, y, z, RandomInclusive(0, 7) * 45, "deco3");
+                    if (!in_middle && current_cell == Cell.Passage) {
+                        // мы находимся на краю квадратной комнаты + текущая ячейка не проход: можно спавнить декорации
+                        int deco_type = current_id % 4 + 1;
+                        if (deco_type == 1) {
+                            Spawn(deco1[RandomInclusive(0, deco1.Length - 1)], x, y, z, RandomInclusive(0, 360 - 1), "deco1");
+                        }
+                        if (deco_type == 2) {
+                            Spawn(deco2[RandomInclusive(0, deco2.Length - 1)], x, y, z, RandomInclusive(0, 3) * 90, "deco2");
+                        }
+                        if (deco_type == 3) {
+                            Spawn(deco3[RandomInclusive(0, deco3.Length - 1)], x, y, z, RandomInclusive(0, 7) * 45, "deco3");
+                        }
+                        if (deco_type == 4) {
+                            Spawn(deco3[RandomInclusive(0, deco4.Length - 1)], x, y, z, RandomInclusive(0, 7) * 45, "deco4");
+                        }
                     }
                 }
             }
