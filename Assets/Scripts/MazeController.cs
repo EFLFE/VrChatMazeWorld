@@ -217,7 +217,7 @@ public class MazeController : UdonSharpBehaviour {
         }
 
         // send synd data to ui
-        syncDataUI.AddText("Maze controler:");
+        syncDataUI.AddText("Maze controller:");
         syncDataUI.AddText($"- {(Networking.IsOwner(gameObject) ? "Is owner!" : "Is secondary")}");
         syncDataUI.AddText($"- {nameof(mazeSize)} = {mazeSize}");
         syncDataUI.AddText($"- {nameof(mazeRoomsAmount)} = {mazeRoomsAmount}");
