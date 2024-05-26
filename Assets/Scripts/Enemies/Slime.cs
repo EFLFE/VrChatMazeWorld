@@ -10,8 +10,8 @@ public class Slime : BaseEnemy {
     VRCPlayerApi localPlayer1;
     float jumpTimer;
 
-    public override void Init() {
-        base.Init();
+    public override void Init(MazeController controller) {
+        base.Init(controller);
         rigidbodyField = GetComponent<Rigidbody>();
         Color clr = GetRandomColor();
         clr.a = .7f;

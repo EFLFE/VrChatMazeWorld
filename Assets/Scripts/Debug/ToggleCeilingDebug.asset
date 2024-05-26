@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c333ccfdd0cbdbc4ca30cef2dd6e6b9b, type: 3}
   m_Name: ToggleCeilingDebug
   m_EditorClassIdentifier: 
-  serializedUdonProgramAsset: {fileID: 11400000, guid: 918399f94136a144bbcbbe4fbab3499c,
+  serializedUdonProgramAsset: {fileID: 11400000, guid: ba3f13221e99a5b4ab40a910ab1fa334,
     type: 2}
   udonAssembly: 
   assemblyError: 

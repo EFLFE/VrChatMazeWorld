@@ -30,6 +30,8 @@ public class MazeController : UdonSharpBehaviour {
     public MazeGenerator MazeGenerator;
     public MazeUI MazeUI;
     public Utils Utils;
+    public PlayersManager PlayersManager;
+    public ListManager ListManager;
 
     public CentralZone CentralZone;
 
@@ -71,6 +73,7 @@ public class MazeController : UdonSharpBehaviour {
         chestPool.Init(this);
         MazeBuilder.Init(this);
         MazeUI.Init(this);
+        PlayersManager.Init(this);
         for (int i = 0; i < maps.Length; i++)
             maps[i].Init(this);
 
@@ -187,6 +190,7 @@ public class MazeController : UdonSharpBehaviour {
 
     public void Update() {
         syncDataUI.Clear();
+        PlayersManager.ManualUpdate();
 
         if (!generator_is_ready) {
             generator_is_ready = MazeGenerator.Generate();
@@ -236,7 +240,7 @@ public class MazeController : UdonSharpBehaviour {
             GameObject obj = Instantiate(enemyPrefab, enemySpawn);
             obj.transform.localPosition = Vector3.zero;
             BaseEnemy script = obj.GetComponent<BaseEnemy>();
-            script.Init();
+            script.Init(this);
         }
     }
 
