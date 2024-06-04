@@ -1,5 +1,6 @@
 ﻿using UdonSharp;
 using UnityEngine;
+using VRC.SDK3.Dynamics.Contact.Components;
 using VRC.SDKBase;
 using VRC.Udon;
 
@@ -9,9 +10,13 @@ public class BaseEnemy : UdonSharpBehaviour {
     [SerializeField, UdonSynced] private float rotateSpeed = 4f;
     [SerializeField] private MeshRenderer meshRenderer;
     [SerializeField] private Rigidbody rigidbodyRef;
+    [SerializeField] private Collider baseCollider;
 
     private MazeController controller;
     protected bool MoveToPlayer;
+
+    public bool IsDead => health <= 0f;
+    public MeshRenderer GetMeshRenderer => meshRenderer;
 
     public virtual void Init(MazeController controller) {
         this.controller = controller;
@@ -20,6 +25,23 @@ public class BaseEnemy : UdonSharpBehaviour {
     }
 
     protected virtual void ManualUpdate() {
+        PlayerData localPlayerData = controller.PlayersManager.GetLocalPlayer();
+        if (localPlayerData.TryPunchLeftHand()) {
+            Vector3 leftHandPos = localPlayerData.GetTrackingData(VRCPlayerApi.TrackingDataType.LeftHand).position;
+            if (baseCollider.bounds.Contains(leftHandPos)) {
+                Damage(1, "left hand");
+                rigidbodyRef.AddForce(Vector3.up * 20f);
+            }
+        }
+        if (localPlayerData.TryPunchRightHand()) {
+            Vector3 rightHandPos = localPlayerData.GetTrackingData(VRCPlayerApi.TrackingDataType.RightHand).position;
+            if (baseCollider.bounds.Contains(rightHandPos)) {
+                Damage(1, "right hand");
+                rigidbodyRef.AddForce(Vector3.up * 20f);
+            }
+        }
+
+
         if (MoveToPlayer) {
             Vector3 pos = transform.position;
             if (controller.PlayersManager.TryGetNearPlayer(pos, out PlayerData playerData)) {
@@ -47,17 +69,21 @@ public class BaseEnemy : UdonSharpBehaviour {
         transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(direction), rotateSpeed * Time.deltaTime);
     }
 
-    protected void SetMaterialColor(Color clr) {
-        var prop = new MaterialPropertyBlock();
-        prop.SetColor("_Color", clr);
-        meshRenderer.SetPropertyBlock(prop);
+    private void OnTriggerEnter(Collider other) {
+        Damage(1, $"collider '{other.gameObject.name}', {other.gameObject.layer}");
     }
 
-    private void OnTriggerEnter(Collider other) {
-        // TODO: проверить что за other объект
-        health--;
+    public void Damage(float value = 1f, string log = null) {
+        if (IsDead)
+            return;
+
+        health -= value;
+
+        controller.MazeUI.UILog($"Enemy got {value} damage (hp {health}) :: {log}");
+
         if (health <= 0f) {
             Destroy(gameObject);
         }
     }
+
 }

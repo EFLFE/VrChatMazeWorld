@@ -15,7 +15,7 @@ public class Slime : BaseEnemy {
         rigidbodyField = GetComponent<Rigidbody>();
         Color clr = GetRandomColor();
         clr.a = .7f;
-        SetMaterialColor(clr);
+        Utils.SetMaterialColor(GetMeshRenderer, clr);
         jumpTimer = 3f;
     }
 

@@ -57,8 +57,10 @@ public class Utils : UdonSharpBehaviour {
         y = spiralY + spiralHalfSize;
     }
 
+    // Static //
+
     // from maze generator ids
-    public Color GetFloorColor(int id) {
+    public static Color GetFloorColor(int id) {
         Color clr;
         if (id == 1) {
             // general room
@@ -78,5 +80,12 @@ public class Utils : UdonSharpBehaviour {
         }
         return clr;
     }
+
+    public static void SetMaterialColor(MeshRenderer meshRenderer, Color clr) {
+        var prop = new MaterialPropertyBlock();
+        prop.SetColor("_Color", clr);
+        meshRenderer.SetPropertyBlock(prop);
+    }
+
 
 }

@@ -152,7 +152,6 @@ public class Map : UdonSharpBehaviour {
     }
 
     private void DrawBlock(int x, int y) {
-
         Cell cellType = maze.GetCell(x, y, maze.middle_floor_index);
         int posX = maze.Size - x - 1;
         int posY = y;
@@ -162,7 +161,7 @@ public class Map : UdonSharpBehaviour {
             case Cell.DoorDeadEnd:
             case Cell.DoorEnterance:
             case Cell.DoorExit:
-                Color clr = controller.Utils.GetFloorColor(maze.Ids[x][y][maze.middle_floor_index]);
+                Color clr = Utils.GetFloorColor(maze.Ids[x][y][maze.middle_floor_index]);
                 CreateCell(posX, posY, clr, cellType);
                 break;
 

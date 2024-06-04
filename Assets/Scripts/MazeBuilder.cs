@@ -362,7 +362,7 @@ public class MazeBuilder : UdonSharpBehaviour {
     private void ColorizeFloor(GameObject floor, int id) {
         var floorMesh = (MeshRenderer)floor.GetComponent(typeof(MeshRenderer));
         var matProp = new MaterialPropertyBlock();
-        Color clr = controller.Utils.GetFloorColor(id);
+        Color clr = Utils.GetFloorColor(id);
         matProp.SetColor("_Color", clr);
         floorMesh.SetPropertyBlock(matProp);
     }

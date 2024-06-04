@@ -581,11 +581,12 @@ MonoBehaviour:
     PrefabModifications: []
     SerializationNodes: []
   _udonSharpBackingUdonBehaviour: {fileID: 14622553}
-  health: 5
+  health: 100
   speed: 1
   rotateSpeed: 5
   meshRenderer: {fileID: 0}
   rigidbodyRef: {fileID: 14622554}
+  baseCollider: {fileID: 14622555}
   controllerRef: {fileID: 112654833}
 --- !u!4 &14622557
 Transform:
@@ -23627,23 +23628,23 @@ MonoBehaviour:
   - {fileID: -8468983757882266563, guid: 1d022daeedcac0c4f934898f60632558, type: 3}
   - {fileID: -7848952084472943420, guid: 1d022daeedcac0c4f934898f60632558, type: 3}
   - {fileID: 2100000, guid: 48f32ce8d7140f045a2c568df3a8d9bd, type: 2}
-  - {fileID: 2100000, guid: 5b91c5c74862dba4d9fc2e8ae3e07b70, type: 2}
-  - {fileID: 2100000, guid: c2af845bdfb561149b08ba13167ff040, type: 2}
-  - {fileID: 2100000, guid: 56778de2f4060f14fb06bc8cba7e30b7, type: 2}
-  - {fileID: 2100000, guid: e01134920adbcf549ac7f52ceeb583a2, type: 2}
-  - {fileID: 2100000, guid: 254a177cd9c57e84683d0fd3bd1be46d, type: 2}
-  - {fileID: 2100000, guid: 43d0ae848fdfe6d4495a87f8e80e386b, type: 2}
-  - {fileID: 2100000, guid: 885a01c79ffd5024489a1fb31f3fffb5, type: 2}
-  - {fileID: 2100000, guid: 87529c80faca0ef4a881efba652815f3, type: 2}
-  - {fileID: 2100000, guid: 9db9f48f3ee803d448488d4368a140f9, type: 2}
-  - {fileID: 2100000, guid: 88aa935393607b6409baa45499f5156b, type: 2}
-  - {fileID: 2100000, guid: a393dafb2990e2c4fa0628ace4444efa, type: 2}
-  - {fileID: 2100000, guid: dd75a5d3bd47a0c489c0fd71aff39ede, type: 2}
   - {fileID: 2100000, guid: 49c7ed6d767622b4fadcf200017fd44f, type: 2}
-  - {fileID: 2100000, guid: b3889ddf2a4bd9346a4843eb47e0acb1, type: 2}
+  - {fileID: 2100000, guid: c2af845bdfb561149b08ba13167ff040, type: 2}
   - {fileID: 2100000, guid: b24ed807dd7dc224baf5390f46738647, type: 2}
-  - {fileID: 2100000, guid: 51d72acecdb1ba249957953415f8e29b, type: 2}
+  - {fileID: 2100000, guid: 254a177cd9c57e84683d0fd3bd1be46d, type: 2}
   - {fileID: 10303, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: 51d72acecdb1ba249957953415f8e29b, type: 2}
+  - {fileID: 2100000, guid: b3889ddf2a4bd9346a4843eb47e0acb1, type: 2}
+  - {fileID: 2100000, guid: dd75a5d3bd47a0c489c0fd71aff39ede, type: 2}
+  - {fileID: 2100000, guid: a393dafb2990e2c4fa0628ace4444efa, type: 2}
+  - {fileID: 2100000, guid: 88aa935393607b6409baa45499f5156b, type: 2}
+  - {fileID: 2100000, guid: 9db9f48f3ee803d448488d4368a140f9, type: 2}
+  - {fileID: 2100000, guid: 87529c80faca0ef4a881efba652815f3, type: 2}
+  - {fileID: 2100000, guid: 885a01c79ffd5024489a1fb31f3fffb5, type: 2}
+  - {fileID: 2100000, guid: 43d0ae848fdfe6d4495a87f8e80e386b, type: 2}
+  - {fileID: 2100000, guid: e01134920adbcf549ac7f52ceeb583a2, type: 2}
+  - {fileID: 2100000, guid: 56778de2f4060f14fb06bc8cba7e30b7, type: 2}
+  - {fileID: 2100000, guid: 5b91c5c74862dba4d9fc2e8ae3e07b70, type: 2}
   - {fileID: 2100000, guid: 977407fc6e7d40942ad9411b602997fd, type: 2}
   - {fileID: 2100000, guid: 4d67ee93926c00243bd0446f92f73578, type: 2}
   - {fileID: 2100000, guid: c815f7613a04b724089c206857e57c6a, type: 2}
@@ -24123,6 +24124,144 @@ MonoBehaviour:
     ID: 456
   - gameObject: {fileID: 1110332044}
     ID: 457
+  - gameObject: {fileID: 1743139519}
+    ID: 458
+  - gameObject: {fileID: 228722906}
+    ID: 459
+  - gameObject: {fileID: 548992838}
+    ID: 460
+  - gameObject: {fileID: 905931567}
+    ID: 461
+  - gameObject: {fileID: 1280487646}
+    ID: 462
+  - gameObject: {fileID: 425288406}
+    ID: 463
+  - gameObject: {fileID: 236762069}
+    ID: 464
+  - gameObject: {fileID: 909126989}
+    ID: 465
+  - gameObject: {fileID: 958411031}
+    ID: 466
+  - gameObject: {fileID: 1424866611}
+    ID: 467
+  - gameObject: {fileID: 150342722}
+    ID: 468
+  - gameObject: {fileID: 1832666218}
+    ID: 469
+  - gameObject: {fileID: 1339313807}
+    ID: 470
+  - gameObject: {fileID: 562018072}
+    ID: 471
+  - gameObject: {fileID: 599315189}
+    ID: 472
+  - gameObject: {fileID: 92596678}
+    ID: 473
+  - gameObject: {fileID: 1293897061}
+    ID: 474
+  - gameObject: {fileID: 1132836864}
+    ID: 475
+  - gameObject: {fileID: 543446078}
+    ID: 476
+  - gameObject: {fileID: 530002338}
+    ID: 477
+  - gameObject: {fileID: 1958104632}
+    ID: 478
+  - gameObject: {fileID: 1112812248}
+    ID: 479
+  - gameObject: {fileID: 1268685396}
+    ID: 480
+  - gameObject: {fileID: 1406600119}
+    ID: 481
+  - gameObject: {fileID: 395585554}
+    ID: 482
+  - gameObject: {fileID: 861360773}
+    ID: 483
+  - gameObject: {fileID: 8591963}
+    ID: 484
+  - gameObject: {fileID: 938668278}
+    ID: 485
+  - gameObject: {fileID: 1127282409}
+    ID: 486
+  - gameObject: {fileID: 1161575286}
+    ID: 487
+  - gameObject: {fileID: 1918380001}
+    ID: 488
+  - gameObject: {fileID: 1935021248}
+    ID: 489
+  - gameObject: {fileID: 229730151}
+    ID: 490
+  - gameObject: {fileID: 1855662365}
+    ID: 491
+  - gameObject: {fileID: 1188621033}
+    ID: 492
+  - gameObject: {fileID: 1807924090}
+    ID: 493
+  - gameObject: {fileID: 64754339}
+    ID: 494
+  - gameObject: {fileID: 1454364815}
+    ID: 495
+  - gameObject: {fileID: 1781006140}
+    ID: 496
+  - gameObject: {fileID: 1450146576}
+    ID: 497
+  - gameObject: {fileID: 88975213}
+    ID: 498
+  - gameObject: {fileID: 1095933599}
+    ID: 499
+  - gameObject: {fileID: 1833804203}
+    ID: 500
+  - gameObject: {fileID: 618587641}
+    ID: 501
+  - gameObject: {fileID: 865008306}
+    ID: 502
+  - gameObject: {fileID: 1933308172}
+    ID: 503
+  - gameObject: {fileID: 759988947}
+    ID: 504
+  - gameObject: {fileID: 884244068}
+    ID: 505
+  - gameObject: {fileID: 1697953833}
+    ID: 506
+  - gameObject: {fileID: 1748472996}
+    ID: 507
+  - gameObject: {fileID: 2123630521}
+    ID: 508
+  - gameObject: {fileID: 1530420010}
+    ID: 509
+  - gameObject: {fileID: 562957280}
+    ID: 510
+  - gameObject: {fileID: 891667401}
+    ID: 511
+  - gameObject: {fileID: 1107074746}
+    ID: 512
+  - gameObject: {fileID: 575340771}
+    ID: 513
+  - gameObject: {fileID: 808747372}
+    ID: 514
+  - gameObject: {fileID: 317511732}
+    ID: 515
+  - gameObject: {fileID: 1981984462}
+    ID: 516
+  - gameObject: {fileID: 1098543843}
+    ID: 517
+  - gameObject: {fileID: 1404380225}
+    ID: 518
+  - gameObject: {fileID: 1056149812}
+    ID: 519
+  - gameObject: {fileID: 230499068}
+    ID: 520
+  - gameObject: {fileID: 7795513}
+    ID: 521
+  - gameObject: {fileID: 1235667483}
+    ID: 522
+  - gameObject: {fileID: 285499168}
+    ID: 523
+  - gameObject: {fileID: 953989780}
+    ID: 524
+  - gameObject: {fileID: 263300202}
+    ID: 525
+  - gameObject: {fileID: 933335808}
+    ID: 526
   portraitCameraPositionOffset: {x: 0, y: 0, z: 0}
   portraitCameraRotationOffset: {x: 0, y: 1, z: 0, w: -0.00000004371139}
 --- !u!1 &7130147489544253970
