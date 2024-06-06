@@ -17,6 +17,7 @@ public class MazeController : UdonSharpBehaviour {
     [Header("Debug")]
     [SerializeField] private int startedLevel = 1;
     [SerializeField] private int startedSeed = 0;
+    [SerializeField] private MazeObject[] tempMazeObjects;
 
     [UdonSynced] private int mazeSize;
     [UdonSynced] private int mazeRoomsAmount;
@@ -76,6 +77,14 @@ public class MazeController : UdonSharpBehaviour {
         PlayersManager.Init(this);
         for (int i = 0; i < maps.Length; i++)
             maps[i].Init(this);
+
+        if (tempMazeObjects == null)
+            tempMazeObjects = new MazeObject[0];
+        else {
+            for (int i = 0; i < tempMazeObjects.Length; i++) {
+                tempMazeObjects[i].Init(this, -1);
+            }
+        }
 
         if (Networking.IsOwner(gameObject)) {
             seed = startedSeed == 0 ? Random.Range(0, 999999) : startedSeed;
@@ -220,6 +229,13 @@ public class MazeController : UdonSharpBehaviour {
             }
         }
 
+        if (MazeBuilder.MazeReady) {
+            for (int i = 0; i < tempMazeObjects.Length; i++) {
+                if (tempMazeObjects[i] != null)
+                    tempMazeObjects[i].ManualUpdate();
+            }
+        }
+
         // send synd data to ui
         syncDataUI.AddText("Maze controller:");
         syncDataUI.AddText($"- {(Networking.IsOwner(gameObject) ? "Is owner!" : "Is secondary")}");
@@ -240,7 +256,7 @@ public class MazeController : UdonSharpBehaviour {
             GameObject obj = Instantiate(enemyPrefab, enemySpawn);
             obj.transform.localPosition = Vector3.zero;
             BaseEnemy script = obj.GetComponent<BaseEnemy>();
-            script.Init(this);
+            script.Init(this, -1);
         }
     }
 

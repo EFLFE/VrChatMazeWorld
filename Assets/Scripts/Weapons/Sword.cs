@@ -1,17 +1,32 @@
 ﻿using UdonSharp;
 using UnityEngine;
 
-public class Sword : UdonSharpBehaviour {
-    [SerializeField] private GameObject swordTip;
+[UdonBehaviourSyncMode(BehaviourSyncMode.Manual)]
+public class Sword : BaseWeapon {
+    [SerializeField] private Transform swordTip;
+    [SerializeField] private TrailRenderer tipTrail;
 
-    private MazeController controller;
+    private bool tipTrailEmitting;
+    private Vector3 lastSwordTipPos;
 
-    public void Init(MazeController mazeController) {
-        controller = mazeController;
+    public override void Init(MazeController controller, int pool_id) {
+        base.Init(controller, pool_id);
+        lastSwordTipPos = swordTip.position;
     }
 
-    public void ManualUpdate() {
+    public override void ManualUpdate() {
+        base.ManualUpdate();
 
+        var swordTipPos = swordTip.position;
+        float dist = Vector3.Distance(swordTipPos, lastSwordTipPos);
+        lastSwordTipPos = swordTipPos;
+        const float minDamageForce = 0.060f;
+        CanDamage = dist >= minDamageForce;
+
+        if (tipTrailEmitting != CanDamage) {
+            tipTrailEmitting = CanDamage;
+            tipTrail.emitting = tipTrailEmitting;
+        }
     }
 
 }

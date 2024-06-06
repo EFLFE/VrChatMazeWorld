@@ -3,6 +3,9 @@ using UnityEngine;
 
 [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
 public class Utils : UdonSharpBehaviour {
+    // Layers
+    public const int LAYER_WEAPON = 25;
+
     private int spiralX;
     private int spiralY;
     private int spiralDX;

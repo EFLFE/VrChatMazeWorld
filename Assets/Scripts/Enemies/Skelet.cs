@@ -1,15 +1,10 @@
-﻿using UnityEngine;
+﻿using UdonSharp;
+using UnityEngine;
 
+[UdonBehaviourSyncMode(BehaviourSyncMode.Manual)]
 public class Skelet : BaseEnemy {
-    [SerializeField] private MazeController controllerRef;
-
-    private void Start() {
-        Init(controllerRef);
+    public override void Init(MazeController controller, int pool_id) {
+        base.Init(controller, pool_id);
         MoveToPlayer = true;
-    }
-
-    private void Update() {
-        if (controllerRef.MazeBuilder.MazeReady) // remove in ManualUpdate
-            ManualUpdate();
     }
 }

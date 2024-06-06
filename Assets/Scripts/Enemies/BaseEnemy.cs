@@ -4,7 +4,7 @@ using VRC.SDK3.Dynamics.Contact.Components;
 using VRC.SDKBase;
 using VRC.Udon;
 
-public class BaseEnemy : UdonSharpBehaviour {
+public class BaseEnemy : MazeObject {
     [SerializeField, UdonSynced] private float health = 5f;
     [SerializeField, UdonSynced] private float speed = 1f;
     [SerializeField, UdonSynced] private float rotateSpeed = 4f;
@@ -19,51 +19,50 @@ public class BaseEnemy : UdonSharpBehaviour {
     public bool IsDead => health <= 0f;
     public MeshRenderer GetMeshRenderer => meshRenderer;
 
-    public virtual void Init(MazeController controller) {
+    public override void Init(MazeController controller, int pool_id) {
+        base.Init(controller, pool_id);
         this.controller = controller;
         speed += Random.Range(0f, 0.2f);
         RequestSerialization();
     }
 
-    protected virtual void ManualUpdate() {
+    public override void ManualUpdate() {
         PlayerData localPlayerData = controller.PlayersManager.GetLocalPlayer();
 
         if (localPlayerData.TryPunchLeftHand()) {
             Vector3 leftHandPos = localPlayerData.GetTrackingData(VRCPlayerApi.TrackingDataType.LeftHand).position;
             if (baseCollider.bounds.Contains(leftHandPos)) {
                 Damage(1, "left hand");
-                rigidbodyRef.AddForce(Vector3.up * 2f, ForceMode.Impulse);
             }
         }
         if (localPlayerData.TryPunchRightHand()) {
             Vector3 rightHandPos = localPlayerData.GetTrackingData(VRCPlayerApi.TrackingDataType.RightHand).position;
             if (baseCollider.bounds.Contains(rightHandPos)) {
                 Damage(1, "right hand");
-                rigidbodyRef.AddForce(Vector3.up * 2f, ForceMode.Impulse);
             }
         }
-
 
         if (MoveToPlayer) {
             Vector3 pos = transform.position;
             if (controller.PlayersManager.TryGetNearPlayer(pos, out PlayerData playerData)) {
                 Vector3 playerPos = playerData.GetGlobalPos;
-                pos = Vector3.MoveTowards(pos, playerPos, speed * Time.deltaTime);
 
                 // 0.6 = впритык к игроку
                 float dist = Vector3.Distance(pos, playerPos);
                 if (dist < 0.8f) {
                     // не двигаться
-                    OnTouchPlayer(playerData.GetPlayerApi);
-                } else {
-                    transform.position = pos;
+                    OnTouchPlayer(playerData);
+                    RotateTo(pos, playerPos);
+                } else if (dist < 10f) {
+                    // move to player
+                    transform.position = Vector3.MoveTowards(pos, playerPos, speed * Time.deltaTime);
+                    RotateTo(pos, playerPos);
                 }
-                RotateTo(pos, playerPos);
             }
         }
     }
 
-    protected virtual void OnTouchPlayer(VRCPlayerApi player) { }
+    protected virtual void OnTouchPlayer(PlayerData player) { }
 
     private void RotateTo(Vector3 from, Vector3 target) {
         from.y = 0f;
@@ -75,21 +74,25 @@ public class BaseEnemy : UdonSharpBehaviour {
             rotateSpeed * Time.deltaTime);
     }
 
-    //private void OnTriggerEnter(Collider other) {
-    //    if(other.gameObject.layer == ??)
-    //      Damage(1, $"collider '{other.gameObject.name}', {other.gameObject.layer}");
-    //}
+    private void OnTriggerEnter(Collider other) {
+        if (other.gameObject.layer == Utils.LAYER_WEAPON) {
+            var weapontPart = other.gameObject.GetComponent<WeapontPart>();
+            if (weapontPart.Weapon.CanDamage)
+                Damage(5, $"collider '{other.gameObject.name}', Weapon");
+        }
+    }
 
     public void Damage(float value = 1f, string log = null) {
         if (IsDead)
             return;
 
         health -= value;
-
-        controller.MazeUI.UILog($"Enemy got {value} damage (hp {health}) :: {log}");
+        controller.MazeUI.UILog($"Enemy got {value} damage (hp {health}) {log}");
 
         if (health <= 0f) {
             Destroy(gameObject);
+        } else {
+            rigidbodyRef.AddForce(Vector3.up * Mathf.Clamp(value, 1, 3), ForceMode.Impulse);
         }
     }
 

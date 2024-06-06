@@ -3,6 +3,7 @@ using UnityEngine;
 using VRC.SDKBase;
 
 // global script
+[UdonBehaviourSyncMode(BehaviourSyncMode.Manual)]
 public class FingerPistol : UdonSharpBehaviour {
     [SerializeField] MazeController controller;
     [SerializeField] GameObject projectilePrefab;

@@ -11,4 +11,6 @@ public class MazeObject : UdonSharpBehaviour {
         Controller = controller;
         this.pool_id = pool_id;
     }
+
+    public virtual void ManualUpdate() { }
 }
