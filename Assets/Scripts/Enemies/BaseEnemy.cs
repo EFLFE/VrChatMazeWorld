@@ -8,6 +8,7 @@ public class BaseEnemy : UdonSharpBehaviour {
     [SerializeField, UdonSynced] private float health = 5f;
     [SerializeField, UdonSynced] private float speed = 1f;
     [SerializeField, UdonSynced] private float rotateSpeed = 4f;
+
     [SerializeField] private MeshRenderer meshRenderer;
     [SerializeField] private Rigidbody rigidbodyRef;
     [SerializeField] private Collider baseCollider;
@@ -26,18 +27,19 @@ public class BaseEnemy : UdonSharpBehaviour {
 
     protected virtual void ManualUpdate() {
         PlayerData localPlayerData = controller.PlayersManager.GetLocalPlayer();
+
         if (localPlayerData.TryPunchLeftHand()) {
             Vector3 leftHandPos = localPlayerData.GetTrackingData(VRCPlayerApi.TrackingDataType.LeftHand).position;
             if (baseCollider.bounds.Contains(leftHandPos)) {
                 Damage(1, "left hand");
-                rigidbodyRef.AddForce(Vector3.up * 20f);
+                rigidbodyRef.AddForce(Vector3.up * 2f, ForceMode.Impulse);
             }
         }
         if (localPlayerData.TryPunchRightHand()) {
             Vector3 rightHandPos = localPlayerData.GetTrackingData(VRCPlayerApi.TrackingDataType.RightHand).position;
             if (baseCollider.bounds.Contains(rightHandPos)) {
                 Damage(1, "right hand");
-                rigidbodyRef.AddForce(Vector3.up * 20f);
+                rigidbodyRef.AddForce(Vector3.up * 2f, ForceMode.Impulse);
             }
         }
 
@@ -48,13 +50,14 @@ public class BaseEnemy : UdonSharpBehaviour {
                 Vector3 playerPos = playerData.GetGlobalPos;
                 pos = Vector3.MoveTowards(pos, playerPos, speed * Time.deltaTime);
 
-                // 0.6 = впритык
+                // 0.6 = впритык к игроку
                 float dist = Vector3.Distance(pos, playerPos);
                 if (dist < 0.8f) {
+                    // не двигаться
                     OnTouchPlayer(playerData.GetPlayerApi);
+                } else {
+                    transform.position = pos;
                 }
-
-                transform.position = pos;
                 RotateTo(pos, playerPos);
             }
         }
@@ -66,12 +69,16 @@ public class BaseEnemy : UdonSharpBehaviour {
         from.y = 0f;
         target.y = 0f;
         Vector3 direction = (target - from).normalized;
-        transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(direction), rotateSpeed * Time.deltaTime);
+        transform.rotation = Quaternion.Slerp(
+            transform.rotation,
+            Quaternion.LookRotation(direction),
+            rotateSpeed * Time.deltaTime);
     }
 
-    private void OnTriggerEnter(Collider other) {
-        Damage(1, $"collider '{other.gameObject.name}', {other.gameObject.layer}");
-    }
+    //private void OnTriggerEnter(Collider other) {
+    //    if(other.gameObject.layer == ??)
+    //      Damage(1, $"collider '{other.gameObject.name}', {other.gameObject.layer}");
+    //}
 
     public void Damage(float value = 1f, string log = null) {
         if (IsDead)

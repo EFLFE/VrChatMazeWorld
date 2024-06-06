@@ -21,7 +21,7 @@ public class PlayerData : UdonSharpBehaviour {
     public Vector3Int GetGridPos => gridPos;
 
     // VR data
-    private const float minPunchForce = 0.03f;
+    private const float minPunchForce = 0.025f;
     private const float handResistanceTime = 0.35f;
 
     private bool isUserInVR;
@@ -85,7 +85,6 @@ public class PlayerData : UdonSharpBehaviour {
         gridPos.z = (int)(halfHeight + pos.y / MazeBuilder.ROOMS_OFFSET + 1f);
 
         // VR data
-        isUserInVR = playerApi.IsUserInVR();
         if (isUserInVR) {
             // calc hands force
             VRCPlayerApi.TrackingData rightHand = playerApi.GetTrackingData(VRCPlayerApi.TrackingDataType.RightHand);
