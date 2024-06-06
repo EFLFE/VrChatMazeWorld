@@ -108,9 +108,9 @@ public class MazeController : UdonSharpBehaviour {
     private void NextLevel() {
 
         // mazeSize = 39 + level * 2;
-        mazeSize = 19;
+        mazeSize = 29;
         mazeHeight = level + MazeGenerator.StartRoomHeight;
-        mazeRoomsAmount = 15 + 5 * level;
+        mazeRoomsAmount = MazeGenerator.floor_rooms_amount * (level + 1);
 
         MazeUI.UILog(
             $"NextLevel, new level = {level} "
@@ -211,7 +211,7 @@ public class MazeController : UdonSharpBehaviour {
                 );
             }
 
-            MazeUI.SetProgressValue((float) MazeGenerator.CurrentId / mazeRoomsAmount);
+            MazeUI.SetProgressValue((float) MazeGenerator.NextRoomID / mazeRoomsAmount);
         }
 
         // if (Input.GetKeyDown(KeyCode.O))
@@ -229,6 +229,7 @@ public class MazeController : UdonSharpBehaviour {
         syncDataUI.AddText($"- {(Networking.IsOwner(gameObject) ? "Is owner!" : "Is secondary")}");
         syncDataUI.AddText($"- {nameof(mazeSize)} = {mazeSize}");
         syncDataUI.AddText($"- {nameof(mazeRoomsAmount)} = {mazeRoomsAmount}");
+        syncDataUI.AddText($"- {nameof(mazeHeight)} = {mazeHeight}");
         syncDataUI.AddText($"- {nameof(mazeChestsAmount)} = {mazeChestsAmount}");
         syncDataUI.AddText($"- {nameof(level)} = {level}");
         syncDataUI.AddText($"- {nameof(mazeChestsAmountGathered)} = {mazeChestsAmountGathered}");

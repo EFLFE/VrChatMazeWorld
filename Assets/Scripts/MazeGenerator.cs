@@ -36,13 +36,13 @@ public class MazeGenerator : UdonSharpBehaviour {
     public int[] ChestsX => chests_x;
     public int[] ChestsY => chests_y;
     public int[] ChestsZ => chests_z;
-    public int CurrentId => current_id;
+    public int NextRoomID => next_room_id;
     public int StartRoomFloorIndex => start_room_floor_index;
     public int StartRoomHeight => start_room_height;
 
     // ================================================================= //
 
-    private int current_id = 0;
+    private int next_room_id = 0;
 
     private int size;
     private int height;
@@ -187,7 +187,7 @@ public class MazeGenerator : UdonSharpBehaviour {
 
     /** make central room 5 by 5 with no doors yet */
     public void GenerateFirstRoom() {
-        current_id = 1;
+        next_room_id = 1;
         int halfSize = size / 2;
         for (int x = halfSize - 2; x <= halfSize + 2; x++) {
             for (int y = halfSize - 2; y <= halfSize + 2; y++) {
@@ -199,7 +199,7 @@ public class MazeGenerator : UdonSharpBehaviour {
                 cells[x][y][StartRoomFloorIndex + 2] = Cell.Passage;
             }
         }
-        current_id++;
+        next_room_id++;
     }
 
     public bool Generate() {
@@ -220,85 +220,91 @@ public class MazeGenerator : UdonSharpBehaviour {
         }
     }
 
-    private int tree_branch_length1 = 10; // длинна ветки
+    private const int tree_branch_length1 = 10; // длинна ветки
     private int tree_branch_iterator1 = 0; // текущий итератор вдоль ветки (не может превышать длинну ветки)
 
-    private int tree_branch_length2 = 4; // длинна микро-ветки
+    private const int tree_branch_length2 = 4; // длинна микро-ветки
     private int tree_branch_iterator2 = 0; // текущий итератор вдоль микро-ветки (не может превышать длинну ветки)
+    
+    public const int floor_rooms_amount = 15; // количество комнат на этаж
+    private int floor_rooms_iterator = 0; // текущее количество комнат в этаже
 
     public bool GenerateTree() {
         ReSeed();
+        
+        if (next_room_id >= max_rooms) {
+            GenerateFinish();
+            return true;
+        }
 
-        if (current_id < max_rooms) {
-            if (PossibleDoorsAmount() == 0) {
-                // в прошлых циклах дверь не заспавнилась, ищем новую
-                int possible_room_id = current_id - 1;
-                while (!TryToSpawnRandomDoorInRoomByID(possible_room_id)) {
-                    possible_room_id--;
-                    // подушка безопасности
-                    if (possible_room_id <= 1) {
-                        GenerateTreeFinish();
-                        return true;
-                    }
+        if (PossibleDoorsAmount() == 0) {
+            // в прошлых циклах дверь не заспавнилась, ищем ближайшую новую 
+            int possible_room_id = next_room_id - 1;
+            while (!TryToSpawnRandomDoorInRoomByID(possible_room_id)) {
+                possible_room_id--;
+                // подушка безопасности
+                if (possible_room_id <= 1) {
+                    GenerateFinish();
+                    return true;
                 }
             }
-
-            PossibleDoorsPopFromHead(out int x, out int y, out int z, out int d);
-
-            if (TryToGenerateRoomForTree(x, y, z, d)) {
-                tree_branch_iterator1++;
-                tree_branch_iterator2++;
-                if (tree_branch_iterator1 >= tree_branch_length1) {
-                    TryToSpawnRandomDoorInRoomByID(current_id - 1 - (tree_branch_length1 / 2));
-                    tree_branch_iterator1 = 0;
-                } else if (tree_branch_iterator2 >= tree_branch_length2) {
-                    TryToSpawnRandomDoorInRoomByID(current_id - 1 - (tree_branch_length2 / 2));
-                    tree_branch_iterator2 = 0;
-                } else {
-                    TryToSpawnRandomDoorInRoomByID(current_id - 1);
-                }
+        }
+        
+        // PossibleDoorsAmount() > 0 => 100% success
+        PossibleDoorsPopFromHead(out int x, out int y, out int z, out int d);
+        
+        if (floor_rooms_iterator >= floor_rooms_amount) {
+            if (TryToGenerateRoomStairs(x, y, z, d, -1)) { // TODO генерировать через while в любом случае, в поиске по румам назад
+                rooms[next_room_id] = Room.Stairs;
+                next_room_id++;
+                
+                floor_rooms_iterator = 0;
+                tree_branch_iterator1 = 0;
+                tree_branch_iterator2 = 0;
                 return false;
             }
-            // ничего не удалось сгенерировать? ничего страшного, в следующем цикле извлечется следующая дверь (наверное)
+        }
+
+        if (TryToGenerateRoom(x, y, z, d)) {
+            floor_rooms_iterator++;
+            tree_branch_iterator1++;
+            tree_branch_iterator2++;
+            if (tree_branch_iterator1 >= tree_branch_length1) {
+                TryToSpawnRandomDoorInRoomByID(next_room_id - 1 - (tree_branch_length1 / 2));
+                tree_branch_iterator1 = 0;
+            } else if (tree_branch_iterator2 >= tree_branch_length2) {
+                TryToSpawnRandomDoorInRoomByID(next_room_id - 1 - (tree_branch_length2 / 2));
+                tree_branch_iterator2 = 0;
+            } else {
+                TryToSpawnRandomDoorInRoomByID(next_room_id - 1);
+            }
             return false;
         }
-
-        GenerateTreeFinish();
-        return true;
+        // ничего не удалось сгенерировать? ничего страшного, в следующем цикле извлечется следующая дверь (наверное)
+        return false;
     }
 
-    bool TryToGenerateRoomForTree(int x, int y, int z, int d) {
-        int random_index = RandomInclusive(0, 3);
-
-        if (random_index == 0) {
-            if (TryToGenerateRoomStairs(x, y, z, d, -1)) {
-                rooms[current_id] = Room.Stairs;
-                current_id++;
-                // return true; // lets just spawn next room immideatly
-                PossibleDoorsPopFromHead(out x, out y, out z, out d);
-            }
-        }
-
+    bool TryToGenerateRoom(int x, int y, int z, int d) {
         if (TryToGenerateRoomSquare(x, y, z, d)) {
-            rooms[current_id] = Room.Square;
-            current_id++;
+            rooms[next_room_id] = Room.Square;
+            next_room_id++;
             return true;
         }
 
         if (TryToGenerateRoomCave(x, y, z, d)) {
-            rooms[current_id] = Room.Cave;
-            current_id++;
+            rooms[next_room_id] = Room.Cave;
+            next_room_id++;
             return true;
         }
         return false;
     }
 
-    public void GenerateTreeFinish() {
+    public void GenerateFinish() {
         RemoveAllUnusedDoors();
 
         // spawn final chests
         int treasures_left = chests_amount;
-        int room_id = current_id;
+        int room_id = next_room_id;
         int i = 0;
         while (treasures_left > 0) {
             room_id--;
@@ -419,22 +425,22 @@ public class MazeGenerator : UdonSharpBehaviour {
             if (!check_if_possible_to_place) continue; // next try
 
             // it is possible to spawn the room
-            cache_cells_ammounts[current_id] = 0;
-            cache_cells_x[current_id] = new int[x_length * y_length];
-            cache_cells_y[current_id] = new int[x_length * y_length];
-            cache_cells_z[current_id] = new int[x_length * y_length];
+            cache_cells_ammounts[next_room_id] = 0;
+            cache_cells_x[next_room_id] = new int[x_length * y_length];
+            cache_cells_y[next_room_id] = new int[x_length * y_length];
+            cache_cells_z[next_room_id] = new int[x_length * y_length];
             for (int x = room_x_start; x < room_x_start + x_length; x++) {
                 for (int y = room_y_start; y < room_y_start + y_length; y++) {
-                    ids[x][y][z] = current_id;
+                    ids[x][y][z] = next_room_id;
                     if (cells[x][y][z] == Cell.Wall) {
                         cells[x][y][z] = Cell.Passage;
                     }
                     // cache
-                    int cache_id = cache_cells_ammounts[current_id];
-                    cache_cells_x[current_id][cache_id] = x;
-                    cache_cells_y[current_id][cache_id] = y;
-                    cache_cells_z[current_id][cache_id] = z;
-                    cache_cells_ammounts[current_id]++;
+                    int cache_id = cache_cells_ammounts[next_room_id];
+                    cache_cells_x[next_room_id][cache_id] = x;
+                    cache_cells_y[next_room_id][cache_id] = y;
+                    cache_cells_z[next_room_id][cache_id] = z;
+                    cache_cells_ammounts[next_room_id]++;
                 }
             }
 
@@ -451,20 +457,20 @@ public class MazeGenerator : UdonSharpBehaviour {
         int amount_of_cells_generated = 1;
 
         cells[start_x][start_y][start_z] = Cell.DoorExit;
-        ids[start_x][start_y][start_z] = current_id;
-        cache_cells_ammounts[current_id] = 0;
-        cache_cells_x[current_id] = new int[amount_of_maximum_desired_cells];
-        cache_cells_y[current_id] = new int[amount_of_maximum_desired_cells];
-        cache_cells_z[current_id] = new int[amount_of_maximum_desired_cells];
-        cache_cells_x[current_id][cache_cells_ammounts[current_id]] = start_x;
-        cache_cells_y[current_id][cache_cells_ammounts[current_id]] = start_y;
-        cache_cells_z[current_id][cache_cells_ammounts[current_id]] = start_z;
-        cache_cells_ammounts[current_id]++;
+        ids[start_x][start_y][start_z] = next_room_id;
+        cache_cells_ammounts[next_room_id] = 0;
+        cache_cells_x[next_room_id] = new int[amount_of_maximum_desired_cells];
+        cache_cells_y[next_room_id] = new int[amount_of_maximum_desired_cells];
+        cache_cells_z[next_room_id] = new int[amount_of_maximum_desired_cells];
+        cache_cells_x[next_room_id][cache_cells_ammounts[next_room_id]] = start_x;
+        cache_cells_y[next_room_id][cache_cells_ammounts[next_room_id]] = start_y;
+        cache_cells_z[next_room_id][cache_cells_ammounts[next_room_id]] = start_z;
+        cache_cells_ammounts[next_room_id]++;
 
         while (amount_of_cells_generated < amount_of_maximum_desired_cells && amount_of_tries_left > 0) {
             amount_of_tries_left--;
 
-            GetRandomCellFromRoomByID(current_id, out int x, out int y, out int z);
+            GetRandomCellFromRoomByID(next_room_id, out int x, out int y, out int z);
             int dir = GetRandomDirectionExceptProvided(GetOppositeDirection(forward_dir));
             GetDirectionsVector(dir, out int dx, out int dy);
             x += dx;
@@ -477,11 +483,11 @@ public class MazeGenerator : UdonSharpBehaviour {
             if (cells[x][y][z] == Cell.Wall) {
                 // вошли в стену
                 cells[x][y][z] = Cell.Passage;
-                ids[x][y][z] = current_id;
-                cache_cells_x[current_id][cache_cells_ammounts[current_id]] = x;
-                cache_cells_y[current_id][cache_cells_ammounts[current_id]] = y;
-                cache_cells_z[current_id][cache_cells_ammounts[current_id]] = z;
-                cache_cells_ammounts[current_id]++;
+                ids[x][y][z] = next_room_id;
+                cache_cells_x[next_room_id][cache_cells_ammounts[next_room_id]] = x;
+                cache_cells_y[next_room_id][cache_cells_ammounts[next_room_id]] = y;
+                cache_cells_z[next_room_id][cache_cells_ammounts[next_room_id]] = z;
+                cache_cells_ammounts[next_room_id]++;
                 amount_of_cells_generated++;
             }
         }
@@ -515,10 +521,10 @@ public class MazeGenerator : UdonSharpBehaviour {
 
         // it is possible to spawn vertical 2x2 room
 
-        ids[start_x][start_y][start_z] = current_id;
-        ids[start_x][start_y][start_z + dz] = current_id;
-        ids[start_x + dx][start_y + dy][start_z] = current_id;
-        ids[start_x + dx][start_y + dy][start_z + dz] = current_id;
+        ids[start_x][start_y][start_z] = next_room_id;
+        ids[start_x][start_y][start_z + dz] = next_room_id;
+        ids[start_x + dx][start_y + dy][start_z] = next_room_id;
+        ids[start_x + dx][start_y + dy][start_z + dz] = next_room_id;
 
         cells[start_x][start_y][start_z + dz] = Cell.Passage;
         cells[start_x + dx][start_y + dy][start_z] = Cell.Passage;
@@ -538,10 +544,10 @@ public class MazeGenerator : UdonSharpBehaviour {
         }
 
         // TODO fill with proper data
-        cache_cells_ammounts[current_id] = 0;
-        cache_cells_x[current_id] = new int[0];
-        cache_cells_y[current_id] = new int[0];
-        cache_cells_z[current_id] = new int[0];
+        cache_cells_ammounts[next_room_id] = 0;
+        cache_cells_x[next_room_id] = new int[0];
+        cache_cells_y[next_room_id] = new int[0];
+        cache_cells_z[next_room_id] = new int[0];
 
         TryToSpawnPossibleDoor(start_x + dx, start_y + dy, start_z + dz, forward_dir);
         return true;
@@ -618,7 +624,7 @@ public class MazeGenerator : UdonSharpBehaviour {
         while (n > 1) {
             n--;
             int k = RandomInclusive(0, n - 1);
-            //(indexes[k], indexes[n]) = (indexes[n], indexes[k]);
+            //(indexes[k], indexes[n]) = (indexes[n], indexes[k]); // Udon can't
             int temp = indexes[n];
             indexes[n] = indexes[k];
             indexes[k] = temp;
@@ -634,6 +640,9 @@ public class MazeGenerator : UdonSharpBehaviour {
             }
             if (cells[x][y][z] == Cell.DoorExit || cells[x][y][z] == Cell.DoorEnterance) {
                 continue;
+            }
+            if (z > 0 && ids[x][y][z] == ids[x][y][z - 1]) {
+                continue; // нас интересуют только нижние ячейки на полу
             }
             int random_direction = RandomInclusive(0, 3);
             for (int fantom_direction = random_direction; fantom_direction < random_direction + 4; fantom_direction++) {
