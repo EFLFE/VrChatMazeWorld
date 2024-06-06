@@ -366,6 +366,21 @@ public class MazeBuilder : UdonSharpBehaviour {
         matProp.SetColor("_Color", clr);
         floorMesh.SetPropertyBlock(matProp);
     }
+    
+    Vector3 ConvertPositionToUnitySpace(Vector3Int position) {
+        int height = controller.MazeGenerator.Height;
+        Vector3 unity_position;
+        unity_position.x = (position.x - controller.MazeGenerator.Size / 2) * ROOMS_OFFSET;
+        unity_position.z = (position.y - controller.MazeGenerator.Size / 2) * ROOMS_OFFSET;
+        unity_position.y = (position.z - controller.MazeGenerator.Height + controller.MazeGenerator.StartRoomHeight) * ROOMS_OFFSET;
+        return unity_position;
+    }
+    
+    Vector3Int ConvertPositionToMazeSpace(Vector3 position) {
+        Vector3Int maze_space = Vector3Int.zero;
+        // TODO
+        return maze_space;
+    }
 
     private GameObject Spawn(
         Mesh mesh,
@@ -381,11 +396,10 @@ public class MazeBuilder : UdonSharpBehaviour {
         GO.GetComponent<MeshFilter>().sharedMesh = mesh;
         GO.GetComponent<MeshCollider>().sharedMesh = mesh;
 
-        Vector3 position = GO.transform.position;
-        position.x = (x - controller.MazeGenerator.Size / 2) * ROOMS_OFFSET;
-        position.z = (y - controller.MazeGenerator.Size / 2) * ROOMS_OFFSET;
-        position.y = (z - controller.MazeGenerator.Height / 2) * ROOMS_OFFSET;
-        GO.transform.SetPositionAndRotation(position, Quaternion.Euler(0, rotation, 0));
+        GO.transform.SetPositionAndRotation(
+            ConvertPositionToUnitySpace(new Vector3Int(x, y, z)), 
+            Quaternion.Euler(0, rotation, 0)
+        );
         GO.transform.localScale = new Vector3(ROOM_SCALE, ROOM_SCALE, ROOM_SCALE);
 
         GO.name = name;
@@ -424,10 +438,10 @@ public class MazeBuilder : UdonSharpBehaviour {
 
         // смещение для стеночек вдоль поворота
         Vector3 position = GO.transform.position;
-        if (rotation == 0) position.z += 2;
-        if (rotation == 90) position.x += 2;
-        if (rotation == 180) position.z -= 2;
-        if (rotation == 270) position.x -= 2;
+        if (rotation == 0) position.z += ROOMS_OFFSET / 2;
+        if (rotation == 90) position.x += ROOMS_OFFSET / 2;
+        if (rotation == 180) position.z -= ROOMS_OFFSET / 2;
+        if (rotation == 270) position.x -= ROOMS_OFFSET / 2;
         GO.transform.SetPositionAndRotation(position, Quaternion.Euler(0, rotation, 0));
 
         return GO;
@@ -437,12 +451,10 @@ public class MazeBuilder : UdonSharpBehaviour {
         // lets spawn treasures only on master
         if (!Networking.IsOwner(gameObject)) return null;
 
-        Vector3 position;
-        position.x = (x - controller.MazeGenerator.Size / 2) * ROOMS_OFFSET;
-        position.z = (y - controller.MazeGenerator.Size / 2) * ROOMS_OFFSET;
-        position.y = (z - controller.MazeGenerator.Height / 2) * ROOMS_OFFSET + 1;
+        Vector3 unity_space_position = ConvertPositionToUnitySpace(new Vector3Int(x, y, z));
+        unity_space_position.y += 1; // слегка приподнять чтобы кристаллы не проваливались под пол
 
-        if (!chestPool.TryTake(out MazeObject GO, position, Quaternion.Euler(0, 0, 0))) {
+        if (!chestPool.TryTake(out MazeObject GO, unity_space_position, Quaternion.Euler(0, 0, 0))) {
             controller.MazeUI.UILog("No more chest in pool!");
             return null;
         }
@@ -450,7 +462,7 @@ public class MazeBuilder : UdonSharpBehaviour {
         var treasure = GO.GetComponent<Treasure>();
         controller.MazeUI.UILog(
             $"Spawn {GO.name}, id = {treasure.pool_id} " +
-            $"\n- x, y = {x}, {y}, {z} => {position.x}, {position.z}, {position.y}"
+            $"\n- xyz = {x}, {y}, {z} => {unity_space_position.x}, {unity_space_position.z}, {unity_space_position.y}"
         );
 
         buildLeft = 0;

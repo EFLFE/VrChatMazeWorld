@@ -19,6 +19,7 @@ public class MazeController : UdonSharpBehaviour {
     [SerializeField] private int startedSeed = 0;
 
     [UdonSynced] private int mazeSize;
+    [UdonSynced] private int mazeHeight;
     [UdonSynced] private int mazeRoomsAmount;
     [UdonSynced] private int mazeChestsAmount;
     [UdonSynced] public int level = 1;
@@ -106,12 +107,15 @@ public class MazeController : UdonSharpBehaviour {
 
     private void NextLevel() {
 
-        mazeSize = 39 + level * 2;
+        // mazeSize = 39 + level * 2;
+        mazeSize = 19;
+        mazeHeight = level + MazeGenerator.StartRoomHeight;
         mazeRoomsAmount = 15 + 5 * level;
 
         MazeUI.UILog(
             $"NextLevel, new level = {level} "
             + $"\n- mazeSize = {mazeSize}"
+            + $"\n- mazeHeight = {mazeHeight}"
             + $"\n- mazeRoomsAmount = {mazeRoomsAmount}"
             + $"\n- mazeChestsAmount = {mazeChestsAmount}"
         );
@@ -134,7 +138,7 @@ public class MazeController : UdonSharpBehaviour {
         RespawnPersonalMap();
         genStopwatch.Restart();
         MazeUI.UILog($"MazeGenerator Init, mazeSize: {mazeSize}, mazeRoomsAmount: {mazeRoomsAmount}, mazeChestsAmount: {mazeChestsAmount}");
-        MazeGenerator.Init(seed, mazeSize, mazeRoomsAmount, mazeChestsAmount);
+        MazeGenerator.Init(seed, mazeSize, mazeHeight, mazeRoomsAmount, mazeChestsAmount);
         MazeBuilder.Init(this);
         generator_is_ready = false;
 

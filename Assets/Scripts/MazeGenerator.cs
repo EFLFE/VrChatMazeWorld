@@ -37,15 +37,18 @@ public class MazeGenerator : UdonSharpBehaviour {
     public int[] ChestsY => chests_y;
     public int[] ChestsZ => chests_z;
     public int CurrentId => current_id;
+    public int StartRoomFloorIndex => start_room_floor_index;
+    public int StartRoomHeight => start_room_height;
 
     // ================================================================= //
 
     private int current_id = 0;
 
     private int size;
-    private int height = 5;
-    public int middle_floor_index = 2; // 01234
-
+    private int height;
+    private int start_room_floor_index;
+    private const int start_room_height = 3;
+    
     private int max_rooms;
 
     private int[][][] ids;
@@ -128,12 +131,15 @@ public class MazeGenerator : UdonSharpBehaviour {
     }
 
 
-    public void Init(int seed, int size, int rooms, int chests) {
+    public void Init(int seed, int size, int height, int rooms, int chests) {
         this.seed = seed;
         udonRandom.SetSeed(seed);
         //rnd = new Random(seed);
-        this.size = size;
+        
         this.max_rooms = rooms;
+        this.size = size;
+        this.height = height;
+        this.start_room_floor_index = height - start_room_height; // 25 - 3 => 22, 23, 24
 
         cache_cells_x = new int[rooms + 1][];
         cache_cells_y = new int[rooms + 1][];
@@ -174,7 +180,7 @@ public class MazeGenerator : UdonSharpBehaviour {
 
         int halfSize = size / 2;
 
-        TryToSpawnPossibleDoor(halfSize + 0, halfSize - 2, middle_floor_index, 0);
+        TryToSpawnPossibleDoor(halfSize + 0, halfSize - 2, StartRoomFloorIndex, 0);
         tree_branch_iterator1 = 0;
         tree_branch_iterator2 = 0;
     }
@@ -185,12 +191,12 @@ public class MazeGenerator : UdonSharpBehaviour {
         int halfSize = size / 2;
         for (int x = halfSize - 2; x <= halfSize + 2; x++) {
             for (int y = halfSize - 2; y <= halfSize + 2; y++) {
-                ids[x][y][middle_floor_index] = 1;
-                cells[x][y][middle_floor_index] = Cell.Passage;
-                ids[x][y][middle_floor_index + 1] = 1;
-                cells[x][y][middle_floor_index + 1] = Cell.Passage;
-                ids[x][y][middle_floor_index + 2] = 1;
-                cells[x][y][middle_floor_index + 2] = Cell.Passage;
+                ids[x][y][StartRoomFloorIndex] = 1;
+                cells[x][y][StartRoomFloorIndex] = Cell.Passage;
+                ids[x][y][StartRoomFloorIndex + 1] = 1;
+                cells[x][y][StartRoomFloorIndex + 1] = Cell.Passage;
+                ids[x][y][StartRoomFloorIndex + 2] = 1;
+                cells[x][y][StartRoomFloorIndex + 2] = Cell.Passage;
             }
         }
         current_id++;
@@ -265,7 +271,7 @@ public class MazeGenerator : UdonSharpBehaviour {
         int random_index = RandomInclusive(0, 3);
 
         if (random_index == 0) {
-            if (TryToGenerateRoomStairs(x, y, z, d)) {
+            if (TryToGenerateRoomStairs(x, y, z, d, -1)) {
                 rooms[current_id] = Room.Stairs;
                 current_id++;
                 // return true; // lets just spawn next room immideatly
@@ -480,16 +486,22 @@ public class MazeGenerator : UdonSharpBehaviour {
     }
 
     // генерирует комнату 2*1*2 с лестницей в случайную сторону: вверх или вниз
-    private bool TryToGenerateRoomStairs(int start_x, int start_y, int start_z, int forward_dir) {
+    // если указать dz, то будет генерировать в указанную сторону: -1 вниз, +1 вверх
+    private bool TryToGenerateRoomStairs(int start_x, int start_y, int start_z, int forward_dir, int dz = 0) {
         if (start_x < 3 || start_x > size - 4 || start_y < 3 || start_y > size - 4) {
             return false;
         }
 
         if (ids[start_x][start_y][start_z] != 0) return false;
-        int dz;
-        if (start_z == 0) dz = 1;
-        else if (start_z == height - 1) dz = -1;
-        else dz = RandomInclusive(0, 1) * 2 - 1;
+        
+        if (dz == 0) {
+            if (start_z == 0) dz = 1;
+            else if (start_z == height - 1) dz = -1;
+            else dz = RandomInclusive(0, 1) * 2 - 1;
+        } else {
+            if (start_z == 0 && dz == -1) return false; // error
+            if (start_z == height - 1 && dz == +1) return false; // error
+        }
 
         if (ids[start_x][start_y][start_z + dz] != 0) return false;
         GetDirectionsVector(forward_dir, out int dx, out int dy);
