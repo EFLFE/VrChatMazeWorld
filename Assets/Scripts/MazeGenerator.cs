@@ -105,7 +105,7 @@ public class MazeGenerator : UdonSharpBehaviour {
         possible_doors2_head++;
     }
 
-    public int PossibleDoorsAmont() {
+    public int PossibleDoorsAmount() {
         return possible_doors2_tail - possible_doors2_head;
     }
     // ----------- PossibleDoors Stack
@@ -207,7 +207,7 @@ public class MazeGenerator : UdonSharpBehaviour {
     }
 
     public void RemoveAllUnusedDoors() {
-        while (PossibleDoorsAmont() > 0) {
+        while (PossibleDoorsAmount() > 0) {
             PossibleDoorsPopFromHead(out int x, out int y, out int z, out int d);
             GetDirectionsVector(d, out int dx, out int dy);
             if (ids[x][y][z] == 0) {
@@ -230,10 +230,10 @@ public class MazeGenerator : UdonSharpBehaviour {
         ReSeed();
 
         if (current_id < max_rooms) {
-            if (PossibleDoorsAmont() == 0) {
+            if (PossibleDoorsAmount() == 0) {
                 // в прошлых циклах дверь не заспавнилась, ищем новую
                 int possible_room_id = current_id - 1;
-                while (TryToSpawnRandomDoorsInRoomByID(possible_room_id, 1) == 0) {
+                while (!TryToSpawnRandomDoorInRoomByID(possible_room_id)) {
                     possible_room_id--;
                     // подушка безопасности
                     if (possible_room_id <= 1) {
@@ -249,13 +249,13 @@ public class MazeGenerator : UdonSharpBehaviour {
                 tree_branch_iterator1++;
                 tree_branch_iterator2++;
                 if (tree_branch_iterator1 >= tree_branch_length1) {
-                    TryToSpawnRandomDoorsInRoomByID(current_id - 1 - (tree_branch_length1 / 2), 1);
+                    TryToSpawnRandomDoorInRoomByID(current_id - 1 - (tree_branch_length1 / 2));
                     tree_branch_iterator1 = 0;
                 } else if (tree_branch_iterator2 >= tree_branch_length2) {
-                    TryToSpawnRandomDoorsInRoomByID(current_id - 1 - (tree_branch_length2 / 2), 1);
+                    TryToSpawnRandomDoorInRoomByID(current_id - 1 - (tree_branch_length2 / 2));
                     tree_branch_iterator2 = 0;
                 } else {
-                    TryToSpawnRandomDoorsInRoomByID(current_id - 1, 1);
+                    TryToSpawnRandomDoorInRoomByID(current_id - 1);
                 }
                 return false;
             }
@@ -316,7 +316,11 @@ public class MazeGenerator : UdonSharpBehaviour {
             }
         }
     }
-
+    
+    private bool TryToSpawnRandomDoorInRoomByID(int room_id) {
+        return TryToSpawnRandomDoorsInRoomByID(room_id, 1) == 1;
+    }
+    
     private int TryToSpawnRandomDoorsInRoomByID(int room_id, int amount) {
         int amount_of_doors_spawned = 0;
         for (int i = 0; i < amount; i++) {
