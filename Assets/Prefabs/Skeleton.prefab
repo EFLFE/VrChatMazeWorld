@@ -58,12 +58,13 @@ MonoBehaviour:
     PrefabModifications: []
     SerializationNodes: []
   _udonSharpBackingUdonBehaviour: {fileID: 3796492592855962452}
-  health: 100
+  health: 15
   speed: 1
   rotateSpeed: 5
   meshRenderer: {fileID: 0}
   rigidbodyRef: {fileID: 7193130384379648626}
   baseCollider: {fileID: 180096748666687009}
+  baseAnimator: {fileID: 4091810456217703207}
 --- !u!136 &180096748666687009
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -466,7 +467,11 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 1d022daeedcac0c4f934898f60632558,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 4091810456217703207}
   m_SourcePrefab: {fileID: 100100000, guid: 1d022daeedcac0c4f934898f60632558, type: 3}
 --- !u!4 &7389587370813984165 stripped
 Transform:
@@ -474,3 +479,30 @@ Transform:
     type: 3}
   m_PrefabInstance: {fileID: 6991750403061312078}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &7910227651173078815 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: 1d022daeedcac0c4f934898f60632558,
+    type: 3}
+  m_PrefabInstance: {fileID: 6991750403061312078}
+  m_PrefabAsset: {fileID: 0}
+--- !u!95 &4091810456217703207
+Animator:
+  serializedVersion: 5
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7910227651173078815}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 46401ef7e83b2d94a98377e991c4a992, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0

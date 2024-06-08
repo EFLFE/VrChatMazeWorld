@@ -12,6 +12,7 @@ public class BaseEnemy : MazeObject {
     [SerializeField] private MeshRenderer meshRenderer;
     [SerializeField] private Rigidbody rigidbodyRef;
     [SerializeField] private Collider baseCollider;
+    [SerializeField] private Animator baseAnimator;
 
     private MazeController controller;
     protected bool MoveToPlayer;
@@ -23,10 +24,17 @@ public class BaseEnemy : MazeObject {
         base.Init(controller, pool_id);
         this.controller = controller;
         speed += Random.Range(0f, 0.2f);
+        baseAnimator.SetBool("Dead", false);
+        baseCollider.enabled = true;
+        rigidbodyRef.useGravity = true;
+        rigidbodyRef.isKinematic = false;
         RequestSerialization();
     }
 
     public override void ManualUpdate() {
+        if (IsDead)
+            return;
+
         PlayerData localPlayerData = controller.PlayersManager.GetLocalPlayer();
 
         if (localPlayerData.TryPunchLeftHand()) {
@@ -53,10 +61,12 @@ public class BaseEnemy : MazeObject {
                     // не двигаться
                     OnTouchPlayer(playerData);
                     RotateTo(pos, playerPos);
-                } else if (dist < 10f) {
+                    baseAnimator.SetBool("Walking", false);
+                } else if (dist < 20f) {
                     // move to player
                     transform.position = Vector3.MoveTowards(pos, playerPos, speed * Time.deltaTime);
                     RotateTo(pos, playerPos);
+                    baseAnimator.SetBool("Walking", true);
                 }
             }
         }
@@ -87,10 +97,13 @@ public class BaseEnemy : MazeObject {
             return;
 
         health -= value;
-        controller.MazeUI.UILog($"Enemy got {value} damage (hp {health}) {log}");
+        //controller.MazeUI.UILog($"Enemy got {value} damage (hp {health}) {log}");
 
         if (health <= 0f) {
-            Destroy(gameObject);
+            baseAnimator.SetBool("Dead", true);
+            baseCollider.enabled = false;
+            rigidbodyRef.useGravity = false;
+            rigidbodyRef.isKinematic = true;
         } else {
             rigidbodyRef.AddForce(Vector3.up * Mathf.Clamp(value, 1, 3), ForceMode.Impulse);
         }
