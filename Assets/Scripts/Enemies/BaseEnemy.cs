@@ -26,8 +26,8 @@ public class BaseEnemy : MazeObject {
         speed += Random.Range(0f, 0.2f);
         baseAnimator.SetBool("Dead", false);
         baseCollider.enabled = true;
-        rigidbodyRef.useGravity = true;
         rigidbodyRef.isKinematic = false;
+        rigidbodyRef.useGravity = true;
         RequestSerialization();
     }
 
@@ -67,6 +67,8 @@ public class BaseEnemy : MazeObject {
                     transform.position = Vector3.MoveTowards(pos, playerPos, speed * Time.deltaTime);
                     RotateTo(pos, playerPos);
                     baseAnimator.SetBool("Walking", true);
+                } else {
+                    baseAnimator.SetBool("Walking", false);
                 }
             }
         }

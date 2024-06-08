@@ -10,6 +10,7 @@ using static VRC.Udon.Common.Interfaces.NetworkEventTarget;
 public class MazeController : UdonSharpBehaviour {
     [SerializeField] private bool buildOnStart;
     [SerializeField] private PoolObjects chestPool;
+    [SerializeField] private PoolObjects skeletsPool;
     [SerializeField] private SyncDataUI syncDataUI;
     [SerializeField] private GameObject enemyPrefab;
     [SerializeField] private Transform enemySpawn;
@@ -73,6 +74,7 @@ public class MazeController : UdonSharpBehaviour {
         genStopwatch = new Stopwatch();
 
         chestPool.Init(this);
+        skeletsPool.Init(this);
         MazeBuilder.Init(this);
         MazeUI.Init(this);
         PlayersManager.Init(this);
@@ -151,7 +153,7 @@ public class MazeController : UdonSharpBehaviour {
         MazeBuilder.Init(this);
         generator_is_ready = false;
 
-        foreach(var map in maps) { 
+        foreach(var map in maps) {
             map.NewLevel();
         }
     }
@@ -234,8 +236,11 @@ public class MazeController : UdonSharpBehaviour {
         }
 
         if (MazeBuilder.MazeReady) {
+            chestPool.ManualUpdate();
+            skeletsPool.ManualUpdate();
+
             for (int i = 0; i < tempMazeObjects.Length; i++) {
-                if (tempMazeObjects[i] != null)
+                if (tempMazeObjects[i] != null && tempMazeObjects[i].gameObject.activeSelf)
                     tempMazeObjects[i].ManualUpdate();
             }
         }
@@ -253,16 +258,6 @@ public class MazeController : UdonSharpBehaviour {
         syncDataUI.AddText("Other:");
         syncDataUI.AddText($"- lang = {VRCPlayerApi.GetCurrentLanguage()}");
         //syncDataUI.AddText($"- my position: {Networking.LocalPlayer.GetPosition()}");
-    }
-
-    // event (test)
-    public void SpawnEnemy() {
-        if (Networking.LocalPlayer.IsOwner(gameObject)) {
-            GameObject obj = Instantiate(enemyPrefab, enemySpawn);
-            obj.transform.localPosition = Vector3.zero;
-            BaseEnemy script = obj.GetComponent<BaseEnemy>();
-            script.Init(this, -1);
-        }
     }
 
     public void UpdateProgressText() {

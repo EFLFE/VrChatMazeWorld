@@ -15,17 +15,16 @@ public class PoolObjects : UdonSharpBehaviour {
     public int MaxCount => poolItems.Length;
 
     public void Init(MazeController controller) {
+        MazeController = controller;
         poolContainer = gameObject.transform;
         int count = poolContainer.childCount;
         poolItems = new MazeObject[count];
         states = new bool[count];
         for (int i = 0; i < count; i++) {
             poolItems[i] = poolContainer.GetChild(i).GetComponent<MazeObject>();
-            poolItems[i].Init(controller, i);
             states[i] = false;
         }
     }
-
 
     public override void OnDeserialization() {
         base.OnDeserialization();
@@ -62,6 +61,15 @@ public class PoolObjects : UdonSharpBehaviour {
         }
     }
 
+    public void ManualUpdate() {
+        for (int i = 0; i < poolItems.Length; i++) {
+            MazeObject item = poolItems[i];
+            if (item.gameObject.activeSelf) {
+                item.ManualUpdate();
+            }
+        }
+    }
+
     public bool TryTake(out MazeObject obj, Vector3 position, Quaternion rotation) {
         obj = null;
         for (int i = 0; i < poolItems.Length; i++) {
@@ -73,6 +81,7 @@ public class PoolObjects : UdonSharpBehaviour {
                 TeleportObject(obj, position, rotation);
 
                 states[i] = true;
+                obj.Init(MazeController, i);
                 RequestSerialization();
                 break;
             }
