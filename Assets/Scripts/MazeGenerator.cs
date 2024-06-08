@@ -72,7 +72,7 @@ public class MazeGenerator : UdonSharpBehaviour {
     private int[][] cache_cells_x;
     private int[][] cache_cells_y;
     private int[][] cache_cells_z;
-    private int[] cache_cells_ammounts;
+    private int[] cache_cells_amounts;
 
     public int GetId(int x, int y, int z) {
         if (x >= 0 && y >= 0 && x < size && y < size && z >= 0 && z < size) {
@@ -145,7 +145,7 @@ public class MazeGenerator : UdonSharpBehaviour {
         cache_cells_x = new int[rooms + 1][];
         cache_cells_y = new int[rooms + 1][];
         cache_cells_z = new int[rooms + 1][];
-        cache_cells_ammounts = new int[rooms + 1];
+        cache_cells_amounts = new int[rooms + 1];
 
         possible_doors2_x = new int[rooms * 5];
         possible_doors2_y = new int[rooms * 5];
@@ -325,7 +325,7 @@ public class MazeGenerator : UdonSharpBehaviour {
         
         // spawn enemies
         for (room_id = 2; room_id < next_room_id; room_id++) {
-            if (rooms[room_id] == Room.Square) {
+            if (rooms[room_id] == Room.Cave && cache_cells_amounts[room_id] > 10) {
                 int enemies_amount = RandomInclusive(1, 4);
                 while (enemies_amount > 0) {
                     GetRandomCellFromRoomByID(room_id, out int x, out int y, out int z);
@@ -440,7 +440,7 @@ public class MazeGenerator : UdonSharpBehaviour {
             if (!check_if_possible_to_place) continue; // next try
 
             // it is possible to spawn the room
-            cache_cells_ammounts[next_room_id] = 0;
+            cache_cells_amounts[next_room_id] = 0;
             cache_cells_x[next_room_id] = new int[x_length * y_length];
             cache_cells_y[next_room_id] = new int[x_length * y_length];
             cache_cells_z[next_room_id] = new int[x_length * y_length];
@@ -451,11 +451,11 @@ public class MazeGenerator : UdonSharpBehaviour {
                         cells[x][y][z] = Cell.Passage;
                     }
                     // cache
-                    int cache_id = cache_cells_ammounts[next_room_id];
+                    int cache_id = cache_cells_amounts[next_room_id];
                     cache_cells_x[next_room_id][cache_id] = x;
                     cache_cells_y[next_room_id][cache_id] = y;
                     cache_cells_z[next_room_id][cache_id] = z;
-                    cache_cells_ammounts[next_room_id]++;
+                    cache_cells_amounts[next_room_id]++;
                 }
             }
 
@@ -473,14 +473,14 @@ public class MazeGenerator : UdonSharpBehaviour {
 
         cells[start_x][start_y][start_z] = Cell.DoorExit;
         ids[start_x][start_y][start_z] = next_room_id;
-        cache_cells_ammounts[next_room_id] = 0;
+        cache_cells_amounts[next_room_id] = 0;
         cache_cells_x[next_room_id] = new int[amount_of_maximum_desired_cells];
         cache_cells_y[next_room_id] = new int[amount_of_maximum_desired_cells];
         cache_cells_z[next_room_id] = new int[amount_of_maximum_desired_cells];
-        cache_cells_x[next_room_id][cache_cells_ammounts[next_room_id]] = start_x;
-        cache_cells_y[next_room_id][cache_cells_ammounts[next_room_id]] = start_y;
-        cache_cells_z[next_room_id][cache_cells_ammounts[next_room_id]] = start_z;
-        cache_cells_ammounts[next_room_id]++;
+        cache_cells_x[next_room_id][cache_cells_amounts[next_room_id]] = start_x;
+        cache_cells_y[next_room_id][cache_cells_amounts[next_room_id]] = start_y;
+        cache_cells_z[next_room_id][cache_cells_amounts[next_room_id]] = start_z;
+        cache_cells_amounts[next_room_id]++;
 
         while (amount_of_cells_generated < amount_of_maximum_desired_cells && amount_of_tries_left > 0) {
             amount_of_tries_left--;
@@ -499,10 +499,10 @@ public class MazeGenerator : UdonSharpBehaviour {
                 // вошли в стену
                 cells[x][y][z] = Cell.Passage;
                 ids[x][y][z] = next_room_id;
-                cache_cells_x[next_room_id][cache_cells_ammounts[next_room_id]] = x;
-                cache_cells_y[next_room_id][cache_cells_ammounts[next_room_id]] = y;
-                cache_cells_z[next_room_id][cache_cells_ammounts[next_room_id]] = z;
-                cache_cells_ammounts[next_room_id]++;
+                cache_cells_x[next_room_id][cache_cells_amounts[next_room_id]] = x;
+                cache_cells_y[next_room_id][cache_cells_amounts[next_room_id]] = y;
+                cache_cells_z[next_room_id][cache_cells_amounts[next_room_id]] = z;
+                cache_cells_amounts[next_room_id]++;
                 amount_of_cells_generated++;
             }
         }
@@ -559,7 +559,7 @@ public class MazeGenerator : UdonSharpBehaviour {
         }
 
         // TODO fill with proper data
-        cache_cells_ammounts[next_room_id] = 0;
+        cache_cells_amounts[next_room_id] = 0;
         cache_cells_x[next_room_id] = new int[0];
         cache_cells_y[next_room_id] = new int[0];
         cache_cells_z[next_room_id] = new int[0];
@@ -607,7 +607,7 @@ public class MazeGenerator : UdonSharpBehaviour {
         cells_x = cache_cells_x[room_id];
         cells_y = cache_cells_y[room_id];
         cells_z = cache_cells_z[room_id];
-        cells_amount = cache_cells_ammounts[room_id];
+        cells_amount = cache_cells_amounts[room_id];
     }
 
     private void GetRandomCellFromRoomByID(int room_id, out int room_x, out int room_y, out int room_z) {
