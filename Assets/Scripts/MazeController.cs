@@ -20,6 +20,7 @@ public class MazeController : UdonSharpBehaviour {
     [SerializeField] private MazeObject[] tempMazeObjects;
 
     [UdonSynced] private int mazeSize;
+    [UdonSynced] private int mazeHeight;
     [UdonSynced] private int mazeRoomsAmount;
     [UdonSynced] private int mazeChestsAmount;
     [UdonSynced] public int level = 1;
@@ -115,12 +116,15 @@ public class MazeController : UdonSharpBehaviour {
 
     private void NextLevel() {
 
-        mazeSize = 39 + level * 2;
-        mazeRoomsAmount = 15 + 5 * level;
+        // mazeSize = 39 + level * 2;
+        mazeSize = 29;
+        mazeHeight = level + MazeGenerator.StartRoomHeight;
+        mazeRoomsAmount = MazeGenerator.floor_rooms_amount * (level + 1);
 
         MazeUI.UILog(
             $"NextLevel, new level = {level} "
             + $"\n- mazeSize = {mazeSize}"
+            + $"\n- mazeHeight = {mazeHeight}"
             + $"\n- mazeRoomsAmount = {mazeRoomsAmount}"
             + $"\n- mazeChestsAmount = {mazeChestsAmount}"
         );
@@ -143,7 +147,7 @@ public class MazeController : UdonSharpBehaviour {
         RespawnPersonalMap();
         genStopwatch.Restart();
         MazeUI.UILog($"MazeGenerator Init, mazeSize: {mazeSize}, mazeRoomsAmount: {mazeRoomsAmount}, mazeChestsAmount: {mazeChestsAmount}");
-        MazeGenerator.Init(seed, mazeSize, mazeRoomsAmount, mazeChestsAmount);
+        MazeGenerator.Init(seed, mazeSize, mazeHeight, mazeRoomsAmount, mazeChestsAmount);
         MazeBuilder.Init(this);
         generator_is_ready = false;
 
@@ -216,7 +220,7 @@ public class MazeController : UdonSharpBehaviour {
                 );
             }
 
-            MazeUI.SetProgressValue((float) MazeGenerator.CurrentId / mazeRoomsAmount);
+            MazeUI.SetProgressValue((float) MazeGenerator.NextRoomID / mazeRoomsAmount);
         }
 
         // if (Input.GetKeyDown(KeyCode.O))
@@ -241,6 +245,7 @@ public class MazeController : UdonSharpBehaviour {
         syncDataUI.AddText($"- {(Networking.IsOwner(gameObject) ? "Is owner!" : "Is secondary")}");
         syncDataUI.AddText($"- {nameof(mazeSize)} = {mazeSize}");
         syncDataUI.AddText($"- {nameof(mazeRoomsAmount)} = {mazeRoomsAmount}");
+        syncDataUI.AddText($"- {nameof(mazeHeight)} = {mazeHeight}");
         syncDataUI.AddText($"- {nameof(mazeChestsAmount)} = {mazeChestsAmount}");
         syncDataUI.AddText($"- {nameof(level)} = {level}");
         syncDataUI.AddText($"- {nameof(mazeChestsAmountGathered)} = {mazeChestsAmountGathered}");

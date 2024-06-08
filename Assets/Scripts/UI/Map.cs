@@ -72,7 +72,7 @@ public class Map : UdonSharpBehaviour {
             int x = (int) (size / 2f + player.GetPosition().x / MazeBuilder.ROOMS_OFFSET);
             int y = (int) (size / 2f + player.GetPosition().z / MazeBuilder.ROOMS_OFFSET);
             if (x >= 0 && x < size && y >= 0 && y < size) {
-                PlayerIsMoving(x, y, controller.MazeGenerator.GetId(x, y, maze.middle_floor_index));
+                PlayerIsMoving(x, y, controller.MazeGenerator.GetId(x, y, maze.StartRoomFloorIndex));
             }
         }
 
@@ -99,7 +99,7 @@ public class Map : UdonSharpBehaviour {
                 int y = player_y + dy;
 
                 if (x >= 0 && x < maze.Size && y >= 0 && y < maze.Size) {
-                    if (!coords_explored[x][y] && maze.GetId(x, y, maze.middle_floor_index) == room_id) {
+                    if (!coords_explored[x][y] && maze.GetId(x, y, maze.StartRoomFloorIndex) == room_id) {
                         coords_explored[x][y] = true;
                         DrawBlock(x, y);
                     }
@@ -152,7 +152,7 @@ public class Map : UdonSharpBehaviour {
     }
 
     private void DrawBlock(int x, int y) {
-        Cell cellType = maze.GetCell(x, y, maze.middle_floor_index);
+        Cell cellType = maze.GetCell(x, y, maze.StartRoomFloorIndex);
         int posX = maze.Size - x - 1;
         int posY = y;
 
@@ -161,7 +161,7 @@ public class Map : UdonSharpBehaviour {
             case Cell.DoorDeadEnd:
             case Cell.DoorEnterance:
             case Cell.DoorExit:
-                Color clr = Utils.GetFloorColor(maze.Ids[x][y][maze.middle_floor_index]);
+                Color clr = Utils.GetFloorColor(maze.Ids[x][y][maze.StartRoomFloorIndex]);
                 CreateCell(posX, posY, clr, cellType);
                 break;
 
@@ -170,14 +170,14 @@ public class Map : UdonSharpBehaviour {
                 break;
         }
 
-        int curID = maze.GetId(x, y, maze.middle_floor_index);
+        int curID = maze.GetId(x, y, maze.StartRoomFloorIndex);
         if (curID != 0) {
             for (int direction = 1; direction <= 4; direction++) {
                 // 1 up, 2 right, 3 down, 4 left
                 int dx = (direction == 2) ? 1 : (direction == 4) ? -1 : 0;
                 int dy = (direction == 1) ? 1 : (direction == 3) ? -1 : 0;
-                int neirID = maze.GetId(x + dx, y + dy, maze.middle_floor_index);
-                Cell neirCell = maze.GetCell(x + dx, y + dy, maze.middle_floor_index);
+                int neirID = maze.GetId(x + dx, y + dy, maze.StartRoomFloorIndex);
+                Cell neirCell = maze.GetCell(x + dx, y + dy, maze.StartRoomFloorIndex);
 
                 if (neirID == 0
                     || neirCell == Cell.Wall
