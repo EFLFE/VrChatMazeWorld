@@ -15,6 +15,7 @@ public class MazeController : UdonSharpBehaviour {
     [SerializeField] private GameObject enemyPrefab;
     [SerializeField] private Transform enemySpawn;
     [SerializeField] private Map[] maps;
+    [SerializeField] private Sword[] swords;
     [Header("Debug")]
     [SerializeField] private int startedLevel = 1;
     [SerializeField] private int startedSeed = 0;
@@ -80,6 +81,10 @@ public class MazeController : UdonSharpBehaviour {
         PlayersManager.Init(this);
         for (int i = 0; i < maps.Length; i++)
             maps[i].Init(this);
+
+        for (int i = 0; i < swords.Length; i++) {
+            swords[i].Init(this, -1);
+        }
 
         if (tempMazeObjects == null)
             tempMazeObjects = new MazeObject[0];
@@ -153,7 +158,11 @@ public class MazeController : UdonSharpBehaviour {
         MazeBuilder.Init(this);
         generator_is_ready = false;
 
-        foreach(var map in maps) {
+        for (int i = 0; i < swords.Length; i++) {
+            swords[i].ReturnToSpawn();
+        }
+
+        foreach (var map in maps) {
             map.NewLevel();
         }
     }
@@ -222,7 +231,7 @@ public class MazeController : UdonSharpBehaviour {
                 );
             }
 
-            MazeUI.SetProgressValue((float) MazeGenerator.NextRoomID / mazeRoomsAmount);
+            MazeUI.SetProgressValue((float)MazeGenerator.NextRoomID / mazeRoomsAmount);
         }
 
         // if (Input.GetKeyDown(KeyCode.O))
@@ -233,6 +242,10 @@ public class MazeController : UdonSharpBehaviour {
                 MazeUI.UILog($"CentralZone - activating");
                 CentralZone.gameObject.SetActive(true);
             }
+        }
+
+        for (int i = 0; i < swords.Length; i++) {
+            swords[i].ManualUpdate();
         }
 
         if (MazeBuilder.MazeReady) {

@@ -209,6 +209,7 @@ MonoBehaviour:
   _udonSharpBackingUdonBehaviour: {fileID: 1363306938746976728}
   swordTip: {fileID: 2079430805140780470}
   tipTrail: {fileID: 5281327799704912630}
+  vrcPickup: {fileID: 8982872267798888218}
 --- !u!114 &8636892214484433911
 MonoBehaviour:
   m_ObjectHideFlags: 0

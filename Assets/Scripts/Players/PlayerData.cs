@@ -77,6 +77,7 @@ public class PlayerData : UdonSharpBehaviour {
         float deltaTime = Time.deltaTime;
 
         Vector3 pos = playerApi.GetPosition();
+        pos.y += 0.5f;
         globalPos = pos;
         float halfSize = controller.MazeGenerator.Size / 2f;
         float halfHeight = controller.MazeGenerator.Height / 2f;

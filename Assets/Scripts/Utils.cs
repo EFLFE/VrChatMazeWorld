@@ -5,6 +5,7 @@ using UnityEngine;
 public class Utils : UdonSharpBehaviour {
     // Layers
     public const int LAYER_WEAPON = 25;
+    public const int LAYER_WALL = 23;
 
     private int spiralX;
     private int spiralY;
