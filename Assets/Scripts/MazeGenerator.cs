@@ -14,6 +14,7 @@ public enum Cell {
     Stairs1, // 1 - right
     Stairs2, // 2 - down
     Stairs3, // 3 - left
+    Enemy,
 }
 
 public enum Room {
@@ -321,6 +322,20 @@ public class MazeGenerator : UdonSharpBehaviour {
                 treasures_left--;
             }
         }
+        
+        // spawn enemies
+        for (room_id = 2; room_id < next_room_id; room_id++) {
+            if (rooms[room_id] == Room.Square) {
+                int enemies_amount = RandomInclusive(1, 4);
+                while (enemies_amount > 0) {
+                    GetRandomCellFromRoomByID(room_id, out int x, out int y, out int z);
+                    if (cells[x][y][z] == Cell.Passage) {
+                        cells[x][y][z] = Cell.Enemy;
+                        enemies_amount--;
+                    }
+                }
+            }
+        }
     }
     
     private bool TryToSpawnRandomDoorInRoomByID(int room_id) {
@@ -599,6 +614,7 @@ public class MazeGenerator : UdonSharpBehaviour {
         GetAllCellsOfRoomByID(room_id, out int[] cells_x, out int[] cells_y, out int[] cells_z, out int cells_amount);
 
         int random_index = RandomInclusive(0, cells_amount - 1);
+        //UnityEngine.Debug.Log($"room_id={room_id}, room type={rooms[room_id]}");
         room_x = cells_x[random_index];
         room_y = cells_y[random_index];
         room_z = cells_z[random_index];
