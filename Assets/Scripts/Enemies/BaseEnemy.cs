@@ -134,7 +134,7 @@ public class BaseEnemy : MazeObject {
 
         wakeupCheckTimer = 0.1f;
         Vector3 pos = transform.position;
-        pos.y += 0.2f;
+        pos.y += 0.5f;
         if (!controller.PlayersManager.TryGetNearPlayer(pos, out PlayerData playerData))
             return;
 
@@ -142,11 +142,9 @@ public class BaseEnemy : MazeObject {
         if (dist > MAX_PLAYER_DISTANCE)
             return;
 
-        var ray = new Ray(pos, playerData.GetGlobalPos - pos);
-        int hitCount = Physics.RaycastNonAlloc(ray, raycastResult, dist, Utils.LAYER_WALL);
-        Debug.Log(hitCount);
-
-        if (hitCount == 0) {
+        int gridID = GetRoomID(pos);
+        int playerGridID = playerData.GridID;
+        if (gridID == playerGridID) {
             Wakeup();
         }
     }
@@ -157,6 +155,14 @@ public class BaseEnemy : MazeObject {
             sleeping = false;
             audioSource.PlayOneShot(wakeupClip);
         }
+    }
+
+    private int GetRoomID(Vector3 pos) {
+        var maze = controller.MazeGenerator;
+        int x = (int)(maze.Size / 2f + pos.x / MazeBuilder.ROOMS_OFFSET);
+        int y = (int)(maze.Size / 2f + pos.z / MazeBuilder.ROOMS_OFFSET);
+        int z = (int)(maze.Height - maze.StartRoomHeight + pos.y / MazeBuilder.ROOMS_OFFSET);
+        return maze.GetId(x, y, z);
     }
 
     protected virtual void OnTouchPlayer(PlayerData player) { }

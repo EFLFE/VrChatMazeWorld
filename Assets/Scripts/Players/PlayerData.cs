@@ -19,6 +19,7 @@ public class PlayerData : UdonSharpBehaviour {
     public int GetPlayerID => playerID;
     public Vector3 GetGlobalPos => globalPos;
     public Vector3Int GetGridPos => gridPos;
+    public int GridID { get; private set; }
 
     // VR data
     private const float minPunchForce = 0.025f;
@@ -75,15 +76,18 @@ public class PlayerData : UdonSharpBehaviour {
             return;
 
         float deltaTime = Time.deltaTime;
-
+        var mazeGen = controller.MazeGenerator;
         Vector3 pos = playerApi.GetPosition();
         pos.y += 0.5f;
         globalPos = pos;
+
         float halfSize = controller.MazeGenerator.Size / 2f;
-        float halfHeight = controller.MazeGenerator.Height / 2f;
         gridPos.x = (int)(halfSize + pos.x / MazeBuilder.ROOMS_OFFSET);
         gridPos.y = (int)(halfSize + pos.z / MazeBuilder.ROOMS_OFFSET);
-        gridPos.z = (int)(halfHeight + pos.y / MazeBuilder.ROOMS_OFFSET + 1f);
+        float z = (mazeGen.Height - mazeGen.StartRoomHeight) + pos.y / MazeBuilder.ROOMS_OFFSET;
+        gridPos.z = (int)z;
+
+        GridID = controller.MazeGenerator.GetId(gridPos.x, gridPos.y, gridPos.z);
 
         // VR data
         if (isUserInVR) {

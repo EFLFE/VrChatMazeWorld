@@ -67,12 +67,13 @@ public class Map : UdonSharpBehaviour {
                 default: clr = Color.white; break;
             }
             DrawCircle(player.GetPosition(), clr);
-            
+
+            // TODO: get data from PlayerData
             int x = (int)(maze.Size / 2f + player.GetPosition().x / MazeBuilder.ROOMS_OFFSET);
             int y = (int)(maze.Size / 2f + player.GetPosition().z / MazeBuilder.ROOMS_OFFSET);
             int z = (int)(maze.Height - maze.StartRoomHeight + (player.GetPosition().y + 0.5f) / MazeBuilder.ROOMS_OFFSET);
-            //UnityEngine.Debug.Log($"z = {z}");
-            
+            //Debug.Log($"z = {z}");
+
             if (x >= 0 && x < maze.Size && y >= 0 && y < maze.Size && z >= 0 && z < maze.Height) {
                 PlayerIsMoving(x, y, z, maze.GetId(x, y, z));
                 if (player.isLocal) {
@@ -105,7 +106,7 @@ public class Map : UdonSharpBehaviour {
                 int x = player_x + dx;
                 int y = player_y + dy;
 
-                
+
                 if (x >= 0 && x < maze.Size && y >= 0 && y < maze.Size) {
                     if (!coords_explored[x][y][player_z] && maze.GetId(x, y, player_z) == room_id) {
                         coords_explored[x][y][player_z] = true;
