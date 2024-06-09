@@ -9,16 +9,21 @@ public class Map3d : UdonSharpBehaviour {
     [SerializeField] private GameObject contentPrefab;
     [SerializeField] private GameObject floorPrefab;
     [SerializeField] private GameObject wallPrefab;
+    [SerializeField] private GameObject playerPrefab;
     [SerializeField] private float floorMoveOffset = 0.1f;
     [SerializeField] private float floorHeightMoveOffset = 0.1f;
     [SerializeField] private float colorAlpha = 0.5f;
+
     private MazeController controller;
     private Transform mapContainer;
+    private GameObject[] playersDots;
 
     public void Init(MazeController controller) {
         this.controller = controller;
         floorPrefab.SetActive(false);
         wallPrefab.SetActive(false);
+        playerPrefab.SetActive(false);
+        playersDots = new GameObject[64];
         enabled = true;
     }
 
@@ -97,6 +102,45 @@ public class Map3d : UdonSharpBehaviour {
             }
         }
 
+    }
+
+    public void ManualUpdate() {
+        // reset dots
+        for (int i = 0; i < playersDots.Length; i++) {
+            if (playersDots[i] == null)
+                break;
+            playersDots[i].transform.position = new Vector3(999999, 99999, 0);
+        }
+
+        // set players dots
+        var players = controller.PlayersManager.GetPlayers;
+        for (int i = 0; i < players.Length; i++) {
+            PlayerData player = players[i];
+            if (!player.IsValid())
+                continue;
+
+            Vector3 playerPos = player.GetGlobalPos;
+            var mazeGen = controller.MazeGenerator;
+
+            playerPos.x = (playerPos.x / MazeBuilder.ROOMS_OFFSET + (mazeGen.Size / 2f)) * floorMoveOffset;
+            playerPos.z = (playerPos.z / MazeBuilder.ROOMS_OFFSET + (mazeGen.Size / 2f)) * floorMoveOffset;
+            playerPos.y = (playerPos.y / MazeBuilder.ROOMS_OFFSET + (mazeGen.Height - mazeGen.StartRoomHeight)) * floorHeightMoveOffset;
+
+            playerPos.x -= floorMoveOffset / 2f;
+            playerPos.z -= floorMoveOffset / 2f;
+
+            var dot = GetPlayerDot(i);
+            dot.transform.localPosition = playerPos;
+        }
+
+    }
+
+    private GameObject GetPlayerDot(int index) {
+        if (playersDots[index] == null) {
+            playersDots[index] = Instantiate(playerPrefab, staticContainer);
+            playersDots[index].SetActive(true);
+        }
+        return playersDots[index];
     }
 
 }

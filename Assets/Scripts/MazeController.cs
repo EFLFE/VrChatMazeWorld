@@ -270,6 +270,9 @@ public class MazeController : UdonSharpBehaviour {
                 if (tempMazeObjects[i] != null && tempMazeObjects[i].gameObject.activeSelf)
                     tempMazeObjects[i].ManualUpdate();
             }
+
+            for (int i = 0; i < maps3d.Length; i++)
+                maps3d[i].ManualUpdate();
         }
 
         // send synd data to ui

@@ -12,6 +12,8 @@ public class PlayersManager : UdonSharpBehaviour {
     private MazeController controller;
     private PlayerData[] playersData;
 
+    public PlayerData[] GetPlayers => playersData;
+
     public void Init(MazeController controller) {
         this.controller = controller;
         playersData = new PlayerData[playersContent.childCount];
