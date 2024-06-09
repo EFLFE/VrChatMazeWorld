@@ -11,12 +11,16 @@ public class PlayersManager : UdonSharpBehaviour {
 
     private MazeController controller;
     private PlayerData[] playersData;
+    private float refreshPlayersTimer;
+    private VRCPlayerApi[] vrcPlayersBuffer;
 
     public PlayerData[] GetPlayers => playersData;
 
     public void Init(MazeController controller) {
         this.controller = controller;
         playersData = new PlayerData[playersContent.childCount];
+        vrcPlayersBuffer = new VRCPlayerApi[playersContent.childCount];
+
         for (int i = 0; i < playersData.Length; i++) {
             PlayerData data = playersContent.GetChild(i).GetComponent<PlayerData>();
             data.Init(controller);
@@ -24,11 +28,16 @@ public class PlayersManager : UdonSharpBehaviour {
         }
 
         // add all players
-        var players = new VRCPlayerApi[VRCPlayerApi.GetPlayerCount()];
-        VRCPlayerApi.GetPlayers(players);
-        Debug.Log($"Found {players.Length} players");
-        for (int i = 0; i < players.Length; i++) {
-            AddPlayer(players[i]);
+        RefreshAllPlayers();
+        FullSerialization();
+    }
+
+    private void RefreshAllPlayers() {
+        int playersCount = VRCPlayerApi.GetPlayerCount();
+        VRCPlayerApi.GetPlayers(vrcPlayersBuffer);
+        //Debug.Log($"Found {vrcPlayersBuffer.Length} players");
+        for (int i = 0; i < playersCount; i++) {
+            AddPlayer(vrcPlayersBuffer[i]);
         }
     }
 
@@ -46,6 +55,14 @@ public class PlayersManager : UdonSharpBehaviour {
     }
 
     public void ManualUpdate() {
+        refreshPlayersTimer += Time.deltaTime;
+        if (refreshPlayersTimer >= 5f) {
+            refreshPlayersTimer = 0f;
+            Clean();
+            RefreshAllPlayers();
+            FullSerialization();
+        }
+
         for (int i = 0; i < playersData.Length; i++) {
             playersData[i].ManualUpdate();
         }
