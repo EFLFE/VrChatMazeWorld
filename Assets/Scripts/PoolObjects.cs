@@ -104,8 +104,9 @@ public class PoolObjects : UdonSharpBehaviour {
 
         states[obj.pool_id] = false;
 
-        TeleportObject(obj, new Vector3(0, -10, 0), Quaternion.Euler(0, 0, 0));
         obj.gameObject.SetActive(false);
+        TeleportObject(obj, new Vector3(0, -10, 0), Quaternion.Euler(0, 0, 0));
+        obj.ReturnedToPool();
 
         RequestSerialization();
     }

@@ -162,6 +162,8 @@ public class MazeController : UdonSharpBehaviour {
             swords[i].ReturnToSpawn();
         }
 
+        skeletsPool.ReturnAll();
+
         foreach (var map in maps) {
             map.NewLevel();
         }

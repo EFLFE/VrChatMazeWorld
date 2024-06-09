@@ -15,8 +15,8 @@ public enum EnemyAnimState {
 public class BaseEnemy : MazeObject {
     private const float MAX_PLAYER_DISTANCE = 20f;
 
-    [SerializeField, UdonSynced] private float health = 5f;
-    [SerializeField, UdonSynced] private float speed = 1f;
+    [SerializeField, UdonSynced] private float startedHealth = 5f;
+    [SerializeField, UdonSynced] private float startedSpeed = 1f;
     [SerializeField, UdonSynced] private float rotateSpeed = 4f;
 
     [SerializeField] private MeshRenderer meshRenderer;
@@ -24,7 +24,15 @@ public class BaseEnemy : MazeObject {
     [SerializeField] private Collider baseCollider;
     [SerializeField] private Animator baseAnimator;
 
+    [Header("SFX")]
+    [SerializeField] private AudioSource audioSource;
+    [SerializeField] private AudioClip wakeupClip;
+    [SerializeField] private AudioClip deadClip;
+    [SerializeField] private AudioClip impactClip;
+
     private MazeController controller;
+    private float health;
+    private float speed;
 
     // пробуждение монстра, когда игрок в поле зрения
     private bool sleeping;
@@ -53,9 +61,12 @@ public class BaseEnemy : MazeObject {
 
         base.Init(controller, pool_id);
         this.controller = controller;
-        speed += Random.Range(0f, 0.2f);
+        health = startedHealth;
+        speed = startedSpeed + Random.Range(0f, 0.25f);
         sleeping = true;
 
+        // go to default state
+        baseAnimator.Play("Default");
         AnimState = EnemyAnimState.Sleeping;
         baseCollider.enabled = true;
         rigidbodyRef.isKinematic = false;
@@ -111,13 +122,19 @@ public class BaseEnemy : MazeObject {
     }
 
     private void SleepModeUpdate() {
+        if (Input.GetKey(KeyCode.R)) {
+            if (controller.PlayersManager.TryGetNearPlayer(transform.position, out PlayerData playerDataDebug)) {
+                Debug.DrawLine(transform.position, playerDataDebug.GetGlobalPos, Color.red);
+            }
+        }
+
         wakeupCheckTimer -= Time.deltaTime;
         if (wakeupCheckTimer > 0f)
             return;
 
         wakeupCheckTimer = 0.1f;
         Vector3 pos = transform.position;
-        pos.y += 0.5f;
+        pos.y += 0.2f;
         if (!controller.PlayersManager.TryGetNearPlayer(pos, out PlayerData playerData))
             return;
 
@@ -125,8 +142,9 @@ public class BaseEnemy : MazeObject {
         if (dist > MAX_PLAYER_DISTANCE)
             return;
 
-        var ray = new Ray(pos, playerData.GetGlobalPos);
+        var ray = new Ray(pos, playerData.GetGlobalPos - pos);
         int hitCount = Physics.RaycastNonAlloc(ray, raycastResult, dist, Utils.LAYER_WALL);
+        Debug.Log(hitCount);
 
         if (hitCount == 0) {
             Wakeup();
@@ -137,6 +155,7 @@ public class BaseEnemy : MazeObject {
         if (AnimState == EnemyAnimState.Sleeping) {
             AnimState = EnemyAnimState.Raise;
             sleeping = false;
+            audioSource.PlayOneShot(wakeupClip);
         }
     }
 
@@ -173,12 +192,14 @@ public class BaseEnemy : MazeObject {
         //controller.MazeUI.UILog($"Enemy got {value} damage (hp {health}) {log}");
 
         if (health <= 0f) {
+            audioSource.PlayOneShot(deadClip);
             AnimState = EnemyAnimState.Dead;
             baseCollider.enabled = false;
             rigidbodyRef.useGravity = false;
             rigidbodyRef.isKinematic = true;
         } else {
-            rigidbodyRef.AddForce(Vector3.back * Mathf.Clamp(value, 1, 3), ForceMode.Impulse);
+            audioSource.PlayOneShot(impactClip);
+            rigidbodyRef.AddForce(new Vector3(0f, Mathf.Clamp(value, 1f, 2f), 0f), ForceMode.Impulse);
         }
     }
 
