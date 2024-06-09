@@ -5,16 +5,15 @@ using VRC.SDKBase;
 
 [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
 public class Map3d : UdonSharpBehaviour {
-    [SerializeField] Transform staticContainer;
-    [SerializeField] GameObject contentPrefab;
-    [SerializeField] GameObject floorPrefab;
-    [SerializeField] GameObject wallPrefab;
-    [SerializeField] float floorMoveOffset = 0.1f;
-    [SerializeField] float floorHeightMoveOffset = 0.1f;
-    [SerializeField] float colorAlpha = 0.5f;
-
-    MazeController controller;
-    Transform mapContainer;
+    [SerializeField] private Transform staticContainer;
+    [SerializeField] private GameObject contentPrefab;
+    [SerializeField] private GameObject floorPrefab;
+    [SerializeField] private GameObject wallPrefab;
+    [SerializeField] private float floorMoveOffset = 0.1f;
+    [SerializeField] private float floorHeightMoveOffset = 0.1f;
+    [SerializeField] private float colorAlpha = 0.5f;
+    private MazeController controller;
+    private Transform mapContainer;
 
     public void Init(MazeController controller) {
         this.controller = controller;
@@ -59,7 +58,7 @@ public class Map3d : UdonSharpBehaviour {
                         // floor color
                         Color clr = Color.white;
                         if (id > 1)
-                            clr = controller.Utils.GetFloorColor(id);
+                            clr = Utils.GetFloorColor(id);
                         clr.a = colorAlpha;
 
                         var prop = new MaterialPropertyBlock();
@@ -69,7 +68,7 @@ public class Map3d : UdonSharpBehaviour {
 
                         // create wall
                         for (int direction = 1; direction <= 4; direction++) {
-                            // 1 up, 2 right, 3 down, 4 left
+                            // 1 up, 2 right, 3 down, 4 left.
                             int dx = (direction == 2) ? 1 : (direction == 4) ? -1 : 0;
                             int dy = (direction == 1) ? 1 : (direction == 3) ? -1 : 0;
                             int neirID = maze.GetId(x + dx, y + dy, z);
