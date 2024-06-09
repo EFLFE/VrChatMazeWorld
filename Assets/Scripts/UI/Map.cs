@@ -24,13 +24,13 @@ public class Map : UdonSharpBehaviour {
     private MazeController controller;
     private MazeGenerator maze;
     private Vector2 cellSize;
-    private Transform mapContainer;
+    private Transform[] mapContainers;
     private VRCPlayerApi[] allPlayers;
     private RectTransform[] circleRects;
     private int circleIndex;
 
     private bool[] rooms_explored;
-    private bool[][] coords_explored;
+    private bool[][][] coords_explored;
 
     public void Init(MazeController controller) {
         this.controller = controller;
@@ -67,12 +67,19 @@ public class Map : UdonSharpBehaviour {
                 default: clr = Color.white; break;
             }
             DrawCircle(player.GetPosition(), clr);
-
-            int size = controller.MazeGenerator.Size;
-            int x = (int) (size / 2f + player.GetPosition().x / MazeBuilder.ROOMS_OFFSET);
-            int y = (int) (size / 2f + player.GetPosition().z / MazeBuilder.ROOMS_OFFSET);
-            if (x >= 0 && x < size && y >= 0 && y < size) {
-                PlayerIsMoving(x, y, controller.MazeGenerator.GetId(x, y, maze.StartRoomFloorIndex));
+            
+            int x = (int)(maze.Size / 2f + player.GetPosition().x / MazeBuilder.ROOMS_OFFSET);
+            int y = (int)(maze.Size / 2f + player.GetPosition().z / MazeBuilder.ROOMS_OFFSET);
+            int z = (int)(maze.Height - maze.StartRoomHeight + (player.GetPosition().y + 0.5f) / MazeBuilder.ROOMS_OFFSET);
+            //UnityEngine.Debug.Log($"z = {z}");
+            
+            if (x >= 0 && x < maze.Size && y >= 0 && y < maze.Size && z >= 0 && z < maze.Height) {
+                PlayerIsMoving(x, y, z, maze.GetId(x, y, z));
+                if (player.isLocal) {
+                    for (int level = 0; level < maze.Height; level++) {
+                        mapContainers[level].gameObject.SetActive(level == z);
+                    }
+                }
             }
         }
 
@@ -87,7 +94,7 @@ public class Map : UdonSharpBehaviour {
         */
     }
 
-    private void PlayerIsMoving(int player_x, int player_y, int room_id) {
+    private void PlayerIsMoving(int player_x, int player_y, int player_z, int room_id) {
         if (rooms_explored == null) return;
         if (coords_explored == null) return;
 
@@ -98,10 +105,11 @@ public class Map : UdonSharpBehaviour {
                 int x = player_x + dx;
                 int y = player_y + dy;
 
+                
                 if (x >= 0 && x < maze.Size && y >= 0 && y < maze.Size) {
-                    if (!coords_explored[x][y] && maze.GetId(x, y, maze.StartRoomFloorIndex) == room_id) {
-                        coords_explored[x][y] = true;
-                        DrawBlock(x, y);
+                    if (!coords_explored[x][y][player_z] && maze.GetId(x, y, player_z) == room_id) {
+                        coords_explored[x][y][player_z] = true;
+                        DrawBlock(x, y, player_z);
                     }
                 }
             }
@@ -129,55 +137,66 @@ public class Map : UdonSharpBehaviour {
 
     public void NewLevel() {
         // former Clear()
-        if (mapContainer != null) {
-            Destroy(mapContainer.gameObject);
-            mapContainer = null;
+        if (mapContainers != null && mapContainers.Length > 0) {
+            for (int layer = 0; layer < mapContainers.Length; layer++) {
+                if (mapContainers[layer] != null) {
+                    Destroy(mapContainers[layer].gameObject);
+                    mapContainers[layer] = null;
+                }
+            }
         }
+        mapContainers = new Transform[maze.Height];
 
         // former NewLevel()
         rooms_explored = new bool[maze.RoomsAmount];
         rooms_explored[1] = true;
 
-        coords_explored = new bool[maze.Size][];
+        coords_explored = new bool[maze.Size][][];
         for (int i = 0; i < maze.Size; i++) {
-            coords_explored[i] = new bool[maze.Size];
+            coords_explored[i] = new bool[maze.Size][];
+            for (int j = 0; j < maze.Size; j++) {
+                coords_explored[i][j] = new bool[maze.Height];
+            }
         }
 
         // former Render()
-        mapContainer = Instantiate(facadePrefab, staticContainer).transform;
-        mapContainer.SetSiblingIndex(bgImage.GetSiblingIndex() + 1);
+        for (int layer = 0; layer < maze.Height; layer++) {
+            mapContainers[layer] = Instantiate(facadePrefab, staticContainer).transform;
+            mapContainers[layer].SetSiblingIndex(bgImage.GetSiblingIndex() + 1);
+        }
 
         cellSize.x = canvasRect.sizeDelta.x / maze.Size;
         cellSize.y = canvasRect.sizeDelta.y / maze.Size;
     }
 
-    private void DrawBlock(int x, int y) {
-        Cell cellType = maze.GetCell(x, y, maze.StartRoomFloorIndex);
+    private void DrawBlock(int x, int y, int z) {
+        Cell cellType = maze.GetCell(x, y, z);
         int posX = maze.Size - x - 1;
         int posY = y;
+        int posZ = z;
 
         switch (cellType) {
             case Cell.Passage:
             case Cell.DoorDeadEnd:
             case Cell.DoorEnterance:
             case Cell.DoorExit:
-                Color clr = Utils.GetFloorColor(maze.Ids[x][y][maze.StartRoomFloorIndex]);
-                CreateCell(posX, posY, clr, cellType);
+                Color clr = Utils.GetFloorColor(maze.Ids[x][y][z]);
+                CreateCell(posX, posY, posZ, clr, cellType);
                 break;
 
             case Cell.Hole:
-                CreateCell(posX, posY, Color.black, cellType);
+                CreateCell(posX, posY, posZ, Color.black, cellType);
                 break;
         }
 
-        int curID = maze.GetId(x, y, maze.StartRoomFloorIndex);
+        int curID = maze.GetId(x, y, z);
         if (curID != 0) {
             for (int direction = 1; direction <= 4; direction++) {
                 // 1 up, 2 right, 3 down, 4 left
                 int dx = (direction == 2) ? 1 : (direction == 4) ? -1 : 0;
                 int dy = (direction == 1) ? 1 : (direction == 3) ? -1 : 0;
-                int neirID = maze.GetId(x + dx, y + dy, maze.StartRoomFloorIndex);
-                Cell neirCell = maze.GetCell(x + dx, y + dy, maze.StartRoomFloorIndex);
+                int neirID = maze.GetId(x + dx, y + dy, z);
+                Cell neirCell = maze.GetCell(x + dx, y + dy, z);
 
                 if (neirID == 0
                     || neirCell == Cell.Wall
@@ -194,14 +213,14 @@ public class Map : UdonSharpBehaviour {
                     else if (direction == 2) wallObj = imageWallLeftPrefab;
                     else if (direction == 3) wallObj = imageWallUpPrefab;
                     else if (direction == 4) wallObj = imageWallRightPrefab;
-                    CreateWall(posX, posY, wallObj);
+                    CreateWall(posX, posY, posZ, wallObj);
                 }
             }
         }
     }
 
-    private void CreateCell(int cellX, int cellY, Color clr, Cell cellType) {
-        var obj = Instantiate(imageCellPrefab, mapContainer);
+    private void CreateCell(int cellX, int cellY, int cellZ, Color clr, Cell cellType) {
+        var obj = Instantiate(imageCellPrefab, mapContainers[cellZ]);
         var image = obj.GetComponent<Image>();
         var rect = obj.GetComponent<RectTransform>();
         rect.sizeDelta = cellSize;
@@ -210,8 +229,8 @@ public class Map : UdonSharpBehaviour {
         obj.name = $"Img:{cellType}";
     }
 
-    private void CreateWall(int cellX, int cellY, GameObject prefab) {
-        var obj = Instantiate(prefab, mapContainer);
+    private void CreateWall(int cellX, int cellY, int cellZ, GameObject prefab) {
+        var obj = Instantiate(prefab, mapContainers[cellZ]);
         var rect = obj.GetComponent<RectTransform>();
         rect.sizeDelta = cellSize;
         rect.anchoredPosition = new Vector2(cellX * cellSize.x, -(cellY * cellSize.y));
