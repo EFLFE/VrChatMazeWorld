@@ -52,7 +52,10 @@ public class PoolObjects : UdonSharpBehaviour {
         }
     }
 
-    private void TeleportObject(MazeObject obj, Vector3 position, Quaternion rotation) {
+    public static void TeleportObject(MazeObject obj, Vector3 position, Quaternion rotation) {
+        if (obj == null)
+            return;
+
         obj.transform.SetPositionAndRotation(position, rotation);
         VRCObjectSync vrc_sync = obj.gameObject.GetComponent<VRCObjectSync>();
         if (vrc_sync != null) {
@@ -81,6 +84,7 @@ public class PoolObjects : UdonSharpBehaviour {
                 TeleportObject(obj, position, rotation);
 
                 states[i] = true;
+                obj.RespawnPos = position;
                 obj.Init(MazeController, i);
                 RequestSerialization();
                 break;

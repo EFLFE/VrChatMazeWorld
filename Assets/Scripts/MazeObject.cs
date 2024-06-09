@@ -1,4 +1,5 @@
 ﻿using UdonSharp;
+using UnityEngine;
 
 /// <summary>
 /// Abstract class.
@@ -6,6 +7,8 @@
 public class MazeObject : UdonSharpBehaviour {
     public int pool_id { get; private set; }
     protected MazeController Controller { get; private set; }
+
+    public Vector3 RespawnPos;
 
     public virtual void Init(MazeController controller, int pool_id) {
         Controller = controller;

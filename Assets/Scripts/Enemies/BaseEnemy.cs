@@ -5,8 +5,8 @@ using VRC.SDKBase;
 using VRC.Udon;
 
 public enum EnemyAnimState {
-    Idle = 0,
-    Sleeping = 1,
+    Sleeping = 0, // to default anim state
+    Idle = 1,
     Walking = 2,
     Dead = 3,
     Raise = 4,
@@ -66,8 +66,8 @@ public class BaseEnemy : MazeObject {
         sleeping = true;
 
         // go to default state
-        baseAnimator.Play("Default");
         AnimState = EnemyAnimState.Sleeping;
+        baseAnimator.Play("Default");
         baseCollider.enabled = true;
         rigidbodyRef.isKinematic = false;
         rigidbodyRef.useGravity = true;
@@ -79,6 +79,11 @@ public class BaseEnemy : MazeObject {
     public override void ManualUpdate() {
         if (IsDead)
             return;
+
+        if (sleeping) {
+            SleepModeUpdate();
+            return;
+        }
 
         PlayerData localPlayerData = controller.PlayersManager.GetLocalPlayer();
 
@@ -95,9 +100,7 @@ public class BaseEnemy : MazeObject {
             }
         }
 
-        if (sleeping) {
-            SleepModeUpdate();
-        } else if (MoveToPlayer) {
+        if (MoveToPlayer) {
             Vector3 pos = transform.position;
             if (controller.PlayersManager.TryGetNearPlayer(pos, out PlayerData playerData)) {
                 Vector3 playerPos = playerData.GetGlobalPos;
@@ -165,7 +168,16 @@ public class BaseEnemy : MazeObject {
         return maze.GetId(x, y, z);
     }
 
-    protected virtual void OnTouchPlayer(PlayerData player) { }
+    protected virtual void OnTouchPlayer(PlayerData player) {
+        var leftHand = player.GetPlayerApi.GetPickupInHand(VRC_Pickup.PickupHand.Left);
+        var rightHand = player.GetPlayerApi.GetPickupInHand(VRC_Pickup.PickupHand.Right);
+        if (leftHand != null)
+            leftHand.Drop();
+        if (rightHand != null)
+            rightHand.Drop();
+
+        player.GetPlayerApi.TeleportTo(Vector3.zero, player.GetPlayerApi.GetRotation());
+    }
 
     private void RotateTo(Vector3 from, Vector3 target) {
         from.y = 0f;
@@ -205,7 +217,7 @@ public class BaseEnemy : MazeObject {
             rigidbodyRef.isKinematic = true;
         } else {
             audioSource.PlayOneShot(impactClip);
-            rigidbodyRef.AddForce(new Vector3(0f, Mathf.Clamp(value, 1f, 2f), 0f), ForceMode.Impulse);
+            rigidbodyRef.AddForce(Vector3.up * Mathf.Clamp(value, 1f, 2f), ForceMode.Impulse);
         }
     }
 

@@ -154,4 +154,24 @@ public class PlayerData : UdonSharpBehaviour {
         return playerApi.GetTrackingData(trackingData);
     }
 
+    public override void OnPlayerRespawn(VRCPlayerApi player) {
+        base.OnPlayerRespawn(player);
+
+        var leftHand = player.GetPickupInHand(VRC_Pickup.PickupHand.Left);
+        if (leftHand != null) {
+            leftHand.Drop();
+            var mazeObj = leftHand.gameObject.GetComponent<MazeObject>();
+            if (mazeObj != null && mazeObj.RespawnPos != Vector3.zero)
+                PoolObjects.TeleportObject(mazeObj, mazeObj.RespawnPos, Quaternion.identity);
+        }
+
+        var rightHand = player.GetPickupInHand(VRC_Pickup.PickupHand.Right);
+        if (rightHand != null) {
+            rightHand.Drop();
+            var mazeObj = rightHand.gameObject.GetComponent<MazeObject>();
+            if (mazeObj != null && mazeObj.RespawnPos != Vector3.zero)
+                PoolObjects.TeleportObject(mazeObj, mazeObj.RespawnPos, Quaternion.identity);
+        }
+    }
+
 }
