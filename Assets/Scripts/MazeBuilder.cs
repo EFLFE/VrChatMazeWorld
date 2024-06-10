@@ -146,12 +146,11 @@ public class MazeBuilder : UdonSharpBehaviour {
             }
             int floor_variant = can_spawn_decorative_floor ? GetRandomIndex(floors.Length, 0.75f) : 0;
             
-            GameObject obj_floor = Spawn(
+            GameObject obj_floor = SpawnFloor(
                 floors[floor_variant],
                 x, y, z, 0,
                 $"floor {current_id}, cell type: {current_cell}, xyz: {x} {y} {z}"
             );
-            
             ColorizeFloor(obj_floor, current_id);
         }
         
@@ -408,6 +407,32 @@ public class MazeBuilder : UdonSharpBehaviour {
         
         GO.GetComponent<MeshFilter>().sharedMesh = mesh;
         GO.GetComponent<MeshCollider>().sharedMesh = mesh;
+        
+        GO.transform.SetPositionAndRotation(
+            ConvertPositionToUnitySpace(new Vector3Int(x, y, z)),
+            Quaternion.Euler(0, rotation, 0)
+        );
+        GO.transform.localScale = new Vector3(ROOM_SCALE, ROOM_SCALE, ROOM_SCALE);
+        
+        GO.name = name;
+        buildLeft--;
+        
+        return GO;
+    }
+    
+    private GameObject SpawnFloor(
+        Mesh mesh,
+        int x,
+        int y,
+        int z,
+        int rotation,
+        string name
+    ) {
+        GameObject GO = Instantiate(universalPrefab, mazeContainer);
+        
+        GO.GetComponent<MeshFilter>().sharedMesh = mesh;
+        GO.GetComponent<MeshCollider>().enabled = false;
+        GO.GetComponent<BoxCollider>().enabled = true;
         
         GO.transform.SetPositionAndRotation(
             ConvertPositionToUnitySpace(new Vector3Int(x, y, z)),
