@@ -155,6 +155,10 @@ public class MazeGenerator : UdonSharpBehaviour {
         possible_doors2_head = 0;
         possible_doors2_tail = 0;
         
+        tree_branch_iterator1 = 0;
+        tree_branch_iterator2 = 0;
+        floor_rooms_iterator = 0;
+        
         this.rooms = new Room[rooms + chests];
         
         ids = new int[size][][];

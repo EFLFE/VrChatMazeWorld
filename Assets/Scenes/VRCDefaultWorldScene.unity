@@ -13651,6 +13651,26 @@ MonoBehaviour:
   - {fileID: 6018880220201159761, guid: 3d4f471e02fb28941aea878ff14babbe, type: 3}
   - {fileID: 9200090720505334235, guid: 69297af4066c02f42ba7a793abd4ed24, type: 3}
   - {fileID: -3234992457524538686, guid: 86f2195c9cfe5a64e8e6a08866246178, type: 3}
+  walls_solid:
+  - {fileID: -4147342352816037521, guid: 8bfe9cff2cd36504eb50b3d439ddc934, type: 3}
+  - {fileID: 4377865600221286077, guid: 8ae8d6a6c1b73b942b365628e1b60816, type: 3}
+  - {fileID: 5703254614228647771, guid: 6b238a1656f54ad4b9a2f7a7d73c6013, type: 3}
+  - {fileID: 7600354733793498603, guid: 52947f0bf2110c34fbb8c05ddc096cad, type: 3}
+  - {fileID: 1239033086771716094, guid: 0c7b87ab2ffb0464a939de3928f02497, type: 3}
+  - {fileID: 5172457886836709913, guid: 424ddc94f1822aa4dab7c129cb7e2ef2, type: 3}
+  - {fileID: 6018880220201159761, guid: 3d4f471e02fb28941aea878ff14babbe, type: 3}
+  - {fileID: 7206180524086135799, guid: cf513e1241e670d49930e053cd2c9fb5, type: 3}
+  - {fileID: -755275953838476291, guid: d48213f0efb728549a610c99834599d1, type: 3}
+  walls_holed:
+  - {fileID: -4147342352816037521, guid: 8bfe9cff2cd36504eb50b3d439ddc934, type: 3}
+  - {fileID: 4377865600221286077, guid: 8ae8d6a6c1b73b942b365628e1b60816, type: 3}
+  - {fileID: 5703254614228647771, guid: 6b238a1656f54ad4b9a2f7a7d73c6013, type: 3}
+  - {fileID: 7125925254588785975, guid: 6824ddae2e72b2e43896b1bea0b9dc5c, type: 3}
+  - {fileID: -550989797650051609, guid: 3f47c27729e2cab45be139d050109e49, type: 3}
+  - {fileID: 6068885569156669, guid: f2576c390e85d474fab75b71c5d46ea4, type: 3}
+  - {fileID: 8138370486785168944, guid: e00f64957fc52834d896ad69a98408df, type: 3}
+  - {fileID: 9200090720505334235, guid: 69297af4066c02f42ba7a793abd4ed24, type: 3}
+  - {fileID: -3234992457524538686, guid: 86f2195c9cfe5a64e8e6a08866246178, type: 3}
   doors:
   - {fileID: 4196161430825003242, guid: b0bf5fe5311e624429ed163ceb51fbe4, type: 3}
   floors:
@@ -30663,7 +30683,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   launchedFromSDKPipeline: 0
   completedSDKPipeline: 0
-  blueprintId: wrld_2bcf06f5-8094-47fa-bebe-7a3bd6c16cc7
+  blueprintId: 
   contentType: 1
   assetBundleUnityVersion: 
   fallbackStatus: 0
