@@ -1,8 +1,7 @@
 ﻿using UdonSharp;
 using UnityEngine;
-using VRC.SDK3.Dynamics.Contact.Components;
 using VRC.SDKBase;
-using VRC.Udon;
+using static VRC.Udon.Common.Interfaces.NetworkEventTarget;
 
 public enum EnemyAnimState {
     Sleeping = 0, // to default anim state
@@ -12,12 +11,19 @@ public enum EnemyAnimState {
     Raise = 4,
 }
 
+public enum EnemyNetState {
+    None = 0,
+    Wakeup = 1,
+    Dead = 2,
+}
+
+[UdonBehaviourSyncMode(BehaviourSyncMode.Manual)]
 public class BaseEnemy : MazeObject {
     private const float MAX_PLAYER_DISTANCE = 20f;
 
-    [SerializeField, UdonSynced] private float startedHealth = 5f;
-    [SerializeField, UdonSynced] private float startedSpeed = 1f;
-    [SerializeField, UdonSynced] private float rotateSpeed = 4f;
+    [SerializeField] private float startedHealth = 5f;
+    [SerializeField] private float startedSpeed = 1f;
+    [SerializeField] private float rotateSpeed = 4f;
 
     [SerializeField] private MeshRenderer meshRenderer;
     [SerializeField] private Rigidbody rigidbodyRef;
@@ -36,6 +42,7 @@ public class BaseEnemy : MazeObject {
 
     // пробуждение монстра, когда игрок в поле зрения
     private bool sleeping;
+    private bool wasDead;
     private float wakeupCheckTimer;
     private RaycastHit[] raycastResult;
 
@@ -64,6 +71,8 @@ public class BaseEnemy : MazeObject {
         health = startedHealth;
         speed = startedSpeed + Random.Range(0f, 0.25f);
         sleeping = true;
+        wasDead = false;
+        netState = EnemyNetState.None;
 
         // go to default state
         AnimState = EnemyAnimState.Sleeping;
@@ -101,7 +110,7 @@ public class BaseEnemy : MazeObject {
         }
 
         if (MoveToPlayer) {
-            Vector3 pos = transform.position;
+            Vector3 pos = Position;
             if (controller.PlayersManager.TryGetNearPlayer(pos, out PlayerData playerData)) {
                 Vector3 playerPos = playerData.GetGlobalPos;
 
@@ -114,7 +123,7 @@ public class BaseEnemy : MazeObject {
                     AnimState = EnemyAnimState.Idle;
                 } else if (dist < MAX_PLAYER_DISTANCE) {
                     // move to player
-                    transform.position = Vector3.MoveTowards(pos, playerPos, speed * Time.deltaTime);
+                    Position = Vector3.MoveTowards(pos, playerPos, speed * Time.deltaTime);
                     RotateTo(pos, playerPos);
                     AnimState = EnemyAnimState.Walking;
                 } else {
@@ -122,12 +131,14 @@ public class BaseEnemy : MazeObject {
                 }
             }
         }
+
+        base.ManualUpdate();
     }
 
     private void SleepModeUpdate() {
         if (Input.GetKey(KeyCode.R)) {
-            if (controller.PlayersManager.TryGetNearPlayer(transform.position, out PlayerData playerDataDebug)) {
-                Debug.DrawLine(transform.position, playerDataDebug.GetGlobalPos, Color.red);
+            if (controller.PlayersManager.TryGetNearPlayer(Position, out PlayerData playerDataDebug)) {
+                Debug.DrawLine(Position, playerDataDebug.GetGlobalPos, Color.red);
             }
         }
 
@@ -136,7 +147,7 @@ public class BaseEnemy : MazeObject {
             return;
 
         wakeupCheckTimer = 0.1f;
-        Vector3 pos = transform.position;
+        Vector3 pos = Position;
         pos.y += 0.5f;
         if (!controller.PlayersManager.TryGetNearPlayer(pos, out PlayerData playerData))
             return;
@@ -148,15 +159,7 @@ public class BaseEnemy : MazeObject {
         int gridID = GetRoomID(pos);
         int playerGridID = playerData.GridID;
         if (gridID == playerGridID) {
-            Wakeup();
-        }
-    }
-
-    private void Wakeup() {
-        if (AnimState == EnemyAnimState.Sleeping) {
-            AnimState = EnemyAnimState.Raise;
-            sleeping = false;
-            audioSource.PlayOneShot(wakeupClip);
+            SetNetState(EnemyNetState.Wakeup);
         }
     }
 
@@ -198,27 +201,63 @@ public class BaseEnemy : MazeObject {
     }
 
     public void Damage(float value = 1f, string log = null) {
+        //controller.MazeUI.UILog($"Enemy got {value} damage (hp {health}) {log}");
+
         if (IsDead)
             return;
 
         if (sleeping) {
-            Wakeup();
+            SetNetState(EnemyNetState.Wakeup);
             return;
         }
 
         health -= value;
-        //controller.MazeUI.UILog($"Enemy got {value} damage (hp {health}) {log}");
 
         if (health <= 0f) {
-            audioSource.PlayOneShot(deadClip);
-            AnimState = EnemyAnimState.Dead;
-            baseCollider.enabled = false;
-            rigidbodyRef.useGravity = false;
-            rigidbodyRef.isKinematic = true;
+            SetNetState(EnemyNetState.Dead);
         } else {
             audioSource.PlayOneShot(impactClip);
             rigidbodyRef.AddForce(Vector3.up * Mathf.Clamp(value, 1f, 2f), ForceMode.Impulse);
         }
+    }
+
+    // ==== Network ====
+    private EnemyNetState netState;
+
+    private void SetNetState(EnemyNetState enemyNetState) {
+        if (netState != enemyNetState) {
+            netState = enemyNetState;
+            switch (netState) {
+                case EnemyNetState.Wakeup:
+                    SendCustomNetworkEvent(All, "NetWakeup");
+                    break;
+
+                case EnemyNetState.Dead:
+                    SendCustomNetworkEvent(All, "NetDead");
+                    break;
+            }
+        }
+    }
+
+    public void NetWakeup() {
+        netState = EnemyNetState.None;
+        if (sleeping) {
+            sleeping = false;
+            AnimState = EnemyAnimState.Raise;
+            audioSource.PlayOneShot(wakeupClip);
+        }
+    }
+
+    public void NetDead() {
+        netState = EnemyNetState.None;
+        if (wasDead) return;
+
+        wasDead = true;
+        audioSource.PlayOneShot(deadClip);
+        AnimState = EnemyAnimState.Dead;
+        baseCollider.enabled = false;
+        rigidbodyRef.useGravity = false;
+        rigidbodyRef.isKinematic = true;
     }
 
 }

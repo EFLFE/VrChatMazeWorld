@@ -25,7 +25,7 @@ public class CentralZone : UdonSharpBehaviour {
 
         var treasure = collider.gameObject.GetComponent<Treasure>();
         if (treasure != null) {
-            MazeController.MazeUI.UILog($"Treasure found in CentralZone: {collider.gameObject.name}, id = {treasure.pool_id}");
+            MazeController.MazeUI.UILog($"Treasure found in CentralZone: {collider.gameObject.name}, id = {treasure.PoolID}");
 
             // дропнуть предмет из руки текущего владельца
             treasure.Drop();

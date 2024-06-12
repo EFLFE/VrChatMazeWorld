@@ -1,6 +1,8 @@
-﻿using UnityEngine;
+﻿using UdonSharp;
+using UnityEngine;
 using VRC.SDKBase;
 
+[UdonBehaviourSyncMode(BehaviourSyncMode.Continuous)]
 public class Treasure : MazeObject {
     [SerializeField] private VRC_Pickup pickup;
     [SerializeField] private AudioSource[] collisionAudios;

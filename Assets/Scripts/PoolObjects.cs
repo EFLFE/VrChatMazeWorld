@@ -98,7 +98,7 @@ public class PoolObjects : UdonSharpBehaviour {
         if (!Networking.IsMaster) return;
         if (!obj.gameObject.activeSelf) return;
 
-        string log = $"Return pool object, id: {obj.pool_id}, owner: ";
+        string log = $"Return pool object, id: {obj.PoolID}, owner: ";
         log += Networking.GetOwner(obj.gameObject).playerId.ToString() + " " + Networking.GetOwner(obj.gameObject).displayName;
         // вернуть предмет во владение мастера
         Networking.SetOwner(Networking.GetOwner(MazeController.gameObject), obj.gameObject);
@@ -106,7 +106,7 @@ public class PoolObjects : UdonSharpBehaviour {
         log += Networking.GetOwner(obj.gameObject).playerId.ToString() + " " + Networking.GetOwner(obj.gameObject).displayName;
         MazeController.MazeUI.UILog(log);
 
-        states[obj.pool_id] = false;
+        states[obj.PoolID] = false;
 
         obj.gameObject.SetActive(false);
         TeleportObject(obj, new Vector3(0, -10, 0), Quaternion.Euler(0, 0, 0));
